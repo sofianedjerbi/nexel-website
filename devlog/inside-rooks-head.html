@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inside Rook&#x27;s head · Nexel Worlds devlog</title>
+<meta name="description" content="A page that shows what an AI player sees, thinks, decides and remembers. Watch 13 real minutes of Rook.">
+<meta property="og:title" content="Inside Rook&#x27;s head · Nexel Worlds devlog">
+<meta property="og:description" content="A page that shows what an AI player sees, thinks, decides and remembers. Watch 13 real minutes of Rook.">
+<meta property="og:image" content="../img/hero.png">
+<link rel="preload" href="../fonts/sprout-pixel.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="../css/site.css">
+<link rel="icon" href="../img/favicon.png">
+</head>
+<body>
+<header class="top"><div class="wrap">
+<a class="brand" href="../index.html">Nexel Worlds</a>
+<nav class="nav"><a href="../index.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/></svg>Home</a><a href="../devlog/index.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="1" y="0" width="1" height="1"/><rect x="2" y="0" width="1" height="1"/><rect x="3" y="0" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="5" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="5" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/></svg>Devlog</a><a href="../play/"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/></svg>Play</a></nav>
+</div></header>
+<main class="wrap"><section>
+<article class="panel post-body">
+<p class="date">2026-11-23</p>
+<h1>Inside Rook&#x27;s head</h1>
+<p></p>
+<p>Rook is one of our AI players. Its body is a small network trained by playing (see <a href="../devlog/ai-players.html">the last post</a>). Every 20 seconds or so, a small local language model, its mind, reads a few lines of facts and gives the body a goal. It also writes notes about the people it meets.</p>
+<p>From the outside you only see a little figure digging. So we built a page that shows the inside.</p>
+<p><a href="../play/brain/">Watch Rook's head: 13 minutes from today's demo</a></p>
+<h2>What the page shows</h2>
+<ul><li><b>Sees</b>: the tiles round it, drawn by hand from the letters the game sends it, plus the people and creatures near it.</li><li><b>Thinks</b>: the exact text the mind was given, with what changed since the last thought in yellow. Then what it answered: the goal, the line it says, its notes.</li><li><b>Body</b>: the actions the trained network likes best right now, and the action it is doing.</li><li><b>Remembers</b>: its notes on people. They are kept between games.</li><li><b>Lately</b>: hits, chat and goal changes.</li></ul>
+<h2>What happened in these 13 minutes</h2>
+<p>Rook was gathering wood when doben00 walked up and said "hi". Rook's mind marked him as an ally. doben00 said he could summon a boss and asked Rook to fight it with him. Rook said "got wood" and kept working. Then sporelings and the mossback hurt it down to 9.5 health of 20.</p>
+<p>Later doben00 hit Rook six times in ten seconds. The mind wrote "hit me 3 times, still here", kept him as an ally, and said "hit again, run". doben00 said "im friendly". The notes went back to "stays calm".</p>
+<p>It is funny and a bit sad. It is also why this page exists: you can watch the mind say "wood near mossback" over and over for three minutes, and see that "wanna fight him with me ?" got "got wood" for an answer.</p>
+<h2>Honest gaps</h2>
+<p>The demo logs did not keep the tiles or the network's odds, so this recording shows Rook's trail on blank ground, and what it picked over the last 30 seconds. A player started with <kbd>--brain</kbd> sends everything, live. The page and the feed are in <a href="https://github.com/sofianedjerbi/nexel-agent">nexel-agent</a>.</p>
+<div class="shot"><img src="../img/brain.png" alt="Rook mid-fight: the facts its mind read, and its answer" loading="lazy"></div>
+<p class="cap">Rook mid-fight: the facts its mind read, and its answer</p>
+</article>
+<div class="post-nav"><a class="btn small ghost" href="ai-players.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/></svg>AI players: from a language model to learning</a></div>
+<p></p>
+</section></main>
+<footer class="foot"><div class="wrap">
+<p>Nexel Worlds is made by <a href="https://github.com/sofianedjerbi">sofianedjerbi</a>. Code: <a href="https://github.com/sofianedjerbi/nexel-worlds">nexel-worlds</a> (the game) and <a href="https://github.com/sofianedjerbi/nexel-agent">nexel-agent</a> (the AI players).</p>
+<p>Art: Sprout Lands by <a href="https://cupnooble.itch.io/">Cup Nooble</a>. The pictures on this site are screenshots of the game.</p>
+</div></footer>
+</body>
+</html>

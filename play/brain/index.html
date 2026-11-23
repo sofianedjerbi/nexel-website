@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inside an AI player's head · Nexel Worlds</title>
+<style>@font-face{font-family:SproutPixel;src:url(sprout-pixel.ttf)}
+:root{--q:2px;--m:-2px;--ink:#5b3f36;--ink2:#9a7a62;--edge:#6b4a3a;--green:#5aa264;--red:#c0584a}
+*{box-sizing:border-box;margin:0}
+body{background:#24391a radial-gradient(#2f4a20 1px,transparent 1px) 0 0 / 8px 8px;color:var(--ink);font:18px/20px SproutPixel,monospace;font-synthesis:none;padding:12px;min-height:100vh}
+.grid{display:grid;gap:14px;grid-template-columns:minmax(0,340px) minmax(0,1fr) minmax(0,300px);max-width:1200px;margin:0 auto}
+@media (max-width:920px){.grid{grid-template-columns:minmax(0,1fr)}
+.goal,.vitals{flex:1 1 100%}
+}
+.p{background:#e8cfa6;padding:10px 12px 12px;box-shadow:inset var(--q) var(--q) 0 #fbf0d6,inset var(--m) var(--m) 0 #c49a6c,var(--m) 0 var(--edge),var(--q) 0 var(--edge),0 var(--m) var(--edge),0 var(--q) var(--edge),0 8px 0 rgba(10,20,5,.4);min-width:0}
+.well{background:#d9bd90;padding:8px;box-shadow:inset var(--q) var(--q) 0 #b8946a,inset var(--m) var(--m) 0 #f8edd4}
+h2{font-size:18px;color:#fff6e2;text-shadow:var(--q) var(--q) 0 var(--edge);margin:0 0 8px;display:flex;gap:8px;align-items:baseline}
+h2 small{margin-left:auto;font-size:14px;color:var(--ink2);text-shadow:none;text-align:right}
+.sec + .sec{margin-top:14px}
+canvas{image-rendering:pixelated;display:block}
+.k,.empty{color:var(--ink2);font-size:14px}
+[hidden]{display:none !important}
+.head{grid-column:1 / -1;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+#face{width:64px;height:64px;box-shadow:inset var(--q) var(--q) 0 #9a6f55,0 0 0 var(--q) var(--edge)}
+.who{min-width:0;flex:1 1 240px}
+.who b{font-size:28px;line-height:28px}
+.who div{color:var(--ink2);font-size:15px}
+.moods,.goals,.row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.mood,.goals span,.chip{font-size:13px;padding:1px 6px;background:#f3e5c2;box-shadow:0 0 0 var(--q) #aa7959}
+.mood.hot{background:#f2c7b4;box-shadow:0 0 0 var(--q) #a1483a;color:#7a2e22}
+.goal{background:var(--green);color:#fff8e8;text-shadow:var(--q) var(--q) 0 #2f5a3b;padding:6px 10px;flex:0 1 260px;min-width:200px;box-shadow:inset var(--q) var(--q) 0 #8fcc97,inset var(--m) var(--m) 0 #3f7a4f,0 0 0 var(--q) #2f5a3b}
+.goal.none{background:#aa9070;box-shadow:inset var(--q) var(--q) 0 #c8b090,inset var(--m) var(--m) 0 #8a7050,0 0 0 var(--q) #6b5a40;text-shadow:none}
+.goal small{display:block;font-size:14px;opacity:.9}
+.vitals{display:grid;gap:6px;flex:0 1 230px;min-width:200px}
+.vit{display:grid;grid-template-columns:54px 1fr 46px;align-items:center;gap:6px;font-size:14px;color:var(--ink2)}
+.pips{display:flex;gap:2px}
+.pips b{flex:1;height:10px;background:#cfad84;box-shadow:inset 0 var(--m) 0 #b8946a}
+.pips b.on{background:var(--c);box-shadow:inset 0 var(--m) 0 rgba(0,0,0,.25),inset 0 var(--q) 0 rgba(255,255,255,.35)}
+.eyew{width:316px;padding:2px;margin:0 auto;position:relative}
+#eye{width:312px;height:312px}
+#eyemsg{position:absolute;inset:8px;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:#fff6e2;text-shadow:var(--q) var(--q) 0 var(--edge);font-size:15px;pointer-events:none}
+.legend{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:13px;color:var(--ink2);margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:-1px;box-shadow:0 0 0 1px #3a2a20}
+.near{font-size:14px;margin-top:6px;line-height:18px}
+.inv{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:4px}
+.inv div{background:#cfad84;box-shadow:inset var(--q) var(--q) 0 #9a6f55,inset var(--m) var(--m) 0 #f8edd4;font-size:12px;padding:4px 2px 3px;text-align:center;line-height:13px;overflow-wrap:anywhere}
+.inv div.want{background:#f1dfb8;box-shadow:inset var(--q) var(--q) 0 #b8946a,0 0 0 var(--q) var(--green)}
+.inv b{display:block;font-size:16px;line-height:17px;color:var(--edge)}
+.bubble{position:relative;background:#fffaf0;padding:10px 12px;box-shadow:0 0 0 var(--q) #aa7959,0 4px 0 rgba(90,60,40,.18)}
+.bubble::after{content:"";position:absolute;left:22px;bottom:-14px;width:8px;height:8px;background:#fffaf0;box-shadow:0 0 0 var(--q) #aa7959,-10px 10px 0 -2px #fffaf0,-10px 10px 0 0 #aa7959}
+.facts{font-size:15px;line-height:18px;height:162px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:4px}
+mark{background:#fff1a8;color:inherit;box-shadow:0 0 0 1px #e0c060}
+.decide{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 10px;font-size:15px;margin-top:22px;overflow-wrap:anywhere}
+.say{display:inline-block;background:#5b3f36;color:#fff6e2;padding:2px 8px}
+.goals span.now{background:var(--green);color:#fff8e8;box-shadow:0 0 0 var(--q) #2f5a3b}
+.act{display:grid;grid-template-columns:minmax(0,130px) 1fr 40px;align-items:center;gap:6px;font-size:15px;margin:3px 0}
+.act span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.act i{height:10px;background:#cfad84;box-shadow:inset var(--q) var(--q) 0 #9a6f55;position:relative}
+.act i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--v);background:#aa7959}
+.act.on{color:#2f5a3b}
+.act.on i::after{background:var(--green)}
+.spark{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.spark canvas{width:100%;height:44px}
+.person{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:2px 8px;align-items:center;padding:7px 0;border-bottom:var(--q) dashed #c49a6c}
+.person:last-child{border:0}
+.person>.k{grid-column:2 / -1;overflow-wrap:anywhere}
+.person canvas{width:24px;height:28px;grid-row:span 2;align-self:start}
+.tag{font-size:12px;color:#fff8e8;padding:0 5px}
+.tag.ally{background:var(--green)}
+.tag.foe{background:var(--red)}
+.tag.meh{background:#aa7959}
+.log{font-size:15px;line-height:19px;height:300px;overflow:auto}
+.log div{display:grid;grid-template-columns:10px 72px minmax(0,1fr);gap:6px;align-items:baseline;overflow-wrap:anywhere}
+.log i{width:8px;height:8px;background:#aa7959}
+.log .whurt i,.log .wattack i{background:var(--red)}
+.log .wgoal i{background:var(--green)}
+.log .chat i{background:#6fb3e0}
+.log .whurt{color:#a1483a}
+.log .wgoal{color:#2f5a3b}
+.log .me span:last-child{color:#3a2a20}
+.bar{grid-column:1 / -1;position:sticky;bottom:8px;z-index:2;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{font:inherit;font-size:15px;color:var(--ink);background:#f3e5c2;border:0;padding:3px 8px;cursor:pointer;box-shadow:0 0 0 var(--q) #aa7959,inset 0 var(--m) 0 #d9bd90}
+.btn.on{background:var(--green);color:#fff8e8;box-shadow:0 0 0 var(--q) #2f5a3b}
+.btn:focus-visible,input:focus-visible{outline:var(--q) solid #fff1a8;outline-offset:2px}
+#play{width:64px}
+#scrub{flex:1 1 200px;min-width:160px;height:20px;appearance:none;-webkit-appearance:none;background:none;cursor:pointer}
+#scrub::-webkit-slider-runnable-track{height:10px;background:#cfad84;box-shadow:inset var(--q) var(--q) 0 #9a6f55}
+#scrub::-moz-range-track{height:10px;background:#cfad84;box-shadow:inset var(--q) var(--q) 0 #9a6f55}
+#scrub::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:20px;margin-top:-5px;background:var(--green);border:0;border-radius:0;box-shadow:inset var(--q) var(--q) 0 #8fcc97,0 0 0 var(--q) #2f5a3b}
+#scrub::-moz-range-thumb{width:12px;height:20px;background:var(--green);border:0;border-radius:0;box-shadow:0 0 0 var(--q) #2f5a3b}
+#clock{font-size:15px;min-width:120px;text-align:right}
+.dot{width:10px;height:10px;background:var(--ink2)}
+.dot.on{background:var(--green)}
+.note{grid-column:1 / -1;text-align:center;color:#b8d49a;font-size:14px}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}
+}
+</style>
+</head>
+<body>
+<div class="grid">
+  <div class="p head">
+    <canvas id="face" width="16" height="16"></canvas>
+    <div class="who"><b id="name">&hellip;</b><div id="sub"></div><div class="moods" id="moods"></div></div>
+    <div class="goal none" id="goalbox"><span id="goal">no goal</span><small id="goalp">the mind has not set one</small></div>
+    <div class="vitals">
+      <div class="vit">health<div class="pips" id="hp" style="--c:var(--red)"></div><span id="hpv">?</span></div>
+      <div class="vit">food<div class="pips" id="fd" style="--c:#d9a441"></div><span id="fdv">?</span></div>
+    </div>
+  </div>
+
+  <div class="p">
+    <div class="sec"><h2>Sees <small id="seesk"></small></h2>
+      <div class="well eyew"><canvas id="eye" width="156" height="156"></canvas><div id="eyemsg">waiting for the first frame&hellip;</div></div>
+      <div class="legend"><span><i style="background:#c7794f"></i><span id="lgme">it</span></span><span><i style="background:#6fb3e0"></i>allies</span><span><i style="background:#a58bd0"></i>people</span><span><i style="background:#c0584a"></i>danger</span><span><i style="background:#fff1a8"></i>animals</span><span><i style="background:#3a2a20"></i>its trail</span><span><i style="background:#c0584a"></i>hurt</span></div>
+      <div class="near" id="near"></div></div>
+    <div class="sec"><h2>Carries <small>green: the goal's item</small></h2><div class="inv" id="inv"></div></div>
+  </div>
+
+  <div class="p">
+    <div class="sec"><h2>Thinks <small id="tago"></small></h2>
+      <div class="bubble"><div class="k">what the mind was told &middot; <mark>new since the thought before</mark></div><div class="facts" id="facts"></div></div>
+      <div class="decide" id="decide"></div>
+      <div class="goals" id="goals"></div></div>
+    <div class="sec"><h2>Body <small id="bodyk">the trained policy</small></h2>
+      <div id="acts"></div>
+      <div class="row"><span class="chip" id="doing">doing: ?</span><span class="chip" id="legal" hidden></span><span class="chip" id="pos" hidden></span></div>
+      <div class="spark"><div id="svw" hidden><div class="k">expects (last minute)</div><canvas id="sv" width="120" height="22"></canvas></div><div><div class="k">health (last minute)</div><canvas id="sh" width="120" height="22"></canvas></div></div></div>
+  </div>
+
+  <div class="p">
+    <div class="sec"><h2>Remembers <small>its notes on people</small></h2><div class="well" id="people"></div></div>
+    <div class="sec"><h2>Lately</h2><div class="well log" id="log"></div></div>
+  </div>
+
+  <div class="p bar" id="bar">
+    <button class="btn" id="play" aria-label="play or pause">play</button>
+    <span id="speeds"></span>
+    <input id="scrub" type="range" min="0" max="1000" value="0" step="1" aria-label="time in the recording">
+    <span id="clock"></span>
+  </div>
+  <div class="note" id="note"></div>
+</div>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id), Q = new URLSearchParams(location.search), { round: rd, max: mx, min: mn, abs: ab, floor: fl } = Math;
+const tx = (id, v) => { $(id).textContent = v; }, ht = (id, v) => { $(id).innerHTML = v; }, EMPTY = (t) => `<span class="empty">${t}</span>`;
+const FEED = Q.get("feed"), REPLAY = FEED ? null : Q.get("replay") || "demo_replay.jsonl";
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const hash = (s) => [...String(s)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+const HUES = ["#6fb3e0", "#a58bd0", "#e8829a", "#d9a441", "#7fc8a9", "#e0a070"];
+const ROUND = (v) => (rd(v * 10) / 10).toString();
+const hm = (t) => new Date(t * 1000).toTimeString().slice(0, 8);
+const ago = (s) => (s < 60 ? `${mx(0, rd(s))} s` : `${fl(s / 60)} min ${rd(s % 60)} s`);
+
+// ---------- pixel painter ----------
+function px(c, x, y, w, h, col) { c.fillStyle = col; c.fillRect(x, y, w, h); }
+function person(c, x, y, body, hair) {          // a 12 x 14 figure
+const P = (a, b, w, h, col) => px(c, x + a, y + b, w, h, col);
+P(2, 12, 8, 2, "rgba(0,0,0,.25)"); P(3, 1, 6, 5, "#3a2a20"); P(4, 2, 4, 4, "#f5d7b0"); P(3, 1, 6, 2, hair);
+P(5, 4, 1, 1, "#3a2a20"); P(7, 4, 1, 1, "#3a2a20"); P(2, 6, 8, 5, "#3a2a20"); P(3, 6, 6, 5, body); P(3, 11, 2, 2, "#3a2a20"); P(7, 11, 2, 2, "#3a2a20");
+}
+const CRIT = { chicken: ["#fbf6e8", "#e06a58"], cow: ["#f3e5c2", "#5b3f36"], tusker: ["#8a5a3a", "#f3e5c2"], pincer: ["#d0603a", "#3a2a20"],
+wisp: ["#fff1a8", "#fffaf0"], wyrm: ["#3f7ab5", "#8fc3e6"], mossback: ["#5a7a3a", "#a58b5a"], sporeling: ["#c0584a", "#fbf6e8"] };
+function critter(c, x, y, kind) {
+const [a, b] = CRIT[kind] || ["#cfad84", "#3a2a20"], P = (u, v, w, h, col) => px(c, x + u, y + v, w, h, col);
+P(2, 11, 8, 2, "rgba(0,0,0,.25)");
+if (kind === "sporeling") { P(5, 7, 2, 4, "#fbf6e8"); P(2, 3, 8, 4, a); P(4, 4, 1, 1, b); P(7, 5, 1, 1, b); return; }
+if (kind === "wisp") { P(3, 3, 6, 6, "rgba(255,241,168,.5)"); P(5, 5, 2, 2, b); return; }
+P(2, 4, 8, 6, "#3a2a20"); P(3, 5, 6, 4, a); P(8, 3, 3, 3, "#3a2a20"); P(8, 4, 2, 1, b); P(3, 10, 1, 2, "#3a2a20"); P(7, 10, 1, 2, "#3a2a20");
+}
+const BOX = { "&": "#b0804a", C: "#9a6a3a", q: "#c8a060", B: "#c0584a", h: "#9a7448", L: "#a07040", p: "#5aa264", K: "#d9a441",
+r: "#b8506a", X: "#6f8fc0", J: "#c49a6c", e: "#8a6a4a", y: "#e8c060", m: "#e8829a", Z: "#8a6a4a", z: "#c49a6c" };
+const WATER = { "~": ["#4a86b5", "#8fc3e6"], "(": ["#3f76a5", "#7fb3d6"], "=": ["#335f8f", "#6f9fc6"], ")": ["#26496f", "#5a86b0"] };
+const GROUND = { ",": "#b08a5a", o: "#9a7448", u: "#7a5a38", _: "#a7a59f", "'": "#8a8580", n: "#c49a6c", "-": "#6f6a66", ":": "#b88a5a" };
+const S = 12, N = 13;
+function tile(c, ch, x, y, fog) {
+const X = x * S, Y = y * S, h = (x * 7 + y * 13) % 4, P = (a, b, w, hh, col) => px(c, X + a, Y + b, w, hh, col);
+const w = WATER[ch === "V" ? "~" : ch], g = GROUND[ch];
+if (w) { P(0, 0, S, S, w[0]); P(1 + (h % 3) * 2, 3 + (h % 2) * 5, 4, 1, w[1]); }
+else if (g) { P(0, 0, S, S, g); if (ch === "_" || ch === "n" || ch === ":") { P(0, 5, S, 1, "rgba(0,0,0,.18)"); P(h * 2 + 2, 0, 1, 5, "rgba(0,0,0,.18)"); P(h * 2 + 6, 6, 1, 6, "rgba(0,0,0,.18)"); }
+else if (ch === "o" || ch === "u") { P(1, 3, 10, 1, "#6f5030"); P(1, 8, 10, 1, "#6f5030"); } else P(2 + h, 3, 2, 1, "rgba(0,0,0,.15)"); }
+else { P(0, 0, S, S, fog ? ((x + y) % 2 ? "#7f9a5e" : "#79945a") : (x + y) % 2 ? "#8fbf5a" : "#86b752");
+P(2 + h, 3, 1, 2, fog ? "#6f8a4e" : "#6fa043"); P(8 - h, 8, 1, 2, fog ? "#6f8a4e" : "#6fa043"); }
+switch (ch) {
+case "T": case "F": case "U": P(5, 8, 2, 4, "#6b4a3a"); P(1, 0, 10, 8, ch === "U" ? "#6f9a4f" : "#3f7a4f"); P(3, 1, 5, 2, "#5aa264"); P(1, 7, 10, 2, "#2f5a3b");
+if (ch === "F") { P(3, 4, 2, 2, "#e06a58"); P(7, 2, 2, 2, "#e06a58"); } break;
+case "t": P(3, 6, 6, 4, "#6b4a3a"); P(4, 6, 4, 1, "#c49a6c"); break;
+case "b": case "v": case "H": P(2, 3, 8, 7, ch === "H" ? "#2f5a3b" : "#3f7a4f"); P(3, 3, 4, 2, "#5aa264");
+if (ch === "b") { P(4, 6, 2, 2, "#c0584a"); P(7, 4, 2, 2, "#c0584a"); } break;
+case "M": case "*": case "R": if (ch === "R") P(0, 0, S, S, "#5f5a56"); P(1, 3, 10, 8, "#6f6d69"); P(2, 2, 8, 7, "#8d8b86"); P(3, 3, 4, 1, "#a7a59f");
+if (ch === "*") { P(4, 5, 2, 2, "#f2c14e"); P(7, 7, 1, 1, "#f2c14e"); } break;
+case "Q": P(5, 7, 2, 3, "#fbf6e8"); P(3, 4, 6, 3, "#c0584a"); P(5, 5, 1, 1, "#fbf6e8"); break;
+case "f": P(3, 4, 2, 2, "#f2c14e"); P(7, 7, 2, 2, "#e8829a"); break;
+case '"': case ";": case "w": for (const a of [2, 6, 9]) P(a, ch === ";" ? 6 : 3, 1, ch === ";" ? 3 : 6, ch === "w" ? "#e8c060" : "#5aa264"); break;
+case "#": case "g": P(1, 3, 2, 8, "#6b4a3a"); P(9, 3, 2, 8, "#6b4a3a"); if (ch === "#") { P(0, 5, S, 2, "#9a6a3a"); P(0, 8, S, 1, "#9a6a3a"); } break;
+case "%": case "W": P(0, 0, S, S, ch === "%" ? "#8d8b86" : "#9a6a3a"); P(0, 5, S, 1, "rgba(0,0,0,.25)"); P(5, 0, 1, 5, "rgba(0,0,0,.25)"); P(2, 6, 1, 6, "rgba(0,0,0,.25)"); break;
+case "+": P(2, 0, 8, S, "#7a4a2a"); P(3, 1, 6, 10, "#9a6a3a"); P(7, 6, 1, 1, "#f2c14e"); break;
+case "^": case "x": if (ch === "^") { P(2, 8, 8, 3, "#6f6d69"); } P(4, 3, 4, 6, "#e07a30"); P(5, 5, 2, 3, "#fff1a8"); break;
+case "?": case "!": P(5, 4, 2, 8, "#6b4a3a"); if (ch === "?") P(2, 2, 8, 5, "#c49a6c"); else P(7, 2, 4, 3, "#c0584a"); break;
+case "O": P(2, 2, 8, 8, "#2a1e16"); P(3, 3, 6, 1, "#4a3a2a"); break;
+case "l": P(3, 0, 1, S, "#9a6a3a"); P(8, 0, 1, S, "#9a6a3a"); P(3, 3, 6, 1, "#9a6a3a"); P(3, 8, 6, 1, "#9a6a3a"); break;
+case "Y": P(2, 2, 8, 8, "#8d8b86"); P(4, 4, 4, 4, "#4a86b5"); break;
+case "V": P(1, 4, 10, 4, "#7a4a2a"); P(2, 4, 8, 2, "#9a6a3a"); break;
+case "$": P(4, 5, 4, 4, "#d9a441"); P(5, 4, 2, 1, "#9a7448"); break;
+default: if (BOX[ch]) { P(2, 3, 8, 7, "#3a2a20"); P(3, 3, 6, 5, BOX[ch]); P(3, 3, 6, 1, "rgba(255,255,255,.3)"); }
+}
+}
+
+// ---------- the data ----------
+const D = { F: [], T: [], M: [], G: [], H: null, t0: null, t1: 0 };
+function add(o) {
+if (typeof o.t !== "number") return;
+if (D.t0 === null) D.t0 = o.t;
+D.t1 = mx(D.t1, o.t);
+({ frame: D.F, thought: D.T, memory: D.M, chat: D.G, event: D.G })[o.k]?.push(o);
+if (o.k === "hello") D.H = o;
+}
+function at(a, T) { let lo = 0, hi = a.length - 1, r = -1; while (lo <= hi) { const m = (lo + hi) >> 1; if (a[m].t <= T) { r = m; lo = m + 1; } else hi = m - 1; } return r; }
+const C = {};                                              // what is on screen now: nothing is redrawn that did not change
+let T = 0;
+
+// ---------- the sections ----------
+const eye = $("eye").getContext("2d");
+function pips(el, v) { $(el).innerHTML = Array.from({ length: 10 }, (_, i) => `<b class="${v != null && i < rd(v / 2) ? "on" : ""}"></b>`).join(""); }
+function sideCol(b) { return b.side === "foe" || CRIT[b.kind] && !["chicken", "cow"].includes(b.kind) ? "#c0584a" : b.kind !== "agent" ? "#fff1a8" : b.side === "ally" ? "#6fb3e0" : "#a58bd0"; }
+function drawFrame(i) {
+const f = D.F[i], me = (D.H && D.H.name) || "it";
+$("eyemsg").hidden = !!f;
+if (!f) { px(eye, 0, 0, 156, 156, "#79945a"); return; }
+const tiles = f.tiles, cx = f.pos[0], cy = f.pos[1];
+for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) tile(eye, tiles ? tiles[y][x] : ".", x, y, !tiles);
+for (let j = mx(1, i - 90); j <= i; j++) {         // its trail: the last 90 frames, step by step; red where it was hurt
+const a = D.F[j - 1], b = D.F[j], n = mn(12, mx(ab(b.pos[0] - a.pos[0]), ab(b.pos[1] - a.pos[1]))), al = 0.2 + 0.6 * (j - i + 90) / 90;
+for (let k = 0; k <= n; k++) { const x = rd(a.pos[0] + (b.pos[0] - a.pos[0]) * k / (n || 1)) - cx + 6, y = rd(a.pos[1] + (b.pos[1] - a.pos[1]) * k / (n || 1)) - cy + 6;
+if (x >= 0 && y >= 0 && x < N && y < N) px(eye, x * S + 5, y * S + 5, 2, 2, `rgba(58,42,32,${al})`); }
+const x = b.pos[0] - cx + 6, y = b.pos[1] - cy + 6;
+if (b.hp < a.hp && x >= 0 && y >= 0 && x < N && y < N) px(eye, x * S + 4, y * S + 4, 4, 4, "#c0584a");
+}
+for (const b of f.beings || []) {
+if (b.dx == null || ab(b.dx) > 6 || ab(b.dy) > 6) continue;
+const X = (b.dx + 6) * S, Y = (b.dy + 6) * S, col = sideCol(b);
+if (b.kind === "agent") person(eye, X, Y - 2, col, "#3a2a20"); else critter(eye, X, Y - 1, b.kind);
+if (b.hp != null) { px(eye, X, Y - 4, 12, 2, "#3a2a20"); px(eye, X, Y - 4, rd(12 * mn(1, b.hp / 20)), 2, "#e06a58"); }
+if (b.name) { eye.font = "8px SproutPixel, monospace"; const w = Math.ceil(eye.measureText(b.name).width) + 4, tx = mx(0, mn(156 - w, X + 6 - w / 2)), ty = b.dy > -5 ? Y - 14 : Y + 13;
+px(eye, tx, ty, w, 9, "rgba(58,42,32,.85)"); eye.fillStyle = "#fff6e2"; eye.fillText(b.name, tx + 2, ty + 7); }
+}
+person(eye, 72, 70, "#c7794f", "#7a4a2a");
+const fx = { N: [77, 67], S: [77, 85], E: [85, 76], W: [69, 76] }[f.facing] || [77, 85];
+px(eye, fx[0], fx[1], 2, 2, "#fff1a8");
+if (/night/.test(f.time || "")) px(eye, 0, 0, 156, 156, "rgba(20,30,80,.28)");
+tx("seesk", tiles ? "13 × 13 tiles round it" : "its trail (no tiles in this log)");
+tx("lgme", me);
+const named = (f.beings || []).filter((b) => b.name || b.side === "foe").slice(0, 4);
+ht("near", named.length ? named.map((b) => `<span style="color:${b.side === "foe" ? "#a1483a" : "inherit"}">${esc(b.name || b.kind)}</span> <span class="k">${b.dx != null ? ab(b.dx) + ab(b.dy) : b.d} tiles${b.hp != null ? " · hp " + ROUND(b.hp) : ""}${b.side ? " · " + b.side : ""}</span>`).join("<br>") : EMPTY("nobody in sight"));
+// head
+pips("hp", f.hp); tx("hpv", f.hp != null ? `${ROUND(f.hp)}/20` : "?");
+pips("fd", f.food); tx("fdv", f.food != null ? `${ROUND(f.food)}/20` : "?");
+const g = f.goal, gb = $("goalbox");
+gb.classList.toggle("none", !g);
+tx("goal", g ? [g.kind, g.item, g.with && "with " + g.with].filter(Boolean).join(" ") : "no goal");
+tx("goalp", g ? [g.since_s != null && `set by the mind ${ago(g.since_s)} ago`, g.item && g.have != null && `carries ${g.have}`].filter(Boolean).join(" · ") : "the mind has not set one");
+// carries
+const inv = Object.entries(f.inv || {}).sort((a, b) => b[1] - a[1]);
+ht("inv", inv.length ? inv.map(([k, n]) => `<div class="${g && g.item === k ? "want" : ""}"><b>${n}</b>${esc(k.replace(/_/g, " "))}</div>`).join("") : EMPTY("nothing"));
+// body
+const top = f.top;
+let rows = top, sub = "its odds this decision";
+if (!top) { const n = {}; let s = 0; for (let j = mx(0, at(D.F, f.t - 30)); j <= i; j++) { const a = D.F[j].act; if (a) { n[a] = (n[a] || 0) + 1; s++; } }
+rows = Object.entries(n).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([a, v]) => [a, v / s]); sub = "what it chose, last 30 s"; }
+tx("bodyk", sub);
+ht("acts", rows.length ? rows.map(([n, p]) => `<div class="act ${n === f.act ? "on" : ""}"><span title="${esc(n)}">${esc(n.replace(/_/g, " "))}</span><i style="--v:${rd(100 * p)}%"></i><span>${rd(100 * p)}%</span></div>`).join("") : EMPTY("no decisions yet"));
+tx("doing", "doing: " + (f.act ? f.act.replace(/_/g, " ") : "?"));
+$("legal").hidden = f.legal == null; tx("legal", `legal ${f.legal} / ${f.of}`);
+$("pos").hidden = !f.pos; tx("pos", `at ${f.pos.slice(0, 2).join(", ")} · facing ${f.facing || "?"}`);
+const lo = at(D.F, f.t - 60) + 1, last = D.F.slice(lo, i + 1);
+spark("sh", last.map((x) => x.hp), 0, 20, "#c0584a");
+const vs = last.map((x) => x.value).filter((v) => v != null);
+$("svw").hidden = !vs.length; if (vs.length) spark("sv", vs, mn(0, ...vs), mx(1, ...vs), "#3f7a4f");
+moods(f);
+}
+function spark(id, arr, lo, hi, col) {
+const c = $(id).getContext("2d"), n = arr.length; c.clearRect(0, 0, 120, 22); px(c, 0, 21, 120, 1, "#c49a6c");
+arr.forEach((v, j) => { if (v == null) return; const x = fl(j * 120 / mx(n, 60)), w = mx(2, Math.ceil(120 / mx(n, 60))), y = rd(20 - 19 * (v - lo) / (hi - lo || 1));
+px(c, x, y, w, 21 - y, col + "55"); px(c, x, y, w, 1, col); });
+}
+function moods(f) {
+const recent = D.G.slice(mx(0, at(D.G, T) - 12), at(D.G, T) + 1).some((e) => e.what === "hurt" && T - e.t < 8);
+const b = f.beings || [], m = [[recent || /^attack/.test(f.act || "") ? "in a fight" : "calm", recent],
+[b.some((x) => x.side === "ally") ? "ally nearby" : b.some((x) => x.kind === "agent") ? "people nearby" : "alone", 0],
+f.food != null && [f.food < 8 ? "hungry" : "fed", f.food < 8], f.hp != null && [f.hp < 8 ? "hurt" : "ok", f.hp < 8], /night/.test(f.time || "") && ["night", 0]].filter(Boolean);
+const h = m.map(([t, hot]) => `<span class="mood ${hot ? "hot" : ""}">${t}</span>`).join("");
+if (h !== C.moods) ht("moods", C.moods = h);
+}
+const norm = (s) => s.replace(/set \d+ s ago|day \d+, \d+:\d+( \(night\))?|\d+ tiles away/g, "");
+function drawThought(i) {
+const th = D.T[i];
+if (!th) { ht("facts", EMPTY("no thought yet")); ht("decide", ""); tx("tago", ""); return; }
+const was = new Set(i ? D.T[i - 1].facts.split(/(?<=[.;:] )|\n/).map(norm) : []);
+ht("facts", th.facts.split(/(?<=[.;:] |\n)/).map((p) => (i && !was.has(norm(p.replace(/\n$/, ""))) && p.trim().length > 2 ? `<mark>${esc(p)}</mark>` : esc(p))).join(""));
+const r = th.reply || {}, notes = Object.entries(r.relation_update || {}).filter(([n]) => !/^(person|someone|nobody|no_one|none)$/i.test(n));
+ht("decide", (r.raw ? `<span class="k">said</span><span>${esc(r.raw)}</span>` :
+`<span class="k">goal</span><b>${esc([r.goal || "free", r.item, r.with && "with " + r.with].filter(Boolean).join(" "))}</b>` +
+(r.say ? `<span class="k">says</span><span><span class="say">${esc(r.say)}</span></span>` : "") +
+notes.map(([n, u]) => `<span class="k">notes</span><span>${esc(n)}${u.ally ? " (ally)" : ""}: "${esc(u.note || "")}"</span>`).join("")) +
+`<span class="k">took</span><span id="took"></span>`);
+const gs = D.G.slice(0, at(D.G, th.t + 1) + 1).filter((e) => e.what === "goal").slice(-5);
+ht("goals", gs.length ? '<span class="k" style="background:none;box-shadow:none;padding:2px 0">goals so far:</span>' + gs.map((e, j) => `<span class="${j === gs.length - 1 ? "now" : ""}">${esc(e.text.replace(/^goal: /, ""))}</span>`).join("") : "");
+}
+function drawMemory(i) {
+const p = Object.entries((D.M[i] || {}).people || {});
+ht("people", p.length ? p.map(([n, r], j) => `<div class="person"><canvas id="pp${j}" width="12" height="14"></canvas><b>${esc(n)}</b><span class="tag ${r.ally ? "ally" : "meh"}">${r.ally ? "ally" : "unsure"}</span><span class="k">"${esc(r.notes || "")}"</span></div>`).join("") : EMPTY("no notes on anyone yet"));
+p.forEach(([n, r], j) => person($("pp" + j).getContext("2d"), 0, 0, r.ally ? "#6fb3e0" : HUES[hash(n) % HUES.length], "#3a2a20"));
+}
+function drawLog(i) {
+const me = D.H && D.H.name, rows = [];
+for (let j = i; j >= 0 && rows.length < 40; j--) { const e = D.G[j];
+rows.push(`<div class="${e.k === "chat" ? "chat" + (e.said ? " me" : "") : "w" + esc(e.what)}"><i></i><span class="k">${hm(e.t)}</span><span>${e.k === "chat" ? `${esc(e.from || "?")}: ${esc(e.text)}` : esc(e.text)}</span></div>`); }
+ht("log", rows.join("") || EMPTY("nothing yet"));
+$("log").scrollTop = 0;
+}
+function clocks() {
+const th = D.T[C.t], f = D.F[C.f];
+tx("tago", th ? `last thought ${ago(T - th.t)} ago` : "");
+if (th && $("took")) tx("took", (th.took_s != null ? `${th.took_s} s to think · ` : "") + `${ago(T - th.t)} ago`);
+const h = D.H || {};
+tx("sub", [h.persona, f && f.time, D.t0 && (FEED ? `watched ${ago(T - D.t0)}` : `${ago(T - D.t0)} into the recording`)].filter(Boolean).join(" · "));
+if (FEED) tx("clock", hm(T));
+else tx("clock", `${hm(T)} · ${ago(T - D.t0)} / ${ago(D.t1 - D.t0)}`);
+}
+function render() {
+const iF = at(D.F, T), iT = at(D.T, T), iM = at(D.M, T), iG = at(D.G, T);
+if (D.H && C.h !== D.H) { C.h = D.H; tx("name", D.H.name || "an AI player"); document.title = `Inside ${D.H.name || "an AI player"}'s head · Nexel Worlds`;
+const f = $("face").getContext("2d"); px(f, 0, 0, 16, 16, "#cfe6a8"); px(f, 0, 12, 16, 4, "#9fca73"); person(f, 2, 2, "#c7794f", "#7a4a2a"); }
+if (iG !== C.g) { C.g = iG; drawLog(iG); }
+if (iF !== C.f) { C.f = iF; drawFrame(iF); }
+if (iT !== C.t) { C.t = iT; drawThought(iT); }
+if (iM !== C.m) { C.m = iM; drawMemory(iM); }
+const s = fl(T);
+if (s !== C.s) { C.s = s; clocks(); if (D.F[iF]) moods(D.F[iF]); }
+}
+
+// ---------- live, or a recording ----------
+let playing = false, speed = 1, last = 0, queued = false;
+const kick = () => { if (!queued && !document.hidden) { queued = true; requestAnimationFrame(loop); } };
+function loop(now) {
+queued = false;
+if (document.hidden) return;
+if (FEED) T = mx(D.t1, Date.now() / 1000);
+else if (playing) { T = mn(D.t1, T + (last ? (now - last) / 1000 : 0) * speed); last = now;
+$("scrub").value = rd(1000 * (T - D.t0) / (D.t1 - D.t0 || 1)); if (T >= D.t1) setPlay(false); }
+render();
+if (playing) kick();
+}
+function setPlay(on) { playing = on; last = 0; tx("play", on ? "pause" : "play"); $("play").classList.toggle("on", on); if (on && T >= D.t1) T = D.t0; kick(); }
+document.addEventListener("visibilitychange", () => { last = 0; kick(); });
+const mq = matchMedia("(prefers-reduced-motion: reduce)");
+if (FEED) {
+$("play").hidden = $("scrub").hidden = true; $("bar").style.position = "static";
+ht("speeds", '<span class="row" style="margin:0;align-items:center"><span class="dot" id="dot"></span><span id="status">connecting&hellip;</span></span>');
+tx("note", "live: one small feed from the AI player (rl/brain.py) · nothing is drawn while this tab is hidden");
+const es = new EventSource(FEED);
+es.onopen = () => { $("dot").classList.add("on"); tx("status", "live"); };
+es.onerror = () => { $("dot").classList.remove("on"); tx("status", "reconnecting…"); };
+es.onmessage = (m) => { try { add(JSON.parse(m.data)); } catch { } kick(); };
+setInterval(kick, 1000);                                    // (the "s ago" clocks; skipped while hidden)
+} else {
+ht("speeds", [1, 2, 4, 8].map((s) => `<button class="btn ${s === 1 ? "on" : ""}" data-s="${s}">${s}x</button>`).join(" "));
+$("speeds").onclick = (e) => { const s = +e.target.dataset.s; if (!s) return; speed = s; for (const b of $("speeds").children) b.classList.toggle("on", +b.dataset.s === s); };
+$("play").onclick = () => setPlay(!playing);
+$("scrub").oninput = () => { T = D.t0 + (D.t1 - D.t0) * $("scrub").value / 1000; last = 0; kick(); };
+addEventListener("keydown", (e) => { if (e.code === "Space" && e.target.tagName !== "BUTTON") { e.preventDefault(); setPlay(!playing); } });
+fetch(REPLAY).then((r) => { if (!r.ok) throw r.status; return r.text(); }).then((txt) => {
+for (const ln of txt.split("\n")) if (ln.trim()) try { add(JSON.parse(ln)); } catch { }
+for (const a of [D.F, D.T, D.M, D.G]) a.sort((x, y) => x.t - y.t);
+const st = parseFloat(Q.get("t"));
+T = D.t0 + (isNaN(st) ? 0 : st);
+$("scrub").value = rd(1000 * (T - D.t0) / (D.t1 - D.t0 || 1));
+tx("note", `a recording: ${D.F.length} frames, ${D.T.length} thoughts over ${ago(D.t1 - D.t0)} · space plays and pauses · what the log did not keep is left out`);
+render(); if (!mq.matches && Q.get("play") !== "0") setPlay(true);
+}).catch(() => { tx("eyemsg", "no feed: open this page with ?feed=http://127.0.0.1:8790/feed (a live player run with --brain 8790) or ?replay=a_recording.jsonl"); $("bar").hidden = true; render(); });
+}
+</script>
+</body>
+</html>

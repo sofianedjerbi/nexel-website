@@ -39,7 +39,9 @@ fi
 
 (cd "$WORK/game" && "$PYTHON" tools/build_pages.py "$WORK/play")
 rm -f "$WORK/play/README.md"
+[ -d "$SITE/play/brain" ] && mv "$SITE/play/brain" "$WORK/brain"     # (the brain view lives in play/ but is not the demo's)
 rm -rf "$SITE/play"
 mv "$WORK/play" "$SITE/play"
+[ -d "$WORK/brain" ] && mv "$WORK/brain" "$SITE/play/brain"
 echo "$SHA" > "$SITE/play/BUILD"
 echo "built play/ from $SHA ($(du -sh "$SITE/play" | cut -f1))"
