@@ -6,8 +6,8 @@
 // (skipWaiting, claim) and drops the old build's. So a build is never mixed with another, and a reload after a publish
 // is the new build as soon as this file has been seen (a page still at its first screen reloads by itself: local.js).
 // Python is kept apart, by its own version: a new build of the game does not fetch it again. The sounds too, by theirs.
-const BUILD = "668f502-43a7c67278";
-const FILES = ['./', 'js/game.172d156fe2.js', 'assets/pack.d7827a592a.bin', 'js/local_worker.js?v=43a7c67278', 'py.zip?v=43a7c67278'];                    // the build's own files: "./" (the page), its script, its pictures, the game's Python
+const BUILD = "7e83802-e09febd583";
+const FILES = ['./', 'js/game.bac96486d7.js', 'assets/pack.d7827a592a.bin', 'js/local_worker.js?v=e09febd583', 'py.zip?v=e09febd583'];                    // the build's own files: "./" (the page), its script, its pictures, the game's Python
 const PYTHON = ['https://cdn.jsdelivr.net/pyodide/v314.0.7/full/pyodide.mjs', 'https://cdn.jsdelivr.net/pyodide/v314.0.7/full/pyodide.asm.mjs', 'https://cdn.jsdelivr.net/pyodide/v314.0.7/full/pyodide.asm.wasm', 'https://cdn.jsdelivr.net/pyodide/v314.0.7/full/pyodide-lock.json', 'python_stdlib.070a7ff67f.zip'];                   // Pyodide's files (another site's, or ours)
 
 function hash(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }

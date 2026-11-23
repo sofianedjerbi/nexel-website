@@ -4900,7 +4900,7 @@ arrivingNow = (arrivingNow || !hereBlock || !Voxels.made(hereBlock)) && !allShow
 const worldReady = !arrivingNow;
 const lacking = !!me && (!hereBlock || !worldReady), late = lacking && goodAt > 0 && now - goodAt >= HOLD_MS && (now - goodAt >= 4 * HOLD_MS || vis.some((b) => onScreen(b) && Voxels.made(b)));
 if (!lacking) goodAt = now; else if (!late && goodAt > 0) { slowFrame(dt, false); return; }
-if (!HdLook.live && !HdLook.lost && me) { ctx.fillStyle = "#2b2420"; ctx.fillRect(0, 0, W, H); }
+if (!HdLook.live && !HdLook.lost && !HdLook.wait && me) { ctx.fillStyle = "#2b2420"; ctx.fillRect(0, 0, W, H); }
 slowFrame(dt, worldReady);
 occupied = new Set([...ents.values()].filter((p) => p.e && p.e.kind === "agent" && !Floors.rise(p)).map((p) => Math.round(p.x) + "," + Math.round(p.y)));
 Voxels.still(vis, t);
@@ -8721,7 +8721,7 @@ const NARROW = 5;
 const cfg = {levels: [-9, 12], variants: 4, up: RELIEF_STEP, rock: {from: 5, lo: -512, n: 4}};
 const cam = {kind: "persp", pitch: 36, fov: 26};
 const api = {eye: null, get on() { return !!this.eye || (!!me && myId !== null); }, u: 0, ms: 0, build: 0, slice: 0, live: false, drew: false, get busy() { return !!gen || (warmOn && warm < 3); }, get warm() { return warm; }, get part() { return (eng ? gen ? eng.part : 1 : 0) * .8 + (warm + 1) / 20; }, get win() { return eng ? eng.win : {n: 0, a: 0, tiles: []}; }, steep: STEEP, nowin: false, edge: "B", force: null, cam, bend: .03, faces: 0, builds: 0, n: 0};
-let hidAt = -1e9, bareAt = false, camL = null, clr = null, pitN = null, stage = 0, tilt = 0, flip = 0, covAt = -1e9, grow = 0, wantG = 0, genG = 0, shownG = 0, south = 8, gen = null, seen = null, eng = null, key = "", ver = -1, last = performance.now(), lit = null, hl = 0, hy = 0, since = 0, hurry = false, cand = null, candKey = "", noGL = false, wrote = false, keyNear = "", keyFar = "", slice1 = 0, camV = 0, lastLf = null, anc = null, genAt = null, landAt = null, held = false, heldAt = 0, wasAt = null, jump = true, genC = null, shownC = null, spent = 0, warm = -1, warmOn = false;
+let hidAt = -1e9, bareAt = false, camL = null, clr = null, pitN = null, stage = 0, tilt = 0, flip = 0, covAt = -1e9, grow = 0, wantG = 0, genG = 0, shownG = 0, south = 8, gen = null, seen = null, eng = null, key = "", ver = -1, last = performance.now(), lit = null, hl = 0, hy = 0, since = 0, hurry = false, cand = null, candKey = "", noGL = false, wrote = false, keyNear = "", keyFar = "", slice1 = 0, camV = 0, lastLf = null, anc = null, ancG = null, genAt = null, landAt = null, held = false, heldAt = 0, wasAt = null, jump = true, genC = null, shownC = null, spent = 0, warm = -1, warmOn = false;
 const sprs = new Map(), lads = new Map(), things = new Map(), piles = new Map(), built = new Map(), stoodOf = new Map();
 let YK = new Float64Array(512); const byY = (l) => { const n = l.length; if (YK.length < n) YK = new Float64Array(n * 2); for (let i = 0; i < n; i++) YK[i] = l[i].y;
 for (let i = 1; i < n; i++) { const k = YK[i]; if (!(k < YK[i - 1])) continue; const o = l[i]; let j = i - 1; while (j >= 0 && k < YK[j]) { YK[j + 1] = YK[j]; l[j + 1] = l[j]; j--; } YK[j + 1] = k; l[j + 1] = o; } };
@@ -8923,13 +8923,13 @@ const sky = typeof Curve !== "undefined" && Curve.on ? api.sky(now / 1000) : nul
 const wl = WaterBed.view(Voxels.engine, now / 1000), day = 1, ed = h / (32 * Math.tan(cam.fov * Math.PI / 360));
 const light = {amb: .8, lr: 8, day, fog: [ed + 4, ed + 22], fogc: low, clear: [0, 0, 0], ca: 0, sun: HdSun.sun, rim: .25, wa: .92, wtint: wl && wl.tint ? wl.tint.subarray(0, 20) : null};
 const pin = p.free ? null : (pr) => { const b = pr(p.x + .5, p.y + .5, Lf), fx = b[0] - Math.round(b[0]), fy = b[1] - Math.round(b[1]);
-if (!anc || anc[1] !== ty || Math.abs(anc[2] - camL) > 8 || Math.abs(anc[0] - tx) > 12) anc = [tx, ty, Math.round(camL), null, null];
+const g = Leap.on() ? Leap.level()[0] : L, sank = ancG !== null && g !== ancG && !Leap.on() && !Leap.gliding() && p.x === p.tx && p.y === p.ty; ancG = g; if (!anc || anc[1] !== ty || Math.abs(anc[0] - tx) > 12 || Math.abs(anc[2] - camL) > 8 || sank) anc = [tx, ty, g, null, null];
 const o = pr(anc[0] + .5, anc[1] + .5, anc[2]), want = Math.round(o[1] - fy), cap = Math.max(1, Math.round(dt * 60));
 const oy = anc[3] === null || anc[4] !== cam.pitch || Math.abs(want - anc[3]) > 24 ? want : anc[3] + Math.sign(want - anc[3]) * Math.max(Math.min(cap, Math.abs(want - anc[3])), Math.abs(want - anc[3]) - 2);
 anc[3] = oy; anc[4] = cam.pitch; return [Math.round(o[0] - fx) - o[0], oy - o[1]]; };
 if (warmOn && warm >= 3 && gen) { api.ms = performance.now() - t0; return; }
 let pic = eng.draw({w, h, cam, at: [p.x + .5, p.y + .5, camL + .5], pin, bend: api.bend, t: now / 1000, light,
-water: typeof waterCv !== "undefined" && waterView ? {canvas: waterCv, x: waterView.x, y: waterView.y, ver: Voxels.wver} : null, dep, own, rim: HdLevel.rim(tx, ty, L), hole: tilt * HdEase.of("shut", !p.free && HdLevel.shut(tx, ty, L, NARROW)), sky: bare, behind: p.free || cov0 ? 0 : HdEase.of("behind", HdLevel.over(tx, ty, L, kS) >= 1), hid: (api.hid = p.free || cov0 || HdLevel.over(tx, ty, L, kS) >= 1 ? 1 : 0), win: api.nowin ? 0 : 1, edge: api.edge, sprites: list, way: WayShow.land(), ghosts: pieces(list), hour: hour(w, h, list, 0)});
+water: typeof waterCv !== "undefined" && waterView ? {canvas: waterCv, x: waterView.x, y: waterView.y, ver: Voxels.wver} : null, dep, own, rim: HdLevel.rim(tx, ty, L), hole: tilt * HdEase.of("shut", !p.free && HdLevel.shut(tx, ty, L, NARROW)), sky: bare, behind: p.free || cov0 ? 0 : HdEase.of("behind", HdLevel.over(tx, ty, L, kS) >= 1), hid: (api.hid = p.free || cov0 || HdLevel.over(tx, ty, L, kS) >= 1 || list.some((s) => s.tx !== undefined && !s.lie && s.ty > ty && s.ty <= ty + 2 && Math.abs(s.tx - tx) <= 1) ? 1 : 0), win: api.nowin ? 0 : 1, edge: api.edge, sprites: list, way: WayShow.land(), ghosts: pieces(list), hour: hour(w, h, list, 0)});
 if (!pic) { if (pic === null) noGL = true; else api.lost = true; api.ms = performance.now() - t0; return; }
 seen = {tx, ty, L, rim: HdLevel.rim(tx, ty, L), top: tilt > .5 && !cov0, ks: eyeRise(cam.pitch), k: 1, me: list.find((q) => q.top), list, at: [snap(p.x + .5), snap(p.y + .5), Lf]}; horizon(tx, ty, L + dep); { const t = Math.max(8, eyeLine([snap(p.x + .5), snap(p.y + .5), Math.round(camL * 16) / 16 + .5], w, h, lowAhead(tx, ty)) + 2); hl = !hl || Math.abs(t - hl) < .5 ? t : hl + (t - hl) * (1 - Math.exp(-dt / .25)); }
 api.faces = eng.faces; api.models = eng.models; reachOf(tx, ty, w, h, now);
@@ -8999,8 +8999,9 @@ api.read = (...a) => HdView.read(...a); api.bodies = () => (seen ? seen.list.fil
 { const f0 = frame; frame = function (now) {
 const t0 = performance.now(), keep = ctx, on = api.on && !noGL && !!(api.eye || ents.get("agent" + myId)); api.live = on && Voxels.engine.ready(); api.drew = wrote = false; slice1 = 0;
 api.lost = on && !api.live && !!HdView.el && HdView.el.style.display === "block";
-if (api.live || api.lost) ctx = HdView.sink(); try { f0(now); } finally { ctx = keep; }
-if (api.live) after(); else if (!api.lost) HdView.hide();
+api.wait = !on && !!me && myId !== null && !ents.get("agent" + myId) && !!HdView.el && HdView.el.style.display === "block";
+if (api.live || api.lost || api.wait) ctx = HdView.sink(); try { f0(now); } finally { ctx = keep; }
+if (api.live) after(); else if (!api.lost && !api.wait) HdView.hide();
 HdView.perf(now, performance.now() - t0, api.drew, eng ? eng.calls : 0, slice1, wrote);
 };
 const d0 = drawTile; drawTile = function (x, y, to = null) { d0(x, y, to); if (!to && eng) eng.touch(x, y); };
