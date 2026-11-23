@@ -1,52 +1,55 @@
-# Nexel Worlds: website
+<p align="center">
+  <img src="assets/banner.png" alt="Nexel Worlds">
+</p>
 
-The public site of Nexel Worlds: a landing page, the playable demo under `play/`, and a devlog under `devlog/`.
-Static HTML and CSS, no framework, no build step needed to serve it. Published on GitHub Pages at
-https://sofianedjerbi.github.io/nexel-website/
+<p align="center"><b>The home of Nexel Worlds: play the game in your browser, watch an AI player think, read how it is made.</b></p>
 
+<p align="center">
+  <a href="https://github.com/sofianedjerbi/nexel-website/actions/workflows/ci.yml"><img src="https://github.com/sofianedjerbi/nexel-website/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://sofianedjerbi.github.io/nexel-website/"><img src="https://img.shields.io/badge/site-live-6b8f4e" alt="site: live"></a>
+</p>
+
+<h3 align="center">
+  <a href="https://sofianedjerbi.github.io/nexel-website/play/">Play in your browser</a>
+  &nbsp;&middot;&nbsp;
+  <a href="https://sofianedjerbi.github.io/nexel-website/play/brain/">Watch an AI player think</a>
+  &nbsp;&middot;&nbsp;
+  <a href="https://sofianedjerbi.github.io/nexel-website/devlog/">Devlog</a>
+</h3>
+
+<br>
+
+<p align="center"><a href="https://sofianedjerbi.github.io/nexel-website/"><img src="assets/site.png" alt="The landing page"></a></p>
+<p align="center"><i>The landing page: one button, and you are in the game.</i></p>
+
+<p align="center"><a href="https://sofianedjerbi.github.io/nexel-website/play/"><img src="assets/phone.png" alt="The game on a phone"></a></p>
+<p align="center"><i>The whole game runs in the page, phones included. Your world is saved in your browser.</i></p>
+
+<p align="center"><a href="https://sofianedjerbi.github.io/nexel-website/play/brain/"><img src="assets/brain.gif" alt="The brain view replaying an AI player's game"></a></p>
+<p align="center"><i>The brain view: 13 minutes of a real AI player, replayed, with everything it saw and thought.</i></p>
+
+<p align="center"><a href="https://sofianedjerbi.github.io/nexel-website/devlog/"><img src="assets/devlog.png" alt="The devlog"></a></p>
+<p align="center"><i>The devlog: how the game got made, a few days at a time.</i></p>
+
+## What you'll find
+
+- The game itself, free, nothing to install: dig, build, farm, fight, and get through the night.
+- A world that is yours: it is kept in your browser between visits.
+- Touch controls on a phone, keys on a computer.
+- A live look inside an AI player's head, from a real recorded game.
+- A short, honest devlog: what worked, what did not, what was measured.
+
+<br>
+
+<sub>**Run it yourself.** It is a plain static site:</sub>
+
+```sh
+git clone https://github.com/sofianedjerbi/nexel-website && cd nexel-website
+python3 -m http.server 8000      # then open http://127.0.0.1:8000
 ```
-index.html            landing page (written by tools/make_site.py from tools/landing.html)
-devlog/               posts (written from devlog/posts/*.md)
-play/                 the demo: the game's own static build, committed as built
-img/                  screenshots of the game (whole pixels, never scaled)
-css/site.css          the look: the game's colours and edges
-fonts/                the game's pixel font
-tools/                the scripts below
-```
 
-## Rebuild
+<sub>The game's code is in [nexel-worlds](https://github.com/sofianedjerbi/nexel-worlds), the AI players in [nexel-agent](https://github.com/sofianedjerbi/nexel-agent). Rebuilding the pages or the demo: [CONTRIBUTING.md](CONTRIBUTING.md).</sub>
 
-Pages (after editing `tools/landing.html` or a post in `devlog/posts/`):
+<sub>**Art.** The pictures in the screenshots and in the demo are the Sprout Lands packs by [Cup Nooble](https://cupnooble.itch.io/), used under their licence. The packs may not be redistributed: the site itself uses only screenshots of the game, and the demo ships only the sheets the game uses, as the game does (`play/assets/CREDITS.md`). The pixel font was drawn for Nexel Worlds. The demo's music is made from CC0 instrument recordings (VCSL, VSCO 2 CE by Versilian Studios, FreePats guitar).</sub>
 
-    python3 tools/make_site.py
-
-The demo, from a clean clone of the game repo (only committed code gets in; the built sound files and the cached
-Pyodide library are copied from the game's working folder, since git does not hold them):
-
-    tools/build_site.sh                         # GAME=~/megastructure REF=HEAD by default
-    GAME=/path/to/megastructure REF=<commit> tools/build_site.sh
-
-It runs the game's `tools/build_pages.py` (the same build as the old demo repo) into `play/` and writes the commit
-it was built from in `play/BUILD`. The music page of the old demo is skipped unless the music is rendered in that
-clone (it is not committed).
-
-Screenshots, from a QA server of the game on a copy of a save (never the live server):
-
-    cp -R ~/megastructure/saves/caves /tmp/site-qa/caves
-    (cd ~/megastructure && PYTHONPATH=src .venv/bin/python -m megastructure.server --port 7881 --world /tmp/site-qa/caves --seed 12 --dev)
-    SHOT_W=960 SHOT_H=540 ZOOM=3 ~/megastructure/.venv/bin/python tools/capture.py village night cave build
-    SHOT_W=960 SHOT_H=540 ZOOM=4 ~/megastructure/.venv/bin/python tools/capture.py water jump
-    python3 tools/crop.py                       # shots/raw/ -> img/ (crops only, no scaling)
-
-Preview (desk and phone screenshots into `.preview/`, and a check that the demo boots under a sub-path):
-
-    mkdir -p /tmp/serve && ln -sfn "$PWD" /tmp/serve/nexel-website && (cd /tmp/serve && python3 -m http.server 7882)
-    ~/megastructure/.venv/bin/python tools/preview.py
-
-## Credits and licences
-
-- Art in the screenshots and in the demo: Sprout Lands by Cup Nooble (https://cupnooble.itch.io/), used under its
-  licence. The pack may not be redistributed: the site itself uses only screenshots of the game; the demo ships
-  only the sheets the game uses, as the game does (`play/assets/CREDITS.md`).
-- Font: `fonts/sprout-pixel.ttf` is the game's own font, drawn for Nexel Worlds (`tools/build_font.py` in the game repo).
-- Music in the demo: CC0 instrument recordings (VCSL, VSCO 2 CE by Versilian Studios; FreePats guitar).
+<sub>**Licence.** The Sprout Lands art is Cup Nooble's, under its own licence, and is not covered by any licence of this repository.</sub>
