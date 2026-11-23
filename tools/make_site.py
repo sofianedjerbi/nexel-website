@@ -137,7 +137,7 @@ def read_post(f: Path) -> dict:
 
 
 def devlog():
-    posts = sorted((read_post(f) for f in POSTS.glob("*.md")), key=lambda p: (p["date"], p.get("order", "0")))
+    posts = sorted((read_post(f) for f in POSTS.glob("*.md")), key=lambda p: (p["date"], p.get("order", "0"), p.get("slug", p.get("file", ""))))
     out = ROOT / "devlog"
     for i, p in enumerate(posts):
         prev = posts[i - 1] if i else None
