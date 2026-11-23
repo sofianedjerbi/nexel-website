@@ -1,0 +1,8 @@
+# Lint for tools/ (CI: .github/workflows/ci.yml). Blocking: these rule families, less the rules today's
+# code breaks (the `ignore` list is the debt). The format check is not blocking until the format pass.
+target-version = "py314"
+line-length = 120
+
+[lint]
+select = ["E", "W", "F", "B", "UP", "SIM", "I", "C4", "RUF", "PIE", "ASYNC"]
+ignore = ["C408", "E501", "E731", "I001"]

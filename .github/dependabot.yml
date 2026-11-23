@@ -1,0 +1,13 @@
+# Weekly updates of the workflows' actions, as Conventional Commits (ci(deps): ...). No Python dependencies.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+      include: scope
+    groups:
+      actions:
+        patterns: ["*"]
