@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Devlog · Nexel Worlds</title>
+<meta name="description" content="How Nexel Worlds got made: short, honest posts.">
+<meta property="og:title" content="Devlog · Nexel Worlds">
+<meta property="og:description" content="How Nexel Worlds got made: short, honest posts.">
+<meta property="og:image" content="../img/hero.png">
+<link rel="preload" href="../fonts/sprout-pixel.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="../css/site.css">
+<link rel="icon" href="../img/favicon.png">
+</head>
+<body>
+<header class="top"><div class="wrap">
+<a class="brand" href="../index.html">Nexel Worlds</a>
+<nav class="nav"><a href="../index.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/></svg>Home</a><a href="../devlog/index.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="1" y="0" width="1" height="1"/><rect x="2" y="0" width="1" height="1"/><rect x="3" y="0" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="5" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="5" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/></svg>Devlog</a><a href="../play/"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/></svg>Play</a></nav>
+</div></header>
+<main class="wrap"><section>
+<div class="panel">
+<h1>Devlog</h1>
+<p>How Nexel Worlds got made, a few days at a time. Short and honest: what worked, what did not, what we measured.
+The full day-by-day notes live in the code repo's <a href="https://github.com/sofianedjerbi/nexel-worlds/blob/main/JOURNAL.md">JOURNAL.md</a>.</p>
+</div>
+<ul class="posts">
+<li><a class="post" href="ai-players.html">
+<div class="thumb"><img src="../img/village.png" alt="" loading="lazy"></div>
+<div><h2>AI players: from a language model to learning</h2><p class="date">2026-11-23</p><p>The game was built for AI players. Making one that plays well is the hard part. Two tries so far.</p></div>
+</a></li>
+<li><a class="post" href="flowing-water.html">
+<div class="thumb"><img src="../img/flow-2.png" alt="" loading="lazy"></div>
+<div><h2>Water that flows</h2><p class="date">2026-11-23</p><p>Water used to stay where the world put it. Now it runs, a cell at a time.</p></div>
+</a></li>
+<li><a class="post" href="the-jump.html">
+<div class="thumb"><img src="../img/jump-2.png" alt="" loading="lazy"></div>
+<div><h2>The jump, eight times</h2><p class="date">2026-11-23</p><p>A jump looks simple. Ours needed eight versions, and real frames to judge them.</p></div>
+</a></li>
+<li><a class="post" href="testing.html">
+<div class="thumb"><img src="../img/build-1.png" alt="" loading="lazy"></div>
+<div><h2>Tests that tell the truth</h2><p class="date">2026-11-22</p><p>Hundreds of tests in a real browser, and what made them flaky. Hint: it was rarely load.</p></div>
+</a></li>
+<li><a class="post" href="hd-voxel-look.html">
+<div class="thumb"><img src="../img/cave.png" alt="" loading="lazy"></div>
+<div><h2>The HD voxel look</h2><p class="date">2026-11-21</p><p>From flat tiles to real blocks with a horizon, light and shadows. The first audit said no.</p></div>
+</a></li>
+<li><a class="post" href="down-to-512.html">
+<div class="thumb"><img src="../img/old-house.jpg" alt="" loading="lazy"></div>
+<div><h2>Floors, tunnels, and 512 blocks down</h2><p class="date">2026-11-18</p><p>Houses with storeys, stairs dug into the ground, and a world 1024 blocks tall.</p></div>
+</a></li>
+<li><a class="post" href="seen-through-rock.html">
+<div class="thumb"><img src="../img/old-build.jpg" alt="" loading="lazy"></div>
+<div><h2>Seen through the rock, a name, and houses block by block</h2><p class="date">2026-11-15</p><p>An x-ray view for when the land hides you, black tiles on one phone, the name Nexel Worlds, and real building.</p></div>
+</a></li>
+<li><a class="post" href="hills-and-water.html">
+<div class="thumb"><img src="../img/old-hills.png" alt="" loading="lazy"></div>
+<div><h2>Hills, holes, and water you can see into</h2><p class="date">2026-11-12</p><p>The flat world got heights, a way underground, and clear water. The underground took six tries.</p></div>
+</a></li>
+<li><a class="post" href="in-the-browser.html">
+<div class="thumb"><img src="../img/phone.png" alt="" loading="lazy"></div>
+<div><h2>The whole game in a browser tab</h2><p class="date">2026-11-09</p><p>The server is plain Python, so we ran it inside the page. Then on a phone.</p></div>
+</a></li>
+<li><a class="post" href="day-one.html">
+<div class="thumb"><img src="../img/island.png" alt="" loading="lazy"></div>
+<div><h2>Day one: a world for robots, then a game</h2><p class="date">2026-11-08</p><p>It started as a server for AI players. By the evening it had to be a game people want to play.</p></div>
+</a></li>
+</ul>
+</section></main>
+<footer class="foot"><div class="wrap">
+<p>Nexel Worlds is made by <a href="https://github.com/sofianedjerbi">sofianedjerbi</a>. Code: <a href="https://github.com/sofianedjerbi/nexel-worlds">nexel-worlds</a> (the game) and <a href="https://github.com/sofianedjerbi/nexel-agent">nexel-agent</a> (the AI players).</p>
+<p>Art: Sprout Lands by <a href="https://cupnooble.itch.io/">Cup Nooble</a>. The pictures on this site are screenshots of the game.</p>
+</div></footer>
+</body>
+</html>

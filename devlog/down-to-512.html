@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Floors, tunnels, and 512 blocks down · Nexel Worlds devlog</title>
+<meta name="description" content="Houses with storeys, stairs dug into the ground, and a world 1024 blocks tall.">
+<meta property="og:title" content="Floors, tunnels, and 512 blocks down · Nexel Worlds devlog">
+<meta property="og:description" content="Houses with storeys, stairs dug into the ground, and a world 1024 blocks tall.">
+<meta property="og:image" content="../img/hero.png">
+<link rel="preload" href="../fonts/sprout-pixel.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="../css/site.css">
+<link rel="icon" href="../img/favicon.png">
+</head>
+<body>
+<header class="top"><div class="wrap">
+<a class="brand" href="../index.html">Nexel Worlds</a>
+<nav class="nav"><a href="../index.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/></svg>Home</a><a href="../devlog/index.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="1" y="0" width="1" height="1"/><rect x="2" y="0" width="1" height="1"/><rect x="3" y="0" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="5" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="5" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/></svg>Devlog</a><a href="../play/"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/></svg>Play</a></nav>
+</div></header>
+<main class="wrap"><section>
+<article class="panel post-body">
+<p class="date">2026-11-18</p>
+<h1>Floors, tunnels, and 512 blocks down</h1>
+<p></p>
+<p>Houses got storeys: stairs and ladders, floors you walk on and build on, a roof as a block like the rest.</p>
+<div class="shot"><img src="../img/old-house.jpg" alt="A house of three storeys in the flat look, 16 November" loading="lazy"></div>
+<p class="cap">A house of three storeys in the flat look, 16 November</p>
+<h2>One view when you are hidden</h2>
+<p>Digging a stair under a hill showed the next problem: the cave had one way of being drawn, a hollow under the meadow another, and the stair crossed from one to the other. The feedback was clear: everything should have the same view, not one view per situation. Since then there is exactly one rule for when you are hidden, whatever hides you.</p>
+<div class="shot"><img src="../img/old-cave.jpg" alt="A stair dug under a hill, 17 November" loading="lazy"></div>
+<p class="cap">A stair dug under a hill, 17 November</p>
+<h2>512 down, 512 up</h2>
+<p>The world was 32 cells tall: digging stopped at -12. A column is now stored as one number with a bit per cell, as long as it needs to be, from -512 to 512. Old saves were backed up first and carried over.</p>
+<h2>The AI players get bodies</h2>
+<p>The AI players are robots: each race in steel, so you can tell them apart from people at a glance.</p>
+</article>
+<div class="post-nav"><a class="btn small ghost" href="seen-through-rock.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/></svg>Seen through the rock, a name, and houses block by block</a><a class="btn small ghost" href="hd-voxel-look.html">The HD voxel look<svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/></svg></a></div>
+<p></p>
+</section></main>
+<footer class="foot"><div class="wrap">
+<p>Nexel Worlds is made by <a href="https://github.com/sofianedjerbi">sofianedjerbi</a>. Code: <a href="https://github.com/sofianedjerbi/nexel-worlds">nexel-worlds</a> (the game) and <a href="https://github.com/sofianedjerbi/nexel-agent">nexel-agent</a> (the AI players).</p>
+<p>Art: Sprout Lands by <a href="https://cupnooble.itch.io/">Cup Nooble</a>. The pictures on this site are screenshots of the game.</p>
+</div></footer>
+</body>
+</html>

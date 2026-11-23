@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day one: a world for robots, then a game · Nexel Worlds devlog</title>
+<meta name="description" content="It started as a server for AI players. By the evening it had to be a game people want to play.">
+<meta property="og:title" content="Day one: a world for robots, then a game · Nexel Worlds devlog">
+<meta property="og:description" content="It started as a server for AI players. By the evening it had to be a game people want to play.">
+<meta property="og:image" content="../img/hero.png">
+<link rel="preload" href="../fonts/sprout-pixel.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="../css/site.css">
+<link rel="icon" href="../img/favicon.png">
+</head>
+<body>
+<header class="top"><div class="wrap">
+<a class="brand" href="../index.html">Nexel Worlds</a>
+<nav class="nav"><a href="../index.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/></svg>Home</a><a href="../devlog/index.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="1" y="0" width="1" height="1"/><rect x="2" y="0" width="1" height="1"/><rect x="3" y="0" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="5" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="5" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/></svg>Devlog</a><a href="../play/"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/></svg>Play</a></nav>
+</div></header>
+<main class="wrap"><section>
+<article class="panel post-body">
+<p class="date">2026-11-08</p>
+<h1>Day one: a world for robots, then a game</h1>
+<p></p>
+<p>Nexel Worlds started on 8 November as something else: a persistent world where the players are AI agents running on a local model. The first version was a server, a world of chunks saved in SQLite, and eight scripted bots walking, digging and building. It worked: 1604 decisions in four minutes, a tick in 0.2 ms.</p>
+<p>Then it had to be looked at, and the first look was a debug viewer. The verdict was short: ugly, and nobody could tell how to play. Then: still ugly, and the latency is insane.</p>
+<h2>What we fixed that day</h2>
+<ul><li><b>Latency.</b> A one-tick step took two ticks (400 ms), and the page waited for the server before moving you. Now your character moves the moment you press a key and the server confirms within a tick.</li><li><b>The look.</b> Hand-drawn tiles at uneven scales made a checkerboard. We switched to the Sprout Lands art pack, drawn at whole-number zooms only, so pixels stay square.</li><li><b>Letters.</b> No font we tried felt right, so the game got its own: a 5 by 7 pixel font, drawn letter by letter. It is the one you are reading.</li><li><b>Feel.</b> Collisions you could trust, things that spawned everywhere, animation for every action.</li></ul>
+<p>By midnight there had been 24 iterations, each written down in the journal: what we thought, what we changed, what we measured.</p>
+<div class="shot"><img src="../img/island.png" alt="The first screen&#x27;s island, as it looks today" loading="lazy"></div>
+<p class="cap">The first screen's island, as it looks today</p>
+</article>
+<div class="post-nav"><span></span><a class="btn small ghost" href="in-the-browser.html">The whole game in a browser tab<svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/></svg></a></div>
+<p></p>
+</section></main>
+<footer class="foot"><div class="wrap">
+<p>Nexel Worlds is made by <a href="https://github.com/sofianedjerbi">sofianedjerbi</a>. Code: <a href="https://github.com/sofianedjerbi/nexel-worlds">nexel-worlds</a> (the game) and <a href="https://github.com/sofianedjerbi/nexel-agent">nexel-agent</a> (the AI players).</p>
+<p>Art: Sprout Lands by <a href="https://cupnooble.itch.io/">Cup Nooble</a>. The pictures on this site are screenshots of the game.</p>
+</div></footer>
+</body>
+</html>

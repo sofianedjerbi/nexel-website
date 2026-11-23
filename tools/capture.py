@@ -1,0 +1,230 @@
+"""Screenshots for the site, taken from the real game.
+
+Runs against a QA server of the game on a COPY of a save (never the live one, never port 7777):
+
+    cp -R ~/megastructure/saves/caves /tmp/site-qa/caves
+    cd ~/megastructure && PYTHONPATH=src .venv/bin/python -m megastructure.server --port 7881 --world /tmp/site-qa/caves --seed 12 --dev
+    ~/megastructure/.venv/bin/python tools/capture.py [shot ...]      (default: all shots)
+
+It drives one headless Chrome with the game's own test helper (tests/e2e/game.py) and writes PNGs to shots/raw/.
+"""
+
+import os
+import sys
+import time
+from pathlib import Path
+
+GAME = Path(os.environ.get("GAME", Path.home() / "megastructure"))
+sys.path.insert(0, str(GAME / "tests" / "e2e"))
+from playwright.sync_api import sync_playwright  # noqa: E402
+from game import Game  # noqa: E402
+
+URL = os.environ.get("QA_URL", "http://127.0.0.1:7881")
+OUT = Path(__file__).resolve().parent.parent / "shots" / "raw"
+W, H = int(os.environ.get("SHOT_W", 1280)), int(os.environ.get("SHOT_H", 720))
+QUIET = """() => { const s = document.createElement('style');
+  s.textContent = '#goalhint, #goals, #chatlog, #toast, #f3 .dbg { display:none !important; }'; document.head.appendChild(s); return 1; }"""
+
+
+def snap(g, name):
+    g.sleep(400)
+    g.page.screenshot(path=str(OUT / f"{name}.png"))
+    print("shot", name, g.pos(), flush=True)
+
+
+def empty(g):
+    """Nothing in the pack (what an earlier scene gave is taken back)."""
+    inv = {k: -n for k, n in g.server()["inventory"].items() if n}
+    if inv:
+        g.rpc("dev_give", items=inv)
+        g.sleep(900)
+
+
+def tp(g, x, y, z=0, wait=2500):
+    g.rpc("dev_teleport", x=x, y=y, z=z)
+    g.sleep(wait)
+    g.settle("!arrivingNow", timeout=8000)
+
+
+def hour(g, phase):
+    g.rpc("dev_time", phase=phase)
+    g.sleep(1500)
+
+
+def run(only):
+    OUT.mkdir(parents=True, exist_ok=True)
+    with sync_playwright() as pw:
+        b = pw.chromium.launch(channel="chrome", headless=True)
+        state = OUT.parent / "browser_state.json"       # (the player's key, kept: the name is taken after the first run)
+        ctx = b.new_context(viewport={"width": W, "height": H}, storage_state=str(state) if state.exists() else None)
+        page = ctx.new_page()
+        page.set_default_timeout(30000)
+        g = Game(page, URL)
+        g.load(zoom=int(os.environ.get("ZOOM", 4)))
+        if not only or "title" in only:
+            page.wait_for_function("typeof ready !== 'undefined'")
+            page.wait_for_timeout(6000)
+            page.screenshot(path=str(OUT / "title.png"))
+            print("shot title", flush=True)
+        g.join(os.environ.get("NAME", "Ada"), int(os.environ.get("ZOOM", 4)))
+        g.js(QUIET)
+        g.rpc("dev_admin")
+        for name in SHOTS:
+            if only and name not in only:
+                continue
+            SHOTS[name](g)
+        assert not g.errors, g.errors
+        ctx.storage_state(path=str(state))
+        ctx.close()
+        b.close()
+
+
+def where(g):
+    snap(g, "where")
+
+
+def explore(g):
+    """EXPLORE="x,y,z x,y,z ...": a shot at each, to find places worth showing."""
+    for p in os.environ.get("EXPLORE", "").split():
+        x, y, z = (int(v) for v in p.split(","))
+        tp(g, x, y, z)
+        snap(g, f"ex_{x}_{y}_{z}")
+
+
+VILLAGE = (88, 186)          # two houses, a fire, a field (built by players in the save)
+GORGE = (31, -25)            # a river down a stone gorge
+
+
+def home(g):
+    """The first screen's island, its menu put away (the island is drawn by the game behind it)."""
+    g.page.goto(g.url + "/?zoom=4")
+    g.page.wait_for_function("typeof ready !== 'undefined'")
+    g.page.add_style_tag(content="#joinbox, #title .tag, #titlemenu { visibility:hidden !important; }")
+    g.page.wait_for_timeout(7000)
+    g.page.screenshot(path=str(OUT / "home.png"))
+    print("shot home", flush=True)
+
+
+def village(g):
+    empty(g)
+    tp(g, VILLAGE[0] - 2, VILLAGE[1] - 3)
+    hour(g, .3)
+    snap(g, "village")
+    hour(g, .62)                 # (late afternoon: long shadows)
+    snap(g, "village_eve")
+
+
+def night(g):
+    empty(g)
+    tp(g, VILLAGE[0] - 1, VILLAGE[1] - 3)
+    g.give(torch=1)
+    g.hold_item("torch")
+    g.face(0, 1)
+    g.rpc("dev_time", phase=.86)
+    g.sleep(4000)
+    snap(g, "night")
+
+
+def water(g):
+    """A river comes into a pit when its bank is cut: frames of it filling."""
+    empty(g)
+    tp(g, 160, 40)
+    g.clear_area(12)
+    g.rpc("dev_time", phase=.35)
+    g.stamp(-5, -9, ["~"] * 9)                                   # a river, north-south, west of you
+    g.stamp(-3, -7, ["....."] * 5, levels=["ccccc"] * 5)         # a pit three deep, a bank left between
+    g.rest()
+    g.face(0, 1)
+    snap(g, "water_0")
+    g.stamp(-4, -5, ["."], levels=["a"])                         # the bank cut: the river comes in
+    for i in range(1, 9):
+        g.sleep(220)
+        snap(g, f"water_{i}")
+
+
+def cave(g):
+    """A hill with a cave in it, a fire inside; you walk in and are seen through the rock (the x-ray window)."""
+    empty(g)
+    tp(g, 220, 40)
+    g.clear_area(16)
+    x, y = g.pos()
+    st = lambda ax, ay, rows, levels, **kw: g.rpc("dev_stamp", x=ax, y=ay, rows=rows, levels=levels, **kw)
+    bx, by = x - 5, y - 12
+    st(bx, by, ["." * 11] * 9, ["4" * 11] * 9)                                   # a hill
+    st(bx + 1, by + 1, ["." * 9, "..^......", "." * 9, "." * 9, "." * 9], ["0" * 9] * 5, roofs=["4" * 9] * 5, heads=["2" * 9] * 5)
+    st(bx + 5, by + 6, [".", ".", "."], ["0", "0", "0"], roofs=["4"] * 3, heads=["2"] * 3)     # its mouth, south
+    g.rest()
+    g.rpc("dev_time", phase=.4)
+    tp(g, bx + 5, by + 10)
+    snap(g, "cave_out")
+    g.give(torch=3)
+    g.hold_item("torch")
+    tp(g, bx + 4, by + 2)                                        # beside the fire, east of it
+    g.face(-1, 0)
+    g.act("ignite", dir="W", **{"with": "torch"})
+    g.sleep(800)
+    tp(g, bx + 6, by + 4)
+    g.face(0, 1)
+    snap(g, "cave_in")
+    g.rpc("dev_time", phase=.86)
+    g.sleep(4000)
+    snap(g, "cave_night")
+
+
+def build(g):
+    """Build mode: a wall planned with the cursor, your character building it."""
+    empty(g)
+    tp(g, 2, 13)
+    g.clear_area(5)
+    hour(g, .45)
+    g.give(stone_block=40)
+    g.hold_item("stone_block")
+    g.face(1, 0)
+    g.press("z")
+    g.wait("Build.on", 3000)
+    k = g.page.keyboard
+
+    def row(arrows):
+        k.down(" ")
+        for a in arrows:
+            at = g.js("[Build.S.at.x, Build.S.at.y]")
+            k.press(a)
+            g.wait(f"Build.S.at.x !== {at[0]} || Build.S.at.y !== {at[1]}", 3000)
+        k.up(" ")
+    row(["ArrowRight"] * 4)
+    row(["ArrowLeft"] * 4)
+    g.sleep(900)
+    snap(g, "build_0")
+    g.sleep(2500)
+    snap(g, "build_1")
+    g.sleep(4000)
+    snap(g, "build_2")
+
+
+def jump(g):
+    """A jump up a block: frames a moment apart."""
+    empty(g)
+    tp(g, 2, 13)
+    g.clear_area(6)
+    hour(g, .4)
+    g.stamp(-3, -4, ["......."] * 2, levels=["1111111"] * 2)       # a step a block high, north of you
+    g.rest()
+    g.face(0, -1)
+    snap(g, "jump_0")
+    k = g.page.keyboard
+    k.down("ArrowUp")
+    g.sleep(120)
+    k.press(" ")
+    for i in range(1, 9):
+        g.page.screenshot(path=str(OUT / f"jump_{i}.png"))
+    k.up("ArrowUp")
+    print("shot jump", flush=True)
+
+
+SHOTS = {"where": where, "explore": explore, "home": home, "village": village, "night": night, "water": water,
+         "cave": cave, "build": build, "jump": jump}
+
+if __name__ == "__main__":
+    t0 = time.time()
+    run(sys.argv[1:])
+    print(f"done in {time.time() - t0:.0f} s")

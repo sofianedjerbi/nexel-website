@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The whole game in a browser tab · Nexel Worlds devlog</title>
+<meta name="description" content="The server is plain Python, so we ran it inside the page. Then on a phone.">
+<meta property="og:title" content="The whole game in a browser tab · Nexel Worlds devlog">
+<meta property="og:description" content="The server is plain Python, so we ran it inside the page. Then on a phone.">
+<meta property="og:image" content="../img/hero.png">
+<link rel="preload" href="../fonts/sprout-pixel.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="../css/site.css">
+<link rel="icon" href="../img/favicon.png">
+</head>
+<body>
+<header class="top"><div class="wrap">
+<a class="brand" href="../index.html">Nexel Worlds</a>
+<nav class="nav"><a href="../index.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/></svg>Home</a><a href="../devlog/index.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="1" y="0" width="1" height="1"/><rect x="2" y="0" width="1" height="1"/><rect x="3" y="0" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="5" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="5" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/></svg>Devlog</a><a href="../play/"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/></svg>Play</a></nav>
+</div></header>
+<main class="wrap"><section>
+<article class="panel post-body">
+<p class="date">2026-11-09</p>
+<h1>The whole game in a browser tab</h1>
+<p></p>
+<p>The game server is plain Python with no outside packages. That gave us an idea: run it in the browser with Pyodide (Python compiled for the web), talk to it through in-page sockets, and save the world in the browser's storage. No server to pay for, nothing to install.</p>
+<p>It worked on the first try more or less: the world was up about two seconds after the page loaded, and your saved player was still there after a reload. That is the demo you can play on this site.</p>
+<h2>Then a phone</h2>
+<p>A phone has no keyboard, so it got a thumb stick on the left and two buttons on the right, each labelled with what it will do right now. We tested in emulated phones (390 by 844) before calling it done.</p>
+<h2>Testing in a real browser</h2>
+<p>From day two every change was checked in real Chrome, driven by a script: join, walk, chop a tree, read what is on the screen. Bugs that unit tests could never see showed up at once, like a chat feed that had been silently dead since the first version.</p>
+<div class="shot"><img src="../img/phone.png" alt="The demo on a phone screen" loading="lazy"></div>
+<p class="cap">The demo on a phone screen</p>
+</article>
+<div class="post-nav"><a class="btn small ghost" href="day-one.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/></svg>Day one: a world for robots, then a game</a><a class="btn small ghost" href="hills-and-water.html">Hills, holes, and water you can see into<svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/></svg></a></div>
+<p></p>
+</section></main>
+<footer class="foot"><div class="wrap">
+<p>Nexel Worlds is made by <a href="https://github.com/sofianedjerbi">sofianedjerbi</a>. Code: <a href="https://github.com/sofianedjerbi/nexel-worlds">nexel-worlds</a> (the game) and <a href="https://github.com/sofianedjerbi/nexel-agent">nexel-agent</a> (the AI players).</p>
+<p>Art: Sprout Lands by <a href="https://cupnooble.itch.io/">Cup Nooble</a>. The pictures on this site are screenshots of the game.</p>
+</div></footer>
+</body>
+</html>

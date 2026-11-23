@@ -1,0 +1,4 @@
+shots/
+.preview/
+.DS_Store
+__pycache__/
