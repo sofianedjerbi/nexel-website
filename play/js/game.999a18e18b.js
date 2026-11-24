@@ -49,14 +49,14 @@ World: "world", Items: "world", Progress: "world", People: "voices", Interface: 
 const soundShare = (family) => (SOUND_OPT[family] ? opt(SOUND_OPT[family]) / 100 : 1);
 const particles = (n) => (opt("particles") === "none" ? 0 : opt("particles") === "fewer" ? Math.ceil(n / 3) : n);
 const KEY_ACTIONS = {use: ["e", "Use: open, place, eat"], alt: ["keyq", "Break: mine, chop, hit"], jump: [" ", "Jump"], pick: ["f", "Pick up"], next: ["tab", "Next thing in hand"],
-hands: ["`", "Empty your hands"], craft: ["c", "Craft"], bag: ["i", "Inventory"], build: ["keyz", "Build mode"], up: ["r", "Dig up"], talk: ["t", "Talk"], mute: ["m", "Sound on or off"]};
+hands: ["`", "Empty your hands"], drop: ["keyy", "Drop one (Shift: all)"], craft: ["c", "Craft"], bag: ["i", "Inventory"], build: ["keyz", "Build mode"], up: ["r", "Dig up"], talk: ["t", "Talk"], mute: ["m", "Sound on or off"]};
 const KEY_FIXED = new Set(["w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright", "shift", "enter", "escape", "control", "alt", "meta", "capslock",
 "h", "?", "g", "v", "f3", "/", "+", "=", "-", "_", ..."0123456789"]);
-const bindable = (k) => typeof k === "string" && !KEY_FIXED.has(k) && (k.length === 1 || /^f\d+$/.test(k) || ["keyq", "keyz", "tab"].includes(k));
+const bindable = (k) => typeof k === "string" && !KEY_FIXED.has(k) && (k.length === 1 || /^f\d+$/.test(k) || ["keyq", "keyz", "keyy", "tab"].includes(k));
 const keyOf = (action) => opt("keys")[action] || KEY_ACTIONS[action][0];
 const KEY_CODE = {KeyW: "w", KeyA: "a", KeyS: "s", KeyD: "d", ArrowUp: "arrowup", ArrowDown: "arrowdown", ArrowLeft: "arrowleft", ArrowRight: "arrowright",
-KeyQ: "keyq", KeyZ: "keyz", Backquote: "`", ...Object.fromEntries([..."0123456789"].map((n) => ["Digit" + n, n]))};
-const LAYOUT = {KeyW: "w", KeyA: "a", KeyS: "s", KeyD: "d", KeyQ: "q", KeyZ: "z", Backquote: "`"}, LAYOUT_SEEN = new Set();
+KeyQ: "keyq", KeyZ: "keyz", KeyY: "keyy", Backquote: "`", ...Object.fromEntries([..."0123456789"].map((n) => ["Digit" + n, n]))};
+const LAYOUT = {KeyW: "w", KeyA: "a", KeyS: "s", KeyD: "d", KeyQ: "q", KeyZ: "z", KeyY: "y", Backquote: "`"}, LAYOUT_SEEN = new Set();
 if (navigator.keyboard && navigator.keyboard.getLayoutMap) navigator.keyboard.getLayoutMap().then((m) => { for (const c of Object.keys(LAYOUT)) if (m.get(c)) { LAYOUT[c] = m.get(c); LAYOUT_SEEN.add(c); } }).catch(() => {});
 function keyId(e) {
 const c = e.code || "";
@@ -82,7 +82,8 @@ return true;
 }
 function keysAgain(own) {
 const now = Object.fromEntries(Object.entries(KEY_ACTIONS).map(([a, [k]]) => [a, k]));
-for (const [a, k] of Object.entries(own || {})) {
+for (let [a, k] of Object.entries(own || {})) {
+if (k === "y") k = "keyy";
 if (!(a in now) || !bindable(k)) continue;
 const other = Object.keys(now).find((b) => b !== a && now[b] === k);
 if (other) now[other] = now[a];
@@ -91,22 +92,30 @@ now[a] = k;
 return Object.fromEntries(Object.entries(now).filter(([a, k]) => k !== KEY_ACTIONS[a][0]));
 }
 { const k = keysAgain(OPT.v.keys); if (JSON.stringify(k) !== JSON.stringify(OPT.v.keys)) { OPT.v.keys = k; optSave(); } }
-const CAP_CODE = {w: "KeyW", a: "KeyA", s: "KeyS", d: "KeyD", keyq: "KeyQ", keyz: "KeyZ", "`": "Backquote"};
+const CAP_CODE = {w: "KeyW", a: "KeyA", s: "KeyS", d: "KeyD", keyq: "KeyQ", keyz: "KeyZ", keyy: "KeyY", "`": "Backquote"};
 const keyCap = (k) => (CAP_CODE[k] ? LAYOUT[CAP_CODE[k]].toUpperCase() : k === " " ? "Space" : k.length === 1 ? k.toUpperCase() : k[0].toUpperCase() + k.slice(1));
 const capOf = (action) => keyCap(keyOf(action));
 ;
+const RULES = {"aside":["eat"],"bite_high":4,"can_size":12,"climb":{"max":12,"rise":[2,7],"s":0.15},"crops":["wheat","pumpkin","cauliflower","lettuce","eggplant","carrot"],"eat_pace":2,"fall_safe":3,"feed":{"berries":1,"bread":1,"carrot":1,"cauliflower":1,"eggplant":1,"fruit":1,"hay":3,"lettuce":1,"mushroom":1,"pumpkin":1,"wheat":1},"fills":{"dirt":{"(":"~",")":"=","=":"(","o":",","u":",","~":","},"path":{"'":"_",",":"_",".":"_"},"plank":{"'":"n",",":"n",".":"n","~":":"},"stone_block":{"(":"~",")":"=","=":"(","o":",","u":",","~":","}},"flee_stride":0.3,"food":{"berries":2,"bread":10,"carrot":4,"cauliflower":5,"cooked_meat":8,"egg":3,"eggplant":5,"fruit":4,"lettuce":3,"meat":3,"milk":4,"mushroom":2,"pumpkin":6,"wheat":1},"food_max":20,"high":512,"hp_max":20,"land_blocks":["dirt","stone_block"],"layer":0.5,"leap":{"g":59.375,"top":1.25},"level":[7,3],"long":{"spear":1},"low":-512,"meanwhile":["walk","move_to","step","stop","leap","say","shout","jump"],"pace":{"sail":6.666666666666667,"sprint":10,"walk":5},"place":{"basket":"q","bed":"B","boat":"V","campfire":"^","chair":"h","chest":"C","clock":"K","coop":"J","door":"+","fence":"#","flag":"!","flower":"f","gate":"g","hay":"y","ladder":"l","mailbox":"X","picnic_blanket":"m","plant":"p","roof":"roof","rug":"r","sign":"?","stairs":"stairs","stone_wall":"%","table":"L","trough":"e","well":"Y","wood_wall":"W","workbench":"&"},"reach":{"animal":2,"give":2,"magnet":1,"melee":2,"station":2,"use":2},"recipes":{"axe":{"inputs":{"fiber":1,"stone":2,"wood":2},"output":{"axe":1},"station":"workbench"},"bandana":{"inputs":{"fiber":2},"output":{"bandana":1},"station":"workbench"},"basket":{"inputs":{"fiber":3},"output":{"basket":1},"station":null},"bed":{"inputs":{"fiber":3,"wood":6},"output":{"bed":1},"station":"workbench"},"blue_slippers":{"inputs":{"fiber":2,"flower":1},"output":{"blue_slippers":1},"station":"workbench"},"boat":{"inputs":{"rope":1,"wood":8},"output":{"boat":1},"station":"workbench"},"bread":{"inputs":{"wheat":3},"output":{"bread":1},"station":"campfire"},"campfire":{"inputs":{"stone":2,"wood":3},"output":{"campfire":1},"station":null},"chair":{"inputs":{"wood":2},"output":{"chair":1},"station":"workbench"},"chest":{"inputs":{"wood":6},"output":{"chest":1},"station":"workbench"},"clock":{"inputs":{"ingot":1,"wood":2},"output":{"clock":1},"station":"workbench"},"cooked_meat":{"inputs":{"meat":1},"output":{"cooked_meat":1},"station":"campfire"},"coop":{"inputs":{"fiber":2,"wood":8},"output":{"coop":1},"station":"workbench"},"denim":{"inputs":{"berries":1,"fiber":4},"output":{"denim":1},"station":"workbench"},"door":{"inputs":{"wood":3},"output":{"door":1},"station":null},"fence":{"inputs":{"wood":2},"output":{"fence":1},"station":null},"firefly_charm":{"inputs":{"rope":1,"torch":1},"output":{"firefly_charm":1},"station":"workbench"},"flag":{"inputs":{"fiber":1,"wood":1},"output":{"flag":1},"station":null},"flame_charm":{"inputs":{"ore":1,"rope":1,"torch":2},"output":{"flame_charm":1},"station":"workbench"},"flower_charm":{"inputs":{"flower":3,"rope":1},"output":{"flower_charm":1},"station":"workbench"},"flower_crown":{"inputs":{"flower":4},"output":{"flower_crown":1},"station":"workbench"},"frost_charm":{"inputs":{"milk":1,"rope":1,"stone":3},"output":{"frost_charm":1},"station":"workbench"},"gate":{"inputs":{"wood":3},"output":{"gate":1},"station":null},"gold_boots":{"inputs":{"ingot":2,"ore":2},"output":{"gold_boots":1},"station":"workbench"},"gold_chestplate":{"inputs":{"ingot":4,"ore":4},"output":{"gold_chestplate":1},"station":"workbench"},"gold_crown":{"inputs":{"ingot":2,"ore":2},"output":{"gold_crown":1},"station":"workbench"},"gold_greaves":{"inputs":{"ingot":3,"ore":3},"output":{"gold_greaves":1},"station":"workbench"},"halo_charm":{"inputs":{"flower":2,"ingot":2,"rope":1},"output":{"halo_charm":1},"station":"workbench"},"hay":{"inputs":{"wheat":3},"output":{"hay":1},"station":null},"heart_charm":{"inputs":{"egg":2,"rope":1},"output":{"heart_charm":1},"station":"workbench"},"hoe":{"inputs":{"stone":1,"wood":2},"output":{"hoe":1},"station":"workbench"},"ingot":{"inputs":{"ore":2},"output":{"ingot":1},"station":"campfire"},"iron_boots":{"inputs":{"ingot":2},"output":{"iron_boots":1},"station":"workbench"},"iron_chestplate":{"inputs":{"ingot":5},"output":{"iron_chestplate":1},"station":"workbench"},"iron_greaves":{"inputs":{"ingot":4},"output":{"iron_greaves":1},"station":"workbench"},"iron_helmet":{"inputs":{"ingot":3},"output":{"iron_helmet":1},"station":"workbench"},"ladder":{"inputs":{"wood":2},"output":{"ladder":1},"station":null},"leaf_charm":{"inputs":{"rope":1,"seed":3},"output":{"leaf_charm":1},"station":"workbench"},"leather_boots":{"inputs":{"fiber":2,"rope":1},"output":{"leather_boots":1},"station":"workbench"},"leather_chaps":{"inputs":{"fiber":3,"rope":1},"output":{"leather_chaps":1},"station":"workbench"},"leather_vest":{"inputs":{"fiber":3,"rope":1},"output":{"leather_vest":1},"station":"workbench"},"linen_shirt":{"inputs":{"fiber":4},"output":{"linen_shirt":1},"station":"workbench"},"linen_shorts":{"inputs":{"fiber":3},"output":{"linen_shorts":1},"station":"workbench"},"mailbox":{"inputs":{"wood":3},"output":{"mailbox":1},"station":"workbench"},"moss_kilt":{"inputs":{"fiber":2,"shell_plate":1},"output":{"moss_kilt":1},"station":"workbench"},"moss_slippers":{"inputs":{"shell_plate":1},"output":{"moss_slippers":1},"station":"workbench"},"mossback_helm":{"inputs":{"fiber":1,"shell_plate":1},"output":{"mossback_helm":1},"station":"workbench"},"mossback_plate":{"inputs":{"shell_plate":2},"output":{"mossback_plate":1},"station":"workbench"},"name_tag":{"inputs":{"fiber":1,"plank":1},"output":{"name_tag":1},"station":null},"overalls":{"inputs":{"fiber":5},"output":{"overalls":1},"station":"workbench"},"path":{"inputs":{"stone":2},"output":{"path":2},"station":null},"pickaxe":{"inputs":{"fiber":1,"stone":3,"wood":2},"output":{"pickaxe":1},"station":"workbench"},"picnic_blanket":{"inputs":{"fiber":6},"output":{"picnic_blanket":1},"station":null},"plank":{"inputs":{"wood":1},"output":{"plank":2},"station":null},"plant":{"inputs":{"flower":1,"stone":1},"output":{"plant":1},"station":null},"rain_boots":{"inputs":{"fiber":2,"wheat":1},"output":{"rain_boots":1},"station":"workbench"},"red_scarf":{"inputs":{"berries":1,"fiber":2},"output":{"red_scarf":1},"station":"workbench"},"red_sneakers":{"inputs":{"berries":1,"fiber":2},"output":{"red_sneakers":1},"station":"workbench"},"red_trousers":{"inputs":{"berries":2,"fiber":4},"output":{"red_trousers":1},"station":"workbench"},"robe_skirt":{"inputs":{"fiber":4,"flower":1},"output":{"robe_skirt":1},"station":"workbench"},"roof":{"inputs":{"wood":1},"output":{"roof":2},"station":null},"rope":{"inputs":{"fiber":3},"output":{"rope":1},"station":null},"rug":{"inputs":{"fiber":4},"output":{"rug":1},"station":null},"sign":{"inputs":{"wood":1},"output":{"sign":1},"station":null},"sparkle_charm":{"inputs":{"ingot":1,"rope":1},"output":{"sparkle_charm":1},"station":"workbench"},"spear":{"inputs":{"fiber":1,"stone":1,"wood":2},"output":{"spear":1},"station":"workbench"},"spore_charm":{"inputs":{"mushroom":3,"rope":1},"output":{"spore_charm":1},"station":"workbench"},"sporecap_hat":{"inputs":{"mushroom":4},"output":{"sporecap_hat":1},"station":"workbench"},"sprout":{"inputs":{"seed":2},"output":{"sprout":1},"station":"workbench"},"stairs":{"inputs":{"wood":1},"output":{"stairs":2},"station":null},"stone":{"inputs":{"stone_block":1},"output":{"stone":2},"station":null},"stone_wall":{"inputs":{"stone":3},"output":{"stone_wall":1},"station":"workbench"},"straw_hat":{"inputs":{"wheat":4},"output":{"straw_hat":1},"station":"workbench"},"sword":{"inputs":{"ingot":2,"wood":1},"output":{"sword":1},"station":"workbench"},"table":{"inputs":{"wood":4},"output":{"table":1},"station":"workbench"},"torch":{"inputs":{"fiber":1,"wood":1},"output":{"torch":1},"station":null},"trough":{"inputs":{"wood":4},"output":{"trough":1},"station":"workbench"},"watering_can":{"inputs":{"stone":3,"wood":1},"output":{"watering_can":1},"station":"workbench"},"well":{"inputs":{"rope":1,"stone":8,"wood":2},"output":{"well":1},"station":"workbench"},"wizard_hat":{"inputs":{"fiber":3,"flower":1},"output":{"wizard_hat":1},"station":"workbench"},"wizard_robe":{"inputs":{"fiber":5,"flower":2},"output":{"wizard_robe":1},"station":"workbench"},"wood_wall":{"inputs":{"wood":3},"output":{"wood_wall":2},"station":"workbench"},"wool_beanie":{"inputs":{"fiber":3},"output":{"wool_beanie":1},"station":"workbench"},"wool_sweater":{"inputs":{"fiber":6},"output":{"wool_sweater":1},"station":"workbench"},"workbench":{"inputs":{"wood":4},"output":{"workbench":1},"station":null}},"sea":1024,"slots":["head","top","pants","shoes","effect"],"sown":{"seed":"ou"},"spring_s":3.0,"sprint_food":6,"storey":3,"swim_pace":2,"tiles":{"!":{"burns":true,"name":"flag","quick":true},"\"":{"burns":true,"name":"crop","quick":true},"#":{"burns":true,"name":"fence","solid":true,"tool":"axe","upstairs":true},"%":{"holds":true,"name":"stone_wall","solid":true,"tool":"pickaxe","upstairs":true},"&":{"burns":true,"name":"workbench","solid":true,"tool":"axe"},"'":{"ground":true,"name":"ash","walk":true},"(":{"depth":2,"ground":true,"liquid":true,"name":"mid_water"},")":{"depth":4,"ground":true,"liquid":true,"name":"abyss"},"*":{"name":"ore","needs":"pickaxe","solid":true},"+":{"burns":true,"holds":true,"name":"door","tool":"axe","upstairs":true},",":{"ground":true,"name":"dirt","walk":true},"-":{"ground":true,"name":"cave_floor","walk":true},".":{"burns":true,"ground":true,"name":"grass","walk":true},":":{"ground":true,"name":"bridge","walk":true},";":{"burns":true,"name":"sprout","quick":true},"=":{"depth":3,"ground":true,"liquid":true,"name":"deep_water"},"?":{"burns":true,"name":"sign","quick":true},"B":{"burns":true,"name":"bed","solid":true,"tool":"axe","upstairs":true},"C":{"burns":true,"name":"chest","solid":true,"tool":"axe"},"F":{"burns":true,"name":"fruit_tree","quick":true,"solid":true},"H":{"burns":true,"name":"thicket","solid":true,"tool":"axe"},"J":{"burns":true,"foot":[2,2],"name":"coop","solid":true,"tool":"axe"},"K":{"burns":true,"name":"clock","solid":true,"tool":"axe","upstairs":true},"L":{"burns":true,"name":"table","solid":true,"tool":"axe","upstairs":true},"M":{"name":"rock","solid":true,"tool":"pickaxe"},"O":{"name":"hole"},"Q":{"name":"mushroom","quick":true},"R":{"name":"cave_wall","solid":true,"tool":"pickaxe"},"T":{"burns":true,"name":"tree","solid":true,"tool":"axe"},"U":{"burns":true,"name":"bare_fruit_tree","solid":true,"tool":"axe"},"V":{"burns":true,"name":"boat","tool":"axe"},"W":{"burns":true,"holds":true,"name":"wood_wall","solid":true,"tool":"axe","upstairs":true},"X":{"burns":true,"name":"mailbox","solid":true,"tool":"axe"},"Y":{"foot":[2,2],"name":"well","solid":true,"tool":"pickaxe"},"Z":{"name":"part","solid":true},"^":{"name":"campfire","solid":true},"_":{"ground":true,"name":"cobble","walk":true},"b":{"burns":true,"name":"berry_bush","quick":true,"solid":true},"e":{"burns":true,"name":"trough","solid":true,"tool":"axe"},"f":{"burns":true,"name":"flower","quick":true},"g":{"burns":true,"name":"gate","tool":"axe","upstairs":true},"h":{"burns":true,"name":"chair","solid":true,"tool":"axe","upstairs":true},"l":{"burns":true,"name":"ladder","tool":"axe","upstairs":true},"m":{"burns":true,"foot":[3,2],"name":"picnic_blanket","quick":true},"n":{"ground":true,"name":"floor","walk":true},"o":{"ground":true,"name":"tilled","walk":true},"p":{"name":"plant","quick":true,"solid":true,"upstairs":true},"q":{"burns":true,"name":"basket","quick":true,"solid":true},"r":{"burns":true,"name":"rug","quick":true,"upstairs":true},"t":{"name":"stump","solid":true,"tool":"axe"},"u":{"ground":true,"name":"wet_tilled","walk":true},"v":{"burns":true,"name":"bare_bush","solid":true},"w":{"burns":true,"name":"ripe_crop","quick":true},"x":{"name":"fire"},"y":{"burns":true,"name":"hay_bale","quick":true,"solid":true},"z":{"name":"flat_part"},"~":{"depth":1,"ground":true,"liquid":true,"name":"water"}},"weapons":{"axe":3,"pickaxe":2,"spear":4,"sword":6},"wear":{"bandana":"head","blue_slippers":"shoes","denim":"pants","firefly_charm":"effect","flame_charm":"effect","flower_charm":"effect","flower_crown":"head","frost_charm":"effect","gold_boots":"shoes","gold_chestplate":"top","gold_crown":"head","gold_greaves":"pants","halo_charm":"effect","heart_charm":"effect","iron_boots":"shoes","iron_chestplate":"top","iron_greaves":"pants","iron_helmet":"head","leaf_charm":"effect","leather_boots":"shoes","leather_chaps":"pants","leather_vest":"top","linen_shirt":"top","linen_shorts":"pants","moss_kilt":"pants","moss_slippers":"shoes","mossback_helm":"head","mossback_plate":"top","overalls":"top","rain_boots":"shoes","red_scarf":"top","red_sneakers":"shoes","red_trousers":"pants","robe_skirt":"pants","sparkle_charm":"effect","spore_charm":"effect","sporecap_hat":"head","sprout":"head","straw_hat":"head","wizard_hat":"head","wizard_robe":"top","wool_beanie":"head","wool_sweater":"top"},"wide":{"mossback":1}};
+;
 "use strict";
-const CH = {
-"~": "water", ":": "bridge", ".": "grass", ",": "dirt", "o": "tilled", "_": "cobble", "'": "ash", "=": "deep_water",
-"T": "tree", "b": "berry_bush", "M": "rock", "*": "ore", "H": "thicket", "Q": "mushroom", "#": "fence",
-"%": "stone_wall", "+": "door", "^": "campfire", "&": "workbench", "?": "sign", "!": "flag", "x": "fire",
-"\"": "crop", "w": "ripe_crop", "t": "stump", "C": "chest", "F": "fruit_tree", ";": "sprout",
-"u": "wet_tilled", "n": "floor", "f": "flower", "B": "bed", "h": "chair", "L": "table", "p": "plant", "K": "clock",
-"r": "rug", "g": "gate", "W": "wood_wall", "V": "boat", "X": "mailbox",
-"Y": "well", "J": "coop", "m": "picnic_blanket", "q": "basket", "Z": "part", "z": "flat_part", "e": "trough", "y": "hay_bale", "U": "bare_fruit_tree", "v": "bare_bush",
-"-": "cave_floor", "R": "cave_wall", "O": "hole", "l": "ladder", "(": "mid_water", ")": "abyss",
-};
-const FOOT = {Y: [2, 2], J: [2, 2], m: [3, 2]};
+const CH = {}, CHAR = {}, DEPTH_OF = {}, FOOT = {}, TOOL_FOR = {}, FILLS = {}, PLACEABLE_BLOCK = {}, recipes = {};
+const GROUND = new Set(), SOLID = new Set(), WALKABLE_GROUND = new Set(), LAND_BLOCKS = new Set(), FOODS = [], FEEDS = [];
+function refill(to, from) {
+if (to instanceof Set) { to.clear(); for (const v of from) to.add(v); }
+else if (Array.isArray(to)) to.splice(0, to.length, ...from);
+else { for (const k in to) delete to[k]; Object.assign(to, from); }
+}
+function setRules(r) {
+if (r !== RULES) refill(RULES, r);
+const T = r.tiles, of = (k) => Object.fromEntries(Object.keys(T).filter((c) => T[c][k]).map((c) => [c, T[c][k]]));
+for (const [to, from] of [[CH, of("name")], [DEPTH_OF, of("depth")], [FOOT, of("foot")], [TOOL_FOR, of("tool")], [FILLS, r.fills], [PLACEABLE_BLOCK, r.place], [recipes, r.recipes],
+[GROUND, Object.keys(of("ground"))], [SOLID, Object.keys(of("solid"))], [WALKABLE_GROUND, Object.keys(of("walk"))], [LAND_BLOCKS, r.land_blocks],
+[FOODS, Object.keys(r.food)], [FEEDS, Object.keys(r.feed)], [CHAR, Object.fromEntries(Object.entries(of("name")).map(([c, n]) => [n, c]))]]) refill(to, from);
+}
+setRules(RULES);
+const tileOf = (c) => RULES.tiles[c] || {};
+const placeable = (item) => !!(PLACEABLE_BLOCK[item] || FILLS[item] || RULES.sown[item]);
 function footprint(c, x, y, px, py) {
 const [w, h] = FOOT[c];
 let x0 = x - ((w - 1) >> 1);
@@ -120,16 +129,10 @@ for (const [c, [w, h]] of Object.entries(FOOT)) for (let i = 0; i < w; i++) for 
 if (combAt(x - i, y + j) === c) return {x: x - i, y: y + j, c};
 return null;
 }
-const CHAR = Object.fromEntries(Object.entries(CH).map(([c, n]) => [n, c]));
-const GROUND = new Set("~:.,o_'=un-()");
-const DEPTH_OF = {"~": 1, "(": 2, "=": 3, ")": 4};
 const wet = (g) => g in DEPTH_OF;
-const SOLID = new Set("TFbM*H#%^&CBhLpKWXYJqZeyUvtR");
-const WALKABLE_GROUND = new Set(":.,o_'un-");
 const LABEL = {name_tag: "name tag", wood_wall: "wooden wall", wet_tilled: "watered soil", watering_can: "watering can", fruit_tree: "fruit tree", berry_bush: "berry bush", stone_wall: "stone wall", ripe_crop: "ripe wheat", crop: "young wheat",
 cooked_meat: "cooked meat", deep_water: "deep water", mid_water: "deeper water", abyss: "the deep", picnic_blanket: "picnic blanket", hay_bale: "hay bale"};
 LABEL.stone_block = "stone block";
-const LAND_BLOCKS = new Set(["dirt", "stone_block"]);
 const label = (n) => LABEL[n] || String(n).replace("_", " ");
 ;
 const ToolArt = (() => {
@@ -565,13 +568,17 @@ const gndAt = (x, y) => { const b = blockOf(x, y); return b ? b.gnd[(y - b.by * 
 const dirtyTiles = [];
 function touch(x, y) { for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) dirtyTiles.push(x + dx, y + dy); }
 const PICK = {F: "U", b: "v"};
+function putMat(b, i, m) {
+if (m === "r") (b.rock || (b.rock = {}))[i] = 1; else if (b.rock) delete b.rock[i];
+if (m === "s" || m === "d") (b.mat || (b.mat = {}))[i] = m; else if (b.mat) delete b.mat[i];
+}
 function setTile(x, y, comb, gnd, who = null, col = null, mat = null) {
 const bx = Math.floor(x / B), by = Math.floor(y / B), b = blocks.get(bkey(bx, by));
 if (!b) return;
 b.edits = (b.edits || 0) + 1;
 const i = (y - by * B) * B + (x - bx * B);
 const relief = col !== null && !colSame(col, colAt(x, y));
-if (mat !== null) { if (mat) (b.mat || (b.mat = {}))[i] = mat; else if (b.mat) delete b.mat[i]; }
+if (mat !== null) putMat(b, i, mat);
 if (b.comb[i] === comb && b.gnd[i] === gnd && !relief) return;
 if (relief) {
 b.lv[i] = String.fromCharCode(SEA + colFloor(col));
@@ -612,7 +619,9 @@ setTile(bx * B + i % B, by * B + (i / B | 0), comb[i], gnd[i], null, c, (d.mats 
 Floors.load(old, d); Flow.load(old, d);
 old.at = performance.now(); return;
 }
-const b = {bx, by, comb, gnd, lv, col, mat: d.mats || null, objs: new Map(), drawn: false, canvas: null, at: performance.now()};
+const b = {bx, by, comb, gnd, lv, col, mat: null, rock: null, objs: new Map(), drawn: false, canvas: null, at: performance.now()};
+for (const i in d.mats || {}) putMat(b, i, d.mats[i]);
+if (!d.sea) lv.forEach((c, i) => { if (c.charCodeAt(0) - SEA > 4) putMat(b, i, "r"); });
 Floors.load(b, d); Flow.load(b, d);
 comb.forEach((c, i) => { if (isObject(c)) b.objs.set(i, c); });
 blocks.set(k, b);
@@ -633,13 +642,13 @@ function hash(x, y, s = 0) {
 let h = (Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263) + Math.imul(s, 2246822519)) >>> 0;
 h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 }
-function drawBlobLayer(g, sheet, x, y, pred, ox, oy, decor) {
-const m = maskOf(x, y, pred), [cx, cy] = blobCell(m);
-let sx = cx * 16, sy = cy * 16;
-if (decor && reduce(m) === 255 && hash(x, y, 3) < decor) {
-sx = Math.floor((decor > .3 && sheet !== IMG.grass ? hash(x, y, 4) ** 3 : hash(x, y, 4)) * (sheet === IMG.grass ? 6 : 5)) * 16; sy = (5 + (hash(x, y, 5) < .5 ? 0 : 1)) * 16;
+function plainCell(sheet, x, y, decor) {
+if (!decor || hash(x, y, 3) >= decor) { const [cx, cy] = blobCell(255); return [cx * 16, cy * 16]; }
+return [Math.floor((decor > .3 && sheet !== IMG.grass ? hash(x, y, 4) ** 3 : hash(x, y, 4)) * (sheet === IMG.grass ? 6 : 5)) * 16, (5 + (hash(x, y, 5) < .5 ? 0 : 1)) * 16];
 }
-g.drawImage(sheet, sx, sy, 16, 16, ox, oy, 16, 16);
+function drawBlobLayer(g, sheet, x, y, pred, decor) {
+const m = maskOf(x, y, pred), [cx, cy] = blobCell(m);
+g.drawImage(sheet, ...(reduce(m) === 255 ? plainCell(sheet, x, y, decor) : [cx * 16, cy * 16]));
 }
 const BW = B * 16, sheetPx = new Map();
 function sheetData(sheet) {
@@ -678,85 +687,49 @@ function drawTile(x, y, to = null) {
 const b = blockOf(x, y);
 if (!b || !(to || b.px)) return;
 if (!to) { b.ver = (b.ver || 0) + 1; landVer++; return; }
-const lx = x - b.bx * B, ly = y - b.by * B, i = ly * B + lx, ox = to.ox, oy = to.oy;
-const c = b.comb[i], gr = b.gnd[i], g = LAID, lv = levelAt(x, y), up = (cc, gg, tx, ty) => maskOf.plain || levelAt(tx, ty) >= k,       dug = lv < 0 && !wet(gr);
-let k = lv;
+const i = (y - b.by * B) * B + (x - b.bx * B), c = b.comb[i], gr = b.gnd[i], g = LAID, lv = levelAt(x, y);
 g.n = 0;
-for (; k >= 1; k--) { drawBlobLayer(g, hillSheet(k), x, y, up, ox, oy, k < 3 ? .25 : k < 5 ? .1 : .45); if (cellSolid(g.img[g.n - 1], g.at[g.n - 1] % 4096, g.at[g.n - 1] >> 12)) break; }
+let k = lv;
+for (; k >= 1; k--) { drawBlobLayer(g, hillSheet(k), x, y, () => true, k < 3 ? .25 : k < 5 ? .1 : .45); if (cellSolid(g.img[g.n - 1], g.at[g.n - 1] % 4096, g.at[g.n - 1] >> 12)) break; }
 const hills = g.n, covered = k >= 1;
-if (!covered) {
-if (gr === ":") Bridge.lay(g, x, y, ox, oy);
-if (isLand(gr)) {
-drawBlobLayer(g, dug ? dugSheet("soil", -lv) : IMG.soil, x, y, (_, gg, tx, ty) => isLand(gg) || Bridge.rests(x, y, tx, ty), ox, oy, .15);
-if (!dug && (gr === "." || gr === "_" || gr === "n")) drawBlobLayer(g, IMG.grass, x, y, (_, gg, tx, ty) => gg === "." || gg === "_" || gg === "n" || Bridge.rests(x, y, tx, ty), ox, oy, gr === "." ? .3 : 0);
-groundMarks(g, x, y, gr, ox, oy);
-}
-let low = lv;
-for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) low = Math.min(low, levelAt(x + dx, y + dy));
-k = 0;
-if (lv >= 0 && low < 0) drawBlobLayer(g, edgeSheet("hill1"), x, y, up, ox, oy, 0);
+if (!covered && isLand(gr)) {
+drawBlobLayer(g, IMG.soil, x, y, (_, gg, tx, ty) => isLand(gg) || Bridge.rests(x, y, tx, ty), .15);
+if (lv >= 0 && (gr === "." || gr === "_" || gr === "n")) drawBlobLayer(g, IMG.grass, x, y, (_, gg, tx, ty) => gg === "." || gg === "_" || gg === "n" || Bridge.rests(x, y, tx, ty), gr === "." ? .3 : 0);
 }
 const base = g.n;
-if (lv && isLand(gr)) groundMarks(g, x, y, gr, ox, oy, lv > 0);
-if (c === "H") drawBlobLayer(g, IMG.hedge, x, y, (cc) => cc === "H", ox, oy, 0);
-const hd = hash(x, y, 41);
-if (gr === "~" && hd < .09) {
-const shore = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => isLand(gndAt(x + dx, y + dy)));
-if (shore || hd < .015) {
-const pick = Math.floor(hash(x, y, 42) * 7), col = [8, 9, 10, 11, 6, 7, 0][pick];
-g.drawImage(IMG.water_objects, col * 16, 0, 16, 16, ox, oy, 16, 16);
-}
-}
+if (isLand(gr)) groundMarks(g, x, y, gr);
+if (c === "H") drawBlobLayer(g, IMG.hedge, x, y, (cc) => cc === "H", 0);
+const f = floatAt(x, y); if (f >= 0) g.drawImage(IMG.water_objects, FLOATS[f] * 16, 0);
 const order = [];
 for (let j = hills; j < base; j++) order.push(j);
 for (let j = hills - 1; j >= 0; j--) order.push(j);
 for (let j = base; j < g.n; j++) order.push(j);
 let first = order.length - 1;
 while (first >= 0 && !cellSolid(g.img[order[first]], g.at[order[first]] % 4096, g.at[order[first]] >> 12)) first--;
-const at = (q) => [g.img[order[q]], g.at[order[q]] % 4096, g.at[order[q]] >> 12];
-if (to && to.g) { for (let q = Math.max(0, first); q < order.length; q++) { const [img, sx, sy] = at(q); to.g.drawImage(img, sx, sy, 16, 16, ox, oy, 16, 16); } return; }
-const px = to.px, W = to.w, o = to.o;
+const at = (q) => [g.img[order[q]], g.at[order[q]] % 4096, g.at[order[q]] >> 12], px = to.px, W = to.w, o = to.o;
 if (first < 0) for (let j = 0; j < 16; j++) px.fill(0, o + j * W, o + j * W + 16);
 for (let q = Math.max(0, first); q < order.length; q++) layCell(px, o, W, ...at(q), q === first);
-dugFoot(px, o, W, x, y, lv);
+if (!wet(gr)) deepen(px, o, W, 16, lv, "floor");
 }
-function groundMarks(g, x, y, gr, ox, oy, high = false) {
-if (gr === "o" || gr === "u") { if (high) drawBlobLayer(g, IMG.tilled, x, y, (_, gg) => gg === "o" || gg === "u", ox, oy, 0); else g.drawImage(...Furrows.cell(x, y), 16, 16, ox, oy, 16, 16); }
-if (gr === "u") drawBlobLayer(g, IMG.tilled_wet, x, y, (_, gg) => gg === "u", ox, oy, 0);
-if (gr === "n") g.drawImage(IMG.house_walls, 16, 16, 16, 16, ox, oy, 16, 16);
-if (gr === "'") drawBlobLayer(g, IMG.ash, x, y, (_, gg) => gg === "'", ox, oy, 0);
-if (gr === "_") g.drawImage(...Pave.cell(x, y), 16, 16, ox, oy, 16, 16);
+const FLOATS = [8, 9, 10, 11, 6, 7, 0];
+function floatAt(x, y) {
+const h = hash(x, y, 41); if (gndAt(x, y) !== "~" || h >= .09) return -1;
+return h < .015 || [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => isLand(gndAt(x + dx, y + dy))) ? Math.floor(hash(x, y, 42) * 7) : -1;
 }
-const dugSheets = {}, EARTH = [[0xc8, 0x98, 0x6e], [0xb0, 0x7e, 0x5a], [0x8b, 0x5a, 0x40]];
-function dugSheet(name, d) {
-d = Math.min(d, 8);
-if (dugSheets[name + d]) return dugSheets[name + d];
-const img = IMG[name], c = document.createElement("canvas"); c.width = img.width; c.height = img.height;
-const g = c.getContext("2d"); g.drawImage(img, 0, 0);
-const im = g.getImageData(0, 0, c.width, c.height), px = im.data, wall = name !== "soil";
-const f = wall ? [Math.max(.45, 1 - .075 * d), Math.max(.38, 1 - .09 * d), Math.max(.3, 1 - .11 * d)] : [Math.max(.62, 1 - .0475 * d), Math.max(.57, 1 - .054 * d), Math.max(.5, 1 - .0625 * d)];
-for (let i = 0; i < px.length; i += 4) {
-if (!px[i + 3]) continue;
-if (px[i + 1] > px[i] + 8) { const l = (px[i] + px[i + 1] + px[i + 2]) / 3; [px[i], px[i + 1], px[i + 2]] = EARTH[l > 170 && !wall ? 0 : l > 130 || wall && l > 100 ? 1 : 2]; }
-for (let j = 0; j < 3; j++) px[i + j] *= f[j];
+const SOIL = {cell: (x, y) => [IMG.soil, ...plainCell(IMG.soil, x, y, 0)]}, FURROWS = {cell: (x, y) => Furrows.cell(x, y)};
+const MARKS = {o: [SOIL, FURROWS], u: [SOIL, FURROWS, {sheet: "tilled_wet", on: "u"}],
+"'": [{sheet: "ash", on: "'"}], n: [{cell: () => [IMG.house_walls, 16, 16]}], _: [{cell: (x, y) => Pave.cell(x, y)}]};
+function groundMarks(g, x, y, gr) {
+for (const m of MARKS[gr] || []) if (m.cell) g.drawImage(...m.cell(x, y)); else drawBlobLayer(g, IMG[m.sheet], x, y, (_, gg) => m.on.includes(gg), 0);
 }
-g.putImageData(im, 0, 0); c.dug = wall ? d + 1 : 0;
-return (dugSheets[name + d] = c);
-}
-function dugFoot(px, o, W, x, y, lv) {
-if (lv < 0 || maskOf.plain) return;
-let a = null, v = 0;
-for (const [dx, dy, at] of [[0, 1, (q, r) => [q, 15 - r]], [1, 0, (q, r) => [15 - r, q]], [-1, 0, (q, r) => [r, q]], [1, 1, (q, r) => [15 - (q & 7), 15 - r]], [-1, 1, (q, r) => [q & 7, 15 - r]]]) {
-if (levelAt(x + dx, y + dy) >= 0 || wet(gndAt(x + dx, y + dy) || "~")) continue;
-if (!a) { const c = colsOf(hillSheet(0)).bands[1]; a = cellAlpha(hillSheet(0), ...blobCell(maskOf(x, y, (cc, gg, tx, ty) => levelAt(tx, ty) >= 0))); v = (255 << 24 | c[2] << 16 | c[1] << 8 | c[0]) >>> 0; }
-for (let q = 0; q < (dx && dy ? 8 : 16); q++) {
-for (let r = 0; r < 16 && !a[at(q, r)[1] * 16 + at(q, r)[0]]; r++) { const [i, j] = at(q, r); px[o + j * W + i] = v; }
-}
-}
+const DEEP = {wall: [[.075, .45], [.09, .38], [.11, .3]], floor: [[.0475, .62], [.054, .57], [.0625, .5]]};
+const deepTone = (z, kind) => DEEP[kind].map(([k, lo]) => Math.max(lo, 1 - k * Math.min(8, Math.max(0, -z))));
+function deepen(px, o, W, rows, z, kind) {
+if (z >= 0) return; const [r, g, b] = deepTone(z, kind);
+for (let j = 0; j < rows; j++) for (let i = o + j * W; i < o + j * W + 16; i++) { const v = px[i]; px[i] = (v & 0xff000000 | ((v >>> 16 & 255) * b) << 16 | ((v >>> 8 & 255) * g) << 8 | (v & 255) * r) >>> 0; }
 }
 const hillSheets = {}, ROCK_TONE = {step: .025, wall: [.79, .81, .87]};
 function hillSheet(k) {
-if (k <= 0) return dugSheet("hill1", -k);
 const rock = k === "rock"; if (!rock) k = Math.min(k, 12);
 if (hillSheets[k]) return hillSheets[k];
 const img = IMG[k <= 2 ? "hill1" : k <= 4 ? "hill2" : "hill3"], f = k <= 4 ? [1.015, 1.03, 1.04, 1.06][k - 1] : rock ? 0 : 1 - ROCK_TONE.step * (12 - k);
@@ -767,19 +740,6 @@ const d = g.getImageData(0, 0, c.width, c.height), px = d.data;
 for (let i = 0; i < px.length; i += 4) for (let j = 0; j < 3; j++) px[i + j] = Math.min(255, px[i + j] * (rock ? ROCK_TONE.wall[j] : j === 2 && f < 1 ? f ** .85 : f));
 g.putImageData(d, 0, 0);
 return hillSheets[k] = c;
-}
-const EDGE_TOP = {hill1: [192, 212, 112], hill3: [193, 200, 185], rock: [193, 200, 185]}, edgeSheets = {};
-function edgeSheet(name) {
-if (edgeSheets[name]) return edgeSheets[name];
-const img = IMG[name === "rock" ? "hill3" : name], c = document.createElement("canvas"); c.width = img.width; c.height = img.height;
-const g = c.getContext("2d"); g.drawImage(img, 0, 0);
-const d = g.getImageData(0, 0, c.width, c.height), px = d.data, [r, gg, b] = EDGE_TOP[name];
-for (let i = 0; i < px.length; i += 4) {
-if (Math.abs(px[i] - r) + Math.abs(px[i + 1] - gg) + Math.abs(px[i + 2] - b) < 30) px[i + 3] = 0;
-else if (name === "rock") { px[i] *= .52; px[i + 1] *= .5; px[i + 2] *= .5; }
-}
-g.putImageData(d, 0, 0);
-return edgeSheets[name] = c;
 }
 const NOPX = new Uint32Array(0);
 function arriveBlock(b) { b.px = NOPX; b.drawn = true; b.ver = (b.ver || 0) + 1; landVer++; }
@@ -820,8 +780,8 @@ g.restore();
 return c;
 }
 function cell(x, y) {
-const lv = levelAt(x, y), joins = (dx) => gndAt(x + dx, y) === "_" && levelAt(x + dx, y) === lv;
-return [sheet || (sheet = make()), (((joins(-1) ? 1 : 0) + (joins(1) ? 2 : 0)) * N + (x & N - 1)) * T, (y & N - 1) * T];
+const lv = levelAt(x, y), m = maskOf(x, y, (_, g, tx, ty) => g === "_" && levelAt(tx, ty) === lv);
+return [sheet || (sheet = make()), (((m & W_ ? 1 : 0) + (m & E_ ? 2 : 0)) * N + (x & N - 1)) * T, (y & N - 1) * T];
 }
 return {cell};
 })();
@@ -848,12 +808,6 @@ return {cell: (x, y) => [sheet || (sheet = make()), (x & N - 1) * T, (y & N - 1)
 const Bridge = {
 ew(x, y) { return [-1, 1].some((d) => { const q = gndAt(x + d, y); return q === ":" || isLand(q); }); },
 rests(x, y, tx, ty) { return gndAt(tx, ty) === ":" && (ty === y ? tx !== x && Bridge.ew(tx, ty) : tx === x && !Bridge.ew(tx, ty)); },
-lay(g, x, y, ox, oy) {
-const ew = Bridge.ew(x, y), at = (k) => (ew ? gndAt(x + k, y) : gndAt(x, y + k)), back = at(-1) === ":", on = at(1) === ":";
-const dry = isLand(at(back ? 1 : -1));
-if (back === on || dry) g.drawImage(IMG.bridge, ew ? 0 : 32, 32, 16, 16, ox, oy, 16, 16);
-if (back !== on) g.drawImage(IMG.bridge, ew ? (back ? 16 : 0) : (dry ? 32 : 48), ew ? (dry ? 0 : 16) : (back ? 16 : 0), 16, 16, ox, oy, 16, 16);
-},
 };
 ;
 const Models = (() => {
@@ -949,7 +903,7 @@ Models.add({start, at, up});
 return {UP, up, planks};
 })();
 ;
-const SEA = 1024, LOW = -512, HIGH = 512, PLAIN = new Map();
+const {sea: SEA, low: LOW, high: HIGH} = RULES, PLAIN = new Map();
 const APART = 24;
 function tileIdx(x, y) { const b = blockOf(x, y); return b ? [b, (y - b.by * B) * B + (x - b.bx * B)] : null; }
 const colSolid = (lv) => PLAIN.get(lv) || PLAIN.set(lv, [lv]).get(lv);
@@ -985,7 +939,7 @@ let z = h;
 const stair = (sx, sy, sz) => { const c = FLOORS && sx !== undefined ? Floors.get(sx, sy, sz) : null; return !!c && c[0] === "stairs"; };
 jump = jump || stair(x, y, h + 1) || stair(fx, fy, h);
 if (solidAt(x, y, h + 1)) z = !jump || solidAt(x, y, h + 2) || (fx !== undefined && solidAt(fx, fy, h + 2)) ? null : h + 1;
-else while (!solidAt(x, y, z)) z--;
+else z = settleAt(x, y, h);
 if (fx !== undefined && FLOORS && Floors.thingAt(fx, fy, h) === "l" && (z === null || !Climb.openAt(x, y, z))) {
 const up = Climb.climb(h, fx, fy, x, y);
 if (up !== null) return up;
@@ -997,6 +951,7 @@ const hollow = (x, y) => roofAt(x, y) > 0;
 const levelAt = (x, y) => { const v = peek ? peek.get(x + "," + y) : undefined; return v === undefined ? topAt(x, y) : v; };
 const standAt = (x, y) => topAt(x, y);
 const groundAt = floorAt;
+const rockAt = (x, y) => { const b = blockOf(x, y); return !!(b && b.rock && b.rock[(y - b.by * B) * B + (x - b.bx * B)]); };
 const matAt = (x, y) => { const b = blockOf(x, y); return (b && b.mat && b.mat[(y - b.by * B) * B + (x - b.bx * B)]) || ""; };
 let myAt = null, myWas = null;
 const myZ = (x, y) => (myAt && myAt.x === x && myAt.y === y ? myAt.z : myAt && Math.abs(myAt.x - x) + Math.abs(myAt.y - y) <= 2 ? settleNear(x, y, myAt.z) : topAt(x, y));
@@ -1006,7 +961,11 @@ const lv = floorAt(x, y);
 for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if ((dx || dy) && floorAt(x + dx, y + dy) < lv) return true;
 return false;
 }
-const canStep = (x0, y0, x1, y1) => landAt(myZ(x0, y0), x1, y1, x0, y0) !== null;
+const standOn = (t, swims = true) => !!t && (wet(t[1]) ? swims && (t[0] === "V" || !SOLID.has(t[0])) : WALKABLE_GROUND.has(t[1]) && !SOLID.has(t[0]));
+function stand(x, y, z, swims) {
+const c = z === undefined || !FLOORS ? null : Floors.get(x, y, z);
+return c ? !SOLID.has(c[1]) : (z !== undefined && z !== floorAt(x, y)) || standOn(tile(x, y), swims);
+}
 ;
 const AGENT_TINTS = ["#f4b6b6", "#a9cdf2", "#b8e0a0", "#f2d58f", "#d3b6ef", "#9fdcd0", "#f3b7d6", "#e8c9a4", "#c9d0f5", "#f6c79a"];
 const agentTint = (name) => AGENT_TINTS[[...name].reduce((h, c) => h * 31 + c.charCodeAt(0) >>> 0, 7) % AGENT_TINTS.length];
@@ -1632,9 +1591,9 @@ function drawEmote(p, sx, sy, S) {
 const key = p.e.name || p.e.kind + p.e.id, em = emotes.get(key); if (!em) return;
 const k = (performance.now() - em.t0) / 1000; if (k > 1.8) { emotes.delete(key); return; }
 const [c, rr] = EMOTE[em.kind], pop = k < .15 ? .6 + k / .15 * .5 : k < .25 ? 1.1 - (k - .15) : 1;
-const size = Math.round(16 * zoom * .75 * pop), o = overBody(p, S), x = Math.round(sx(p.x) + S / 2 - size / 2 + o[0]);
+const size = Math.round(16 * zoom * .75 * pop), o = BodyPlace.over(p, S), x = onArt(sx(p.x) + S / 2 - size / 2 + o[0]);
 const head = p.e.kind === "agent" ? 9 * zoom + 18 : ANIMALS[p.e.kind] && ANIMALS[p.e.kind].fw === 32 ? 12 * zoom : 2 * zoom;
-const y = Math.round(bodyY(p, sy) + o[1] - head - size);
+const y = onArt(bodyY(p, sy) + o[1] - head - size);
 ctx.globalAlpha = k > 1.5 ? (1.8 - k) / .3 : 1;
 ctx.drawImage(IMG.emoji, c * 32, rr * 32, 32, 32, x, y, size, size);
 ctx.globalAlpha = 1;
@@ -1914,14 +1873,15 @@ out.data.set([best >> 16, best >> 8 & 255, best & 255, 255], (j * DROP + i) * 4)
 smalls11.set(name, out);
 return out;
 }
-function dropLoot(x, y, items, now) {
+function dropLoot(x, y, items, now, ox = 0, oy = 0) {
 const names = Object.keys(items || {}).filter((n) => items[n] > 0);
 names.slice(0, 3).forEach((name, i, all) => {
 const [dx, dy] = pileAt(i, all.length);
 const flight = .42 + Math.random() * .08;
-loot.push({x, y, name, dx, dy, t0: now + 90 + i * 70, flight, vy: -LOOT_G * flight / 2});
+loot.push({x, y, name, dx, dy, ox, oy, t0: now + 90 + i * 70, flight, vy: -LOOT_G * flight / 2});
 });
 }
+const lootFrom = (l, k) => [(l.ox || 0) * (1 - k), (l.oy || 0) * (1 - k)];
 const lootAt = (x, y) => loot.some((l) => l.x === x && l.y === y);
 const LOOT_HOPS = [.16, .08];
 const lootRests = (l, now) => (now - l.t0) / 1000 >= l.flight + LOOT_HOPS[0] + LOOT_HOPS[1];
@@ -1944,7 +1904,7 @@ let t = s - l.flight, n = 0;
 while (n < LOOT_HOPS.length && t > LOOT_HOPS[n]) t -= LOOT_HOPS[n++];
 if (n < LOOT_HOPS.length) { h = LOOT_G * LOOT_HOPS[n] / 2 * t - LOOT_G * t * t / 2; since = t; }
 }
-const cx = sx(l.x) + S / 2 + Math.round(l.dx * dxk) * z, ground = sy(l.y, l.x) + S / 2 + Math.round(l.dy * dxk) * z;
+const [fx, fy] = lootFrom(l, dxk), cx = sx(l.x + fx) + S / 2 + Math.round(l.dx * dxk) * z, ground = sy(l.y + fy, l.x + fx) + S / 2 + Math.round(l.dy * dxk) * z;
 const dip = s > l.flight && since < .05 ? 1 : 0;
 list.push({y: l.y - .01 + i * 1e-4, x: l.x, fx: () => {
 ctx.fillStyle = "rgba(60,40,30,.25)";
@@ -1957,8 +1917,8 @@ ctx.drawImage(ghostIcon(l.name), 0, 0, DROP, DROP - dip, Math.round(cx - DROP * 
 const orbs = [], magnets = [];
 let xpKnown = null, xpLevelShown = null;
 function levelOf(xp) {
-let level = 0, need = 7;
-while (xp >= need) { xp -= need; level++; need = 7 + 3 * level; }
+let level = 0, [need, more] = RULES.level;
+while (xp >= need) { xp -= need; level++; need = RULES.level[0] + more * level; }
 return [level, xp, need];
 }
 function spawnOrbs(e) {
@@ -2056,7 +2016,7 @@ g.fillStyle = "#c8ea5a"; g.fillRect(2 * SC, 2 * SC, fill * SC, SC);
 }
 }
 ;
-const CROPS = ["wheat", "pumpkin", "cauliflower", "lettuce", "eggplant", "carrot"];
+const CROPS = RULES.crops;
 const CROP_ROW = {wheat: 8, pumpkin: 9, cauliflower: 3, lettuce: 7, eggplant: 5, carrot: 2};
 const cropSpecies = (x, y) => CROPS[((Math.imul(x, 73856093) ^ Math.imul(y, 19349663)) >>> 0) % CROPS.length];
 const FLOWERS = [[0, 3], [1, 3], [2, 3], [4, 3], [5, 3], [6, 3], [8, 3], [9, 3], [10, 3], [11, 3],
@@ -2185,58 +2145,23 @@ if (was >= 1 && o < 1 && !lately) { sfx("door_close", x, y); doorShut.set(key, n
 doors.set(key, o);
 return 5 - Math.round(o * 5);
 }
-const UP = 4, L = 5, R = 11;
-function drawWall(c, x, y, sx, sy, S, now, a = 1, at) {
-const z = zoom, px = sx(x), py = sy(y, x) - UP * z, n = wall(x, y - 1, at), s = wall(x, y + 1, at), w = wall(x - 1, y, at), e = wall(x + 1, y, at), stone = c === "%";
-const ink = stone ? STONE[0] : INK, top = stone ? STONE[1] : CAP, x0 = w ? 0 : L, x1 = e ? 16 : R;
-const r = (col, X, Y, W_, H_) => { ctx.fillStyle = col; ctx.fillRect(px + X * z, py + Y * z, W_ * z, H_ * z); };
-const planks = (X, W_) => {
-if (W_ <= 0) return;
-if (stone) { const [gx, gy] = genCell("stone_wall"); ctx.drawImage(IMG.gen, gx + X, gy + 2, W_, 12, px + X * z, py + 4 * z, W_ * z, 12 * z); }
-else ctx.drawImage(IMG.house_walls, 56 + X, 4, W_, 12, px + X * z, py + 4 * z, W_ * z, 12 * z);
-};
-const cap = (X0, X1) => { r(top, X0, 1, X1 - X0, 3); r(ink, X0, 0, X1 - X0, 1); };
-ctx.globalAlpha = a;
-if (sideDoor(x, y, at)) {
-[.3, .2, .1].forEach((al, k) => r(`rgba(30,20,28,${al})`, 3 - k, 4, 10 + 2 * k, 8));
-for (const Y of [0, 12]) { r(ink, L, Y, 6, 4); r(top, L + 1, Y + (Y ? 0 : 1), 4, 3); }
-if ((a >= 1 ? doorFrame(x, y, at) : 5) >= 3) { r(INK, 6, 4, 4, 8); r("#90625d", 7, 4, 2, 8); r("#e8cfa6", 7, 9, 1, 1); }
-else { r(INK, R, 3, 5, 4); r("#90625d", R, 4, 4, 2); }
-} else if (c === "+") {
-r("#4a3530", 3, 1, 10, 14);
-ctx.drawImage(IMG.door, (a >= 1 ? doorFrame(x, y, at) : 5) * 16, 0, 16, 16, px, py, S, S);
-} else if (!s) {
-planks(x0, x1 - x0); cap(x0, x1);
-if (!w) r(ink, x0, 0, 1, 16);
-if (!e) r(ink, x1 - 1, 0, 1, 16);
-if (n) r(top, L + 1, 0, R - L - 2, 1);
-} else {
-if (w) planks(0, L);
-if (e) planks(R, 16 - R);
-r(ink, L, 0, 1, 16); r(ink, R - 1, 0, 1, 16); r(top, L + 1, 0, R - L - 2, 16);
-if (w) { cap(0, L + 1); r(top, L, 1, 1, 3); }
-if (e) { cap(R - 1, 16); r(top, R - 1, 1, 1, 3); }
-if (!n) r(ink, L, 0, R - L, 1);
+const abgr = (h) => (0xff000000 | parseInt(h.slice(5, 7), 16) << 16 | parseInt(h.slice(3, 5), 16) << 8 | parseInt(h.slice(1, 3), 16)) >>> 0;
+const look = (c) => (c === "%" ? {ink: abgr(STONE[0]), cap: abgr(STONE[1]), front: [IMG.gen, genCell("stone_wall")[0], genCell("stone_wall")[1] + 2]} : {ink: abgr(INK), cap: abgr(CAP), front: [IMG.house_walls, 56, 4]});
+function roofPx(up, down, w, e) {
+const d = sheetData(IMG.house_roof), px = new Uint32Array(16 * 30), row = up + down >= 2 && up === Math.floor((up + down) / 2) ? 2 : up % 2 ? 3 : 1;
+const lay = (sx, sy, h, at, dx) => { for (let k = 0; k < h; k++) for (let i = 0; i < 16; i++) { const X = i + dx, v = d.px[(sy + k) * d.w + sx + i]; if (X >= 0 && X < 16 && v >>> 24 > 127) px[(at + k) * 16 + X] = v; } };
+const piece = (r, y0, h, at) => { lay(16, r * 16 + y0, h, at, 0); if (!w) lay(0, r * 16 + y0, h, at, -11); if (!e) lay(32, r * 16 + y0, h, at, 11); };
+piece(row, 0, 16, 7);
+if (!up) piece(0, 9, 7, 0);
+if (!down) piece(4, 0, 7, 23);
+return {px, w: 16, h: 30, key: "roof" + [up, down, w, e]};
 }
-ctx.globalAlpha = 1;
-}
-function drawRoof(px, top, S, up, down, w, e) {
-const z = zoom, row = up + down >= 2 && up === Math.floor((up + down) / 2) ? 2 : up % 2 ? 3 : 1;
-const piece = (r, y0, h, at) => {
-ctx.drawImage(IMG.house_roof, 16, r * 16 + y0, 16, h, px, at, S, h * z);
-if (!w) ctx.drawImage(IMG.house_roof, 0, r * 16 + y0, 16, h, px - 11 * z, at, S, h * z);
-if (!e) ctx.drawImage(IMG.house_roof, 32, r * 16 + y0, 16, h, px + 11 * z, at, S, h * z);
-};
-piece(row, 0, 16, top);
-if (!up) piece(0, 9, 7, top - 7 * z);
-if (!down) piece(4, 0, 7, top + 16 * z);
-}
-return {WALLS, INK, drawWall, drawRoof, sideDoor, doorFrame};
+return {WALLS, INK, look, roofPx, sideDoor, doorFrame};
 })();
 ;
 let FLOORS = false;
 const Floors = (() => {
-const STOREY = 3, K = .03, THIN = .12, FAINT = .3;
+const STOREY = RULES.storey, K = .03, THIN = .12, FAINT = .3;
 let ver = 0, over = {key: "-", z: 99, tiles: new Set()};
 const colOf = (x, y) => { const b = blockOf(x, y); return b && b.built ? b.built.get((y - b.by * B) * B + (x - b.bx * B)) : undefined; };
 const get = (x, y, z) => { const c = colOf(x, y); return c ? c.get(z) : undefined; };
@@ -2258,10 +2183,10 @@ const cells = (x, y) => (FLOORS && colOf(x, y)) || null, built = (x, y, z) => { 
 const thingAt = (x, y, z) => { const c = get(x, y, z); return c ? c[1] : z === groundAt(x, y) ? combAt(x, y) || "" : ""; };
 function fits(x, y, z, planned = () => false) {
 if (solidAt(x, y, z)) return "A block is there";
-const under = Math.max(...surfacesAt(x, y).filter((s) => s < z)), on = thingAt(x, y, under), t = tile(x, y);
+const under = settleAt(x, y, z - 1), on = thingAt(x, y, under), t = tile(x, y);
 if (under === z - 1) return on && !GROUND.has(on) ? "Something is in the way" : !get(x, y, under) && t && wet(t[1]) ? "Not on water: a bridge first" : null;
 if (z - under < STOREY) return "Too low over the floor";
-if (z - under === STOREY && Structures.WALLS.includes(on || "-")) return null;
+if (z - under === STOREY && tileOf(on).holds) return null;
 return Object.values(DIRV).some(([dx, dy]) => solidAt(x + dx, y + dy, z) || planned(x + dx, y + dy, z)) ? null : "Needs a wall under it";
 }
 function standOf(p, x, y) {
@@ -2272,9 +2197,10 @@ if (was && was.x === x && was.y === y) return was.z;
 const z = at && Math.abs(at.x - x) + Math.abs(at.y - y) === 1 ? landAt(at.z, x, y, at.x, at.y) : null;
 return z !== null ? z : at ? settleNear(x, y, at.z) : standAt(x, y);
 }
+const between = (p) => { const ax = Math.floor(p.x), ay = Math.floor(p.y), bx = Math.ceil(p.x), by = Math.ceil(p.y); return [ax, ay, bx, by, standOf(p, ax, ay), standOf(p, bx, by)]; };
 const rise = (p) => { const x = Math.round(p.x), y = Math.round(p.y); return FLOORS && colOf(x, y) ? standOf(p, x, y) - standAt(x, y) : 0; };
 function mine() {
-const s = myAt, key = s ? [s.x, s.y, s.z, ver].join() : "";
+const P = HdLevel.place, s = P && !P.free ? {x: P.tx, y: P.ty, z: P.L} : null, key = s ? [s.x, s.y, s.z, ver].join() : "";
 if (key === over.key) return over;
 const zs = (x, y) => { const c = colOf(x, y); return c ? [...c.keys()] : []; }, tiles = new Set();
 let z = 99;
@@ -2289,41 +2215,14 @@ return (over = {key, z, tiles});
 }
 const hides = (x, y, z) => (mine().tiles.has(x + "," + y) && z >= over.z ? THIN : Build.on && z > Build.level() ? FAINT : 0);
 const alpha = (x, y, z) => { const h = hides(x, y, z); return !h ? 1 : opt("above") === "faded" || opt("above") === "circle" ? h : 0; };
-function cell(kind, x, y, z, sx, sy, S, a) {
-const q = zoom, px = sx(x), top = syUp(sy, y, shOf(z) * q), same = (dx, dy) => { const c = get(x + dx, y + dy, z); return !!c && c[0] === kind; };
-const r = (col, X, Y, W_, H_) => { ctx.fillStyle = col; ctx.fillRect(px + X * q, top + Y * q, W_ * q, H_ * q); };
-ctx.globalAlpha = a;
-if (kind === "stairs") { ctx.globalAlpha = 1; return Climb.drawStep(x, y, z, px, top, a); }
-if (kind === "roof") {
-let up = 0, down = 0;
-while (up < 14 && same(0, -up - 1)) up++;
-while (down < 14 && same(0, down + 1)) down++;
-Structures.drawRoof(px, top, S, up, down, same(-1, 0), same(1, 0));
-} else {
-const ink = Structures.INK;
-if (!get(x, y, z + 1)) {
-ctx.drawImage(IMG.house_walls, 16, 16, 16, 16, px, top, S, S);
-if (!get(x, y - 1, z)) r(ink, 0, 0, 16, 1);
-if (!get(x - 1, y, z)) r(ink, 0, 0, 1, 16);
-if (!get(x + 1, y, z)) r(ink, 15, 0, 1, 16);
-}
-if (!get(x, y + 1, z)) {
-const n = RELIEF_STEP; for (let j = 0; j < n - 1; j += 7) { const h = Math.min(7, n - 1 - j); ctx.drawImage(IMG.house_walls, 56, 9, 16, h, px, top + (16 + j) * q, S, h * q); }
-r(ink, 0, 15 + n, 16, 1); r(ink, 0, 16, 16, 1);
-if (!get(x - 1, y, z)) r(ink, 0, 16, 1, n);
-if (!get(x + 1, y, z)) r(ink, 15, 16, 1, n);
-}
-}
-ctx.globalAlpha = 1;
-}
-const UP = new Set("W%+#ghLBpKrl");
+function cell(kind, x, y, z, sx, sy, S, a) { return Climb.drawStep(x, y, z, sx(x), syUp(sy, y, shOf(z) * zoom), a); }
 function intent(p, shift) {
 const s = myPos(), it = selected && !shift ? selected : null, isMe = s.x === p.x && s.y === p.y;
 const z = settleNear(p.x, p.y, myZ(s.x, s.y)), c = FLOORS ? get(p.x, p.y, z) : null, on = c ? c[1] : "", zArg = (zz) => (FLOORS ? {z: zz} : {});
-const place = (zz, text) => ({text, ghost: it, ok: true, near: 1, z: zz, run: (d) => act("place", {dir: d, item: it, ...zArg(zz)})});
+const place = (zz, text) => ({text, ghost: it, ok: true, z: zz, run: (d) => act("place", {dir: d, item: it, ...zArg(zz)})});
 const t = tile(p.x, p.y);
 if (LAND_BLOCKS.has(it) && FLOORS && t && ".,'".includes(t[1]) && (GROUND.has(t[0]) || t[0] === "f") && !isMe && !c && z === topAt(p.x, p.y) && colAt(p.x, p.y) === colSolid(z) && !colOf(p.x, p.y))
-return entityAt(p) ? {text: "Someone is standing there", ghost: it, ok: false} : {text: "Raise the ground", ghost: it, ok: true, near: 1, run: (d) => act("place", {dir: d, item: it})};
+return entityAt(p) ? {text: "Someone is standing there", ghost: it, ok: false} : {text: "Raise the ground", ghost: it, ok: true, run: (d) => act("place", {dir: d, item: it})};
 const h = myZ(s.x, s.y);
 if (it === "plank" && FLOORS && get(s.x, s.y, h) && !isMe && !solidAt(p.x, p.y, h) && !fits(p.x, p.y, h)) return place(h, "Lay planks");
 if (it === "roof" || (it === "plank" && c && !isMe)) {
@@ -2332,14 +2231,14 @@ return why ? {text: why, ghost: it, ok: false, z: zz} : place(zz, it === "roof" 
 }
 if (!c || isMe) return null;
 if (it && PLACEABLE_BLOCK[it] && c[0] === "stairs") return {text: "Not on a step", ghost: it, ok: false, z};
-if (it && PLACEABLE_BLOCK[it]) return on ? {text: "Something is there", ghost: it, ok: false, z} : UP.has(PLACEABLE_BLOCK[it]) ? place(z, `Place ${label(it)}`) : {text: "It needs the ground", ghost: it, ok: false, z};
-if (on === "B" && !shift) return {text: "Sleep", near: 1, z, run: (d) => act("sleep", {dir: d})};
+if (it && PLACEABLE_BLOCK[it]) return on ? {text: "Something is there", ghost: it, ok: false, z} : tileOf(PLACEABLE_BLOCK[it]).upstairs ? place(z, `Place ${label(it)}`) : {text: "It needs the ground", ghost: it, ok: false, z};
+if (on === "B" && !shift) return {text: "Sleep", z, run: (d) => act("sleep", {dir: d})};
 if (on && !shift) return {text: label(CH[on]), info: true, quiet: true, z};
-if (on) { const tool = TOOL_FOR[on], w = inHand(); return {text: (HARVEST[on] || "Take down " + label(CH[on])) + (tool && w !== tool ? " (slow)" : ""), near: 1, z, run: (d) => act("dig", {dir: d, z, ...(w ? {with: w} : {})})}; }
-if (shift) return {text: c[0] === "roof" ? "Take the roof block" : c[0] === "stairs" ? "Take up the step" : "Take up the planks", near: 1, z, ground: true, run: (d) => act("dig", {dir: d, z})};
+if (on) { const tool = TOOL_FOR[on], w = inHand(); return {text: (HARVEST[on] || "Take down " + label(CH[on])) + (tool && w !== tool ? " (slow)" : ""), z, run: (d) => act("dig", {dir: d, z, ...(w ? {with: w} : {})})}; }
+if (shift) return {text: c[0] === "roof" ? "Take the roof block" : c[0] === "stairs" ? "Take up the step" : "Take up the planks", z, ground: true, run: (d) => act("dig", {dir: d, z})};
 return {text: "Walk here", walk: true, run: () => act("move_to", {x: p.x, y: p.y, z})};
 }
-return {STOREY, K, UP, any: (x, y) => !!colOf(x, y), get, set, load, cells, built, thingAt, fits, standOf, rise, alpha, cell, intent, get ver() { return ver; }};
+return {STOREY, K, any: (x, y) => !!colOf(x, y), get, set, load, cells, built, thingAt, fits, standOf, between, rise, alpha, cell, intent, get ver() { return ver; }};
 })();
 ;
 const Flow = (() => {
@@ -2363,13 +2262,12 @@ return {load, set, col, at, get ver() { return ver; }};
 })();
 ;
 const Climb = (() => {
-const CLIMB = 12, RISE = [2, 7], WAYS = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+const CLIMB = RULES.climb.max, RISE = RULES.climb.rise, WAYS = [[0, -1], [1, 0], [0, 1], [-1, 0]];
 const RAIL = "#90625d", RUNG = "#c49a6c", LIGHT = "#e8cfa6";
 const ladderAt = (x, y, z) => FLOORS && Floors.thingAt(x, y, z) === "l";
 function openAt(x, y, z) {
 if (!surfacesAt(x, y).includes(z) || solidAt(x, y, z + 2)) return false;
-const c = Floors.get(x, y, z);
-return c ? !SOLID.has(c[1]) : z !== floorAt(x, y) || plainWalk(x, y);
+return stand(x, y, z, false);
 }
 function climb(h, x0, y0, x, y) {
 for (const s of surfacesAt(x, y)) {
@@ -2384,7 +2282,7 @@ for (const [dx, dy] of [[0, -1], [-1, 0], [1, 0], [0, 1]]) { const s = climb(z, 
 return null;
 }
 const onLadder = (x0, y0, h0, x, y, h) => ladderAt(x0, y0, h0) || ladderAt(x, y, h);
-const CLIMB_S = .15;
+const CLIMB_S = RULES.climb.s;
 function pace(fx, fy, h, x, y) {
 const z = landAt(h, x, y, fx, fy);
 return z !== null && Math.abs(z - h) > 1 && onLadder(fx, fy, h, x, y, z) ? 1 / (Math.abs(z - h) * CLIMB_S) : 0;
@@ -2397,10 +2295,8 @@ return Math.abs(la - lb) > 1 && onLadder(ax, ay, la, bx, by, lb) ? 1 / (Math.abs
 }
 const OVER = .8;
 function climbOf(p) {
-const ax = Math.floor(p.x), ay = Math.floor(p.y), bx = Math.ceil(p.x), by = Math.ceil(p.y);
-if ((ax === bx && ay === by) || !FLOORS) return null;
-const la = Floors.standOf(p, ax, ay), lb = Floors.standOf(p, bx, by);
-if (Math.abs(la - lb) < 2 || !onLadder(ax, ay, la, bx, by, lb)) return null;
+const [ax, ay, bx, by, la, lb] = Floors.between(p);
+if (ax === bx && ay === by || !FLOORS || Math.abs(la - lb) < 2 || !onLadder(ax, ay, la, bx, by, lb)) return null;
 const footA = la < lb, u = footA ? (ax === bx ? p.y - ay : p.x - ax) : (ax === bx ? by - p.y : bx - p.x);
 const lo = Math.min(la, lb), hi = Math.max(la, lb), on = u <= OVER;
 const pos = on ? 0 : (u - OVER) / (1 - OVER), h = on ? lo + (hi - lo) * u / OVER : hi;
@@ -2426,12 +2322,12 @@ return {why: why || "Stairs go up to something higher beside them"};
 function down(x, y, dx, dy, top) {
 const out = [];
 for (let t = top - 1; ; t--, x += dx, y += dy) {
-const under = surfacesAt(x, y).filter((v) => v < t), g = under.length ? Math.max(...under) : null;
-if (g === null || t <= g) return out.length ? out : "The ground there is as high";
+const g = settleAt(x, y, t - 1);
+if (t <= g) return out.length ? out : "The ground there is as high";
 for (let c = g + 1; c <= t + 2; c++) if (solidAt(x, y, c)) return "No room: leave the floor open over them";
 const cell = Floors.get(x, y, g), what = cell ? cell[1] : g === floorAt(x, y) ? combAt(x, y) : "";
 const me_ = myPos();
-if ((what && !GROUND.has(what) && what !== "f") || (!cell && !plainWalk(x, y)) || entityAt({x, y}) || (me_ && me_.x === x && me_.y === y)) return "Something is in the way";
+if ((what && !GROUND.has(what) && what !== "f") || (!cell && !stand(x, y)) || entityAt({x, y}) || (me_ && me_.x === x && me_.y === y)) return "Something is in the way";
 out.push([x, y, g, t]);
 if (t - g <= 1) return out;
 if (out.length >= RISE[1]) return "Too far down";
@@ -2495,20 +2391,20 @@ if (it === "stairs") {
 const f = flight(p.x, p.y), have = meObs ? meObs.self.inventory.stairs || 0 : 0;
 if (!Array.isArray(f)) return {text: f.why, ghost: it, ok: false};
 const ok = have >= f.length;
-return {text: ok ? `Build stairs (${f.length} step${f.length > 1 ? "s" : ""})` : `The flight takes ${f.length} stairs`, ghost: it, ok, near: 1, steps: f,
+return {text: ok ? `Build stairs (${f.length} step${f.length > 1 ? "s" : ""})` : `The flight takes ${f.length} stairs`, ghost: it, ok, steps: f,
 draw: (sx, sy, S) => ghostFlight(f, sx, sy, S, ok), run: (d) => act("place", {dir: d, item: it})};
 }
 const h = own(p, s);
 if (h !== null) {
 const b = FLOORS ? Floors.get(s.x, s.y, h) : null, was = b ? b[1] : h === groundAt(s.x, s.y) && !wet(gndAt(s.x, s.y)) ? combAt(s.x, s.y) : "-", ok = !was || GROUND.has(was) || was === "f";
 if (was === "l") return {text: "", info: true, none: true, own: {x: s.x, y: s.y}};
-return {text: ok ? "Place ladder" : "Something is in the way", ghost: it, ok, near: 1, z: h, flat: true, own: {x: s.x, y: s.y},
+return {text: ok ? "Place ladder" : "Something is in the way", ghost: it, ok, z: h, flat: true, own: {x: s.x, y: s.y},
 draw: (sx, sy, S) => drawLadder(s.x, s.y, h, sx, sy, S, .6), run: () => act("place", {dir: dirTo(p), item: it})};
 }
 const z = settleNear(p.x, p.y, myZ(s.x, s.y)), c = FLOORS ? Floors.get(p.x, p.y, z) : null, on = c ? c[1] : z === groundAt(p.x, p.y) ? combAt(p.x, p.y) : "";
 if ((on && !GROUND.has(on) && on !== "f") || !openAt(p.x, p.y, z)) return {text: "Something is in the way", ghost: it, ok: false, z};
 if (!FLOORS || !lean(p.x, p.y, z)) return {text: "Needs something taller behind", ghost: it, ok: false, z};
-return {text: "Place ladder", ghost: it, ok: true, near: 1, z, draw: (sx, sy, S) => drawLadder(p.x, p.y, z, sx, sy, S, .6), run: (d) => act("place", {dir: d, item: it, z})};
+return {text: "Place ladder", ghost: it, ok: true, z, draw: (sx, sy, S) => drawLadder(p.x, p.y, z, sx, sy, S, .6), run: (d) => act("place", {dir: d, item: it, z})};
 }
 function ghostFlight(f, sx, sy, S, ok) {
 for (const [x, y, g, t] of f) for (let z = g + 1; z <= t; z++) Floors.cell("stairs", x, y, z, sx, sy, S, .55);
@@ -2528,8 +2424,7 @@ const liftAt = (x, y) => (shOf(standAt(x, y)) + Models.up(x, y)) * zoom;
 function liftOf(p) {
 const lz = p.leapAt ? Leap.landedOn(p) : null;
 if (lz !== null) return (shOf(lz) + Models.up(Math.round(p.x), Math.round(p.y))) * zoom;
-const ax = Math.floor(p.x), ay = Math.floor(p.y), bx = Math.ceil(p.x), by = Math.ceil(p.y);
-const f = ax === bx ? p.y - ay : p.x - ax, a = (shOf(Floors.standOf(p, ax, ay)) + Models.up(ax, ay)) * zoom, b = (shOf(Floors.standOf(p, bx, by)) + Models.up(bx, by)) * zoom;
+const [ax, ay, bx, by, la, lb] = Floors.between(p), f = ax === bx ? p.y - ay : p.x - ax, a = (shOf(la) + Models.up(ax, ay)) * zoom, b = (shOf(lb) + Models.up(bx, by)) * zoom;
 return a + (b - a) * f;
 }
 const sheetCols = new Map();
@@ -2545,7 +2440,7 @@ let w0 = 0; while (w0 < 15 && at(wx * 16 + w0, wy * 16 + 8)[3] < 128) w0++;
 const side = [0, 1, 2, 3].map((i) => at(wx * 16 + w0 + i, wy * 16 + 8));
 const [nx, ny] = blobCell(S_ | E_ | W_ | SE | SW);
 let n0 = 0; while (n0 < 15 && at(nx * 16 + 8, ny * 16 + n0)[3] < 128) n0++;
-const dd = Math.min(8, (sheet.dug || 1) - 1) / 8, seam = sheet.dug ? [1 + .1 * dd, .86 - .24 * dd] : [1, 1], out = {bands: [l.map((v, q) => (q < 3 ? Math.min(255, v * seam[0]) : v)), [(d[0] + l[0]) / 2, (d[1] + l[1]) / 2, (d[2] + l[2]) / 2], d.map((v, q) => (q < 3 ? v * seam[1] : v))], side, top: at(ix * 16 + 8, iy * 16 + 8),
+const out = {bands: [l, [(d[0] + l[0]) / 2, (d[1] + l[1]) / 2, (d[2] + l[2]) / 2], d], side, top: at(ix * 16 + 8, iy * 16 + 8),
 foot: ink + 1, inset: w0, north: n0};
 sheetCols.set(sheet, out); return out;
 }
@@ -2633,14 +2528,16 @@ else if (now - paceFrom > 4000) { DPR_MAX = 1; frameMs = 16; resize(); }
 }
 let zoom = 3;
 const TS = () => P * zoom;
+const artPx = () => { const d = window.devicePixelRatio || 1; return Math.max(1, Math.round(zoom * d)) / d; };
+const onArt = (v) => { const u = artPx(); return Math.round(v / u) * u; };
 function screenOrigin(S = TS()) {
 return [Math.round(W / 2 - S / 2) - Math.round(cam.x * S), Math.round(H / 2 - S / 2) - Math.round(cam.y * S)];
 }
 let cam = {x: 0, y: 0}, camT = {x: 0, y: 0};
-let follow = null, me = null, myId = null, meObs = null, agents = [], metrics = {}, recipes = {}, clock = {night: false, phase: .3};
-let selected = null, progress = null, foodValue = {};
+let follow = null, me = null, myId = null, meObs = null, agents = [], metrics = {}, clock = {night: false, phase: .3};
+let selected = null, progress = null;
 let handSlot = Math.min(9, Math.max(0, Math.floor(+localStorage.getItem("megastructure-hand")) || 0));
-let HP_MAX = 100, FOOD_MAX = 100, SPRINT_FOOD = -1, SWIM_SPRINT = false, SWIM_PACE = 1, EAT_PACE = 1;
+let {hp_max: HP_MAX, food_max: FOOD_MAX, sprint_food: SPRINT_FOOD, swim_pace: SWIM_PACE, eat_pace: EAT_PACE} = RULES, SWIM_SPRINT = false;
 const hearts = (hp) => Math.round(hp / (HP_MAX / 10) * 10) / 10;
 const ents = new Map();
 let bubbles = [], floats = [];
@@ -2653,22 +2550,21 @@ const fmt = (o) => Object.entries(o || {}).map(([k, v]) => `${v} ${label(k)}`).j
 let spec, sid = 0, lastWatch = "", webStamp = 0;
 function connectSpec() {
 spec = openSocket("/spectate");
-spec.onopen = () => { lastWatch = ""; requested.clear(); sendSpec({op: "recipes"}); sendSpec({op: "agents"}); };
+spec.onopen = () => { lastWatch = ""; requested.clear(); sendSpec({op: "agents"}); if (myId !== null) sendSpec({op: "me", id: myId}); };
 spec.onmessage = (m) => {
 const d = JSON.parse(m.data);
 if (d.type === "hello") {
 if (webStamp && d.web && d.web !== webStamp) location.reload();
 webStamp = d.web || webStamp;
-if (d.hp_max) { HP_MAX = d.hp_max; FOOD_MAX = d.food_max; SPRINT_FOOD = d.sprint_food; }
+if (d.rules) { setRules(d.rules); ({hp_max: HP_MAX, food_max: FOOD_MAX, sprint_food: SPRINT_FOOD, swim_pace: SWIM_PACE, eat_pace: EAT_PACE} = RULES); }
 FLOORS = !!d.floors;
-SWIM_SPRINT = !!d.swim_sprint; SWIM_PACE = d.swim_pace || 1; EAT_PACE = d.eat_pace || 1;
+SWIM_SPRINT = !!d.swim_sprint;
 } else if (d.type === "tick") { if (typeof TitleScene === "undefined" || !TitleScene.on) onTick(d); }
 else if (d.type === "event") onEvent(d.ev);
 else if (d.type === "resync") { for (const b of blocks.values()) b.at = -1e9; }
 else if (d.type === "reply") {
 if (d.rows) onRegion(d);
 else if (d.agents) { agents = d.agents; drawAgents(); if (document.body.classList.contains("tab")) drawWho(); }
-else if (d.recipes) { recipes = d.recipes; foodValue = d.food || {}; drawRecipes(); }
 else if (d.tick_ms_p50 !== undefined) { metrics = d; }
 else if (d.who) accountNamed(d.name);
 }
@@ -2700,8 +2596,8 @@ if ((!b || stale) && !(requested.get(k) > now - 3000)) { requested.set(k, now); 
 }
 const f = typeof HdLook !== "undefined" && HdLook.live && HdLook.far, fb = f && [f[0], f[1], f[2], f[3]].map((v) => Math.floor(v / B));
 if (fb) { const cx = Math.floor(cam.x / B), cy = Math.floor(cam.y / B), far = [];
-for (let by = fb[1]; by <= fb[3]; by++) for (let bx = fb[0]; bx <= fb[2]; bx++) { const k = bkey(bx, by), b = blocks.get(k); if ((!b || now - b.at > 30000) && !(requested.get(k) > now - 3000)) far.push([Math.abs(bx - cx) + Math.abs(by - cy), bx, by]); }
-for (const [, bx, by] of far.sort((a, b) => a[0] - b[0]).slice(0, 4)) { const k = bkey(bx, by), b = blocks.get(k); requested.set(k, now); if (b) b.at = now; sendSpec({op: "region", x: bx * B, y: by * B, w: B, h: B, far: true}); } }
+for (let by = fb[1]; by <= fb[3]; by++) for (let bx = fb[0]; bx <= fb[2]; bx++) { const k = bkey(bx, by), b = blocks.get(k); if ((!b || now - b.at > 30000) && !(Math.abs(requested.get(k)) > now - 3000)) far.push([Math.abs(bx - cx) + Math.abs(by - cy), bx, by]); }
+for (const [, bx, by] of far.sort((a, b) => a[0] - b[0]).slice(0, 4)) { const k = bkey(bx, by), b = blocks.get(k); requested.set(k, -now); if (b) b.at = now; sendSpec({op: "region", x: bx * B, y: by * B, w: B, h: B, far: true}); } }
 const bx0 = Math.min(Math.floor(x / B) - 1, fb ? fb[0] : 1e9), bx1 = Math.max(Math.floor((x + w) / B) + 1, fb ? fb[2] : -1e9), by0 = Math.min(Math.floor(y / B) - 1, fb ? fb[1] : 1e9), by1 = Math.max(Math.floor((y + h) / B) + 1, fb ? fb[3] : -1e9);
 for (const [k, b] of blocks) if (b.bx < bx0 || b.bx > bx1 || b.by < by0 || b.by > by1) blocks.delete(k);
 }, 100);
@@ -2727,12 +2623,13 @@ p.e = e;
 if (e.kind === "agent" && e.id === myId && myTick(p, e, now)) continue;
 if (p.tx !== e.x || p.ty !== e.y) {
 const dx = Math.sign(e.x - p.tx), dy = Math.sign(e.y - p.ty);
-if (ANIMALS[e.kind]) { if (dx) p.fx = dx; } else if (dx || dy) { p.fx = dx; p.fy = dy; }
+if (ANIMALS[e.kind]) { if (dx) BodyPlace.face(p, dx, p.fy); } else if (dx || dy) BodyPlace.face(p, dx, dy);
 const gap = (now - p.moved) / 1000;
-p.pace = e.run ? 10 : gap < 1 ? Math.min(10, Math.hypot(e.x - p.tx, e.y - p.ty) / Math.max(gap, .05)) : 0;
+p.pace = e.run ? RULES.pace.sprint : gap < 1 ? Math.min(RULES.pace.sprint, Math.hypot(e.x - p.tx, e.y - p.ty) / Math.max(gap, .05)) : 0;
 p.moved = now; p.tx = e.x; p.ty = e.y;
 if (Math.abs(p.x - e.x) + Math.abs(p.y - e.y) > 4) { p.x = e.x; p.y = e.y; }
 }
+if (e.kind === "agent" && e.doing) BodyPlace.faceAction(p, e.dir, e.tid);
 }
 for (const [k, p] of ents) if (!seen.has(k)) {
 if (k === "agent" + myId) { refresh(); continue; }
@@ -2841,6 +2738,7 @@ if (e.type === "board" || e.type === "moor") { burst(e.x, e.y, "water", 8, {up: 
 if (e.type === "hatch") { burst(e.x, e.y, "spark", 8, {dy: -.3, g: 4}); sfx("hatch", e.x, e.y); }
 if (e.type === "born") { burst(e.x, e.y, "food", 8, {dy: -.5, g: 3}); sfx("love", e.x, e.y); }
 if (e.type === "craft") { burst(e.x, e.y, "spark", 10, {dy: -.6, g: 4}); sfx("craft", e.x, e.y); }
+if (e.type === "drop") dropLoot(e.x, e.y, e.items, performance.now(), e.ox, e.oy);
 if (["xp", "pick_up", "drop", "chest", "milk", "love", "lay", "fill", "picnic", "trough"].includes(e.type)) return;
 if (e.type === "attack") return;
 let text;
@@ -2935,7 +2833,7 @@ if (e.what === "puff") burst(e.x, e.y, "dust", 8, {up: 1, spread: 3, g: 1, life:
 }
 setInterval(() => bossMusic([...ents.values()].some((q) => q.e && q.e.kind === "mossback" && q.e.act !== "sleep")), 500);
 ;
-const JUMP = {g: 950, top: 20, over: 4, crouch: 40, off: 30, touch: 25};
+const JUMP = {g: RULES.leap.g * 16, top: RULES.leap.top * 16, over: 4, crouch: 40, off: 30, touch: 25};
 const SETTLE = {land: 45, ms: 100};
 const STEPDOWN = {from: .35, q: 1.6};
 const JPOSE = {crouch: 0, takeoff: 1, rise: 2, apex: 3, fall: 4, land: 5, settle: 6, touch: 7};
@@ -2958,10 +2856,8 @@ return [h, v > .4 * v0 ? "rise" : v < -.3 * v0 ? "fall" : "apex", true];
 const mineWalking = (p) => !!(p.e && p.e.kind === "agent" && p.e.id === myId && walking && p.walking);
 function jumpOf(p) {
 if (p.leapAt && Leap.landedOn(p) !== null) return null;
-const ax = Math.floor(p.x), ay = Math.floor(p.y), bx = Math.ceil(p.x), by = Math.ceil(p.y);
-if (ax === bx && ay === by) return null;
-const la = Floors.standOf(p, ax, ay), lb = Floors.standOf(p, bx, by);
-if (la === lb || Climb.onLadder(ax, ay, la, bx, by, lb)) return null;
+const [ax, ay, bx, by, la, lb] = Floors.between(p);
+if ((ax === bx && ay === by) || la === lb || Climb.onLadder(ax, ay, la, bx, by, lb)) return null;
 const f = ax === bx ? p.y - ay : p.x - ax, d = (lb - la) * RELIEF_STEP;
 const fwd = (ax === bx ? p.ty - p.y || p.fy : p.tx - p.x || p.fx) >= 0;
 const g = fwd ? f : 1 - f, D = fwd ? d : -d, line = D * g, key = ax + "," + ay + "," + bx + "," + by;
@@ -2973,20 +2869,22 @@ return {body: h - line, ground: (g < .5 ? 0 : D) - line, squash: false, tuck: fa
 const J = stepPath(D), [h, pose, air] = jumpAt(J, g * J.ms, D * 1000 / J.ms);
 return {body: h - line, ground: (g < .5 ? 0 : D) - line, squash: !air, tuck: air, pose, d: D, key};
 }
-const FALL = {from: 3, g: 1000, flail: 70, heavy: 4, shake: [3.5, .32], bounce: [3, .17]};
+const FALL = {from: RULES.fall_safe, g: 1000, flail: 70, heavy: 4, shake: [3.5, .32], bounce: [3, .17]};
 let fallQuake = null;
 function falling(p, now) {
 if (p.fallAt !== now) { p.fallAt = now; p.fallNow = fallOf(p, now); }
 return p.fallNow;
 }
 function fallOf(p, now) {
-const ax = Math.floor(p.x), ay = Math.floor(p.y), bx = Math.ceil(p.x), by = Math.ceil(p.y), ramp = liftOf(p) / zoom;
-const la = Floors.standOf(p, ax, ay), lb = Floors.standOf(p, bx, by), between = (ax !== bx || ay !== by) && la !== lb;
+if (p.e && p.e.kind === "agent" && p.e.id === myId && (Leap.on() || Leap.gliding())) { p.fall = null; return null; }
+const [ax, ay, bx, by, la, lb] = Floors.between(p), ramp = liftOf(p) / zoom, between = (ax !== bx || ay !== by) && la !== lb;
 const fwd = (ax === bx ? p.ty - p.y || p.fy : p.tx - p.x || p.fx) >= 0, down = between && fwd === la > lb;
 const f = ax === bx ? p.y - ay : p.x - ax, u = la > lb ? f : 1 - f;
 let F = p.fall;
 if (!F) {
 if (!down || Math.abs(la - lb) < FALL.from || Climb.onLadder(ax, ay, la, bx, by, lb)) return null;
+const zNow = p.e && p.e.kind === "agent" && p.e.id === myId ? myAt && myAt.z : p.e && p.e.z;
+if (typeof zNow === "number" && zNow <= Math.min(la, lb)) return null;
 F = p.fall = {top: Math.max(la, lb) * RELIEF_STEP, land: Math.min(la, lb) * RELIEF_STEP, t0: 0};
 }
 if (F.done) {
@@ -3007,12 +2905,8 @@ return p.fall ? {body: F.land - ramp, ground: F.land - ramp, air: false} : null;
 if (mine) fallWind(Math.min(1, FALL.g * t / 600));
 return {body: h - ramp, ground: F.land - ramp, air: true};
 }
-function overBody(p, S) {
-const cl = Climb.climbOf(p), j = p.fall && p.fallNow ? p.fallNow : Leap.body(p) || jumpOf(p) || hopOf(p, performance.now());
-return [cl ? cl.dx * S : 0, (cl ? cl.dy * S - cl.lift * zoom : 0) - (j ? Math.round(j.body) * zoom : 0)];
-}
 function hopOf(p, now) {
-if (!(now - p.hop < HOP.ms) || jumpOf(p)) return null;
+if (!(now - p.hop < HOP.ms) || jumpOf(p) || (p.e && swimsAt(p, p.e))) return null;
 const [h, pose, air] = jumpAt(HOPJ, now - p.hop, 0);
 return {body: Math.round(h), ground: 0, air: false, squash: !air, tuck: air, pose};
 }
@@ -3050,7 +2944,7 @@ return jumping0(p, now);
 }
 function jumping0(p, now) {
 const fall = falling(p, now);
-if (fall) return fall;
+if (fall) { if (fall.air && now - p.hop < HOP.ms) p.hop = -1e9; return fall; }
 if (now - p.bounce < FALL.bounce[1] * 1000 && !jumpOf(p)) {
 const k = (now - p.bounce) / 1000 / FALL.bounce[1];
 return {body: Math.sin(k * Math.PI) * FALL.bounce[0], ground: 0, air: false};
@@ -3086,14 +2980,6 @@ const la = Floors.standOf(p, fx, fy), lb = Floors.standOf(p, nx, ny);
 if (lb <= la || Climb.onLadder(fx, fy, la, nx, ny, lb)) return Infinity;
 return 1000 / jumpMs((lb - la) * RELIEF_STEP);
 }
-function lineLift(p) {
-const ax = Math.floor(p.x), ay = Math.floor(p.y), bx = Math.ceil(p.x), by = Math.ceil(p.y);
-if (ax === bx && ay === by) return 0;
-const la = Floors.standOf(p, ax, ay), lb = Floors.standOf(p, bx, by);
-if (la === lb || Math.abs(la - lb) >= FALL.from || Climb.onLadder(ax, ay, la, bx, by, lb)) return 0;
-const f = ax === bx ? p.y - ay : p.x - ax;
-return (la + (lb - la) * f) - (f < .5 ? la : lb);
-}
 ;
 const LEAP = {steer: 8, margin: .45};
 const Leap = (() => {
@@ -3109,7 +2995,7 @@ return !!p && !Build.on && !(p.e && p.e.sail) && !(t && wet(t[1])) && !Climb.cli
 }
 function start(p, now) {
 const [x, y] = tileOf(p.x, p.y), run = !!(walking && walking.run && sprinting()), w = walking && p.walking ? DIRV[walking.dir] : null;
-const sp = walking && p.walking ? (run ? 10 : 5) : 0;
+const sp = walking && p.walking ? RULES.pace[run ? "sprint" : "walk"] : 0;
 if (walking) {
 const args = {at: mark(x, y)}; if (walking.run) args.run = true; if (autoJump()) args.jump = true;
 walking = null; p.walking = false; pred = {x, y, until: now + 2000};
@@ -3117,7 +3003,7 @@ rpc("act", {tool: "stop", args});
 }
 L = {t: 0, x: p.x, y: p.y, z: myZ(x, y), vx: w ? w[0] * sp : 0, vy: w ? w[1] * sp : 0, vz: V0(), path: [], run, tx: x, ty: y};
 L.z0 = L.z; if (C === null) { C = L.z; Ct = now; }
-if (w) { p.fx = w[0]; p.fy = w[1]; }
+if (w) BodyPlace.face(p, w[0], w[1]);
 jumpDust(p, 3, .8);
 }
 const T1 = () => { const v = V0(), g = G(); return (v - Math.sqrt(v * v - 2 * g)) / g; };
@@ -3129,7 +3015,7 @@ return !solidAt(x0, y0, h + 3) && !solidAt(x0, y0, h + 4) && !solidAt(x1, y1, h 
 function due(p, w) {
 if (!can(p)) return false;
 const [dx, dy] = DIRV[w.dir], s = dx || dy, x = Math.round(p.x), y = Math.round(p.y), h = myZ(x, y), at = dx ? p.x : p.y;
-const need = (w.run && sprinting() ? 10 : 5) * T1() + .08;
+const need = RULES.pace[w.run && sprinting() ? "sprint" : "walk"] * T1() + .08;
 for (let k = 1; k <= 2; k++) {
 const nx = x + dx * k, ny = y + dy * k, px = nx - dx, py = ny - dy, d = ((dx ? x : y) + (k - .5) * s - at) * s;
 if (d < 0) continue;
@@ -3141,11 +3027,11 @@ return false;
 function frame(p, dt, now) {
 if (!L) return;
 L.t += dt;
-const h = held(), cap = L.run ? 10 : 5;
+const h = held(), cap = RULES.pace[L.run ? "sprint" : "walk"];
 if (h) {
 const k = Math.min(1, LEAP.steer * dt / cap);
 L.vx += (h[0] * cap - L.vx) * k; L.vy += (h[1] * cap - L.vy) * k;
-p.fx = h[0]; p.fy = h[1];
+BodyPlace.face(p, h[0], h[1]);
 }
 const g = G(), z1 = L.z + L.vz * dt - g * dt * dt / 2;
 L.vz -= g * dt;
@@ -3169,8 +3055,9 @@ if (L.vz <= 0 && L.z <= ground + 1e-6) land(p, now, ground);
 }
 function land(p, now, z) {
 const path = L.path.filter((t, i, a) => !i || t[0] !== a[i - 1][0] || t[1] !== a[i - 1][1]), run = L.run, z0 = L.z0;
-const h = held(), past = h && (p.x - p.tx) * h[0] + (p.y - p.ty) * h[1] >= 0 && Math.abs((p.x - p.tx) * h[1]) + Math.abs((p.y - p.ty) * h[0]) < .01;
+const h = held(), past = h && (p.x - p.tx) * h[0] + (p.y - p.ty) * h[1] >= 0 && Math.abs((p.x - p.tx) * h[1]) + Math.abs((p.y - p.ty) * h[0]) < .01 && fits(p.tx + h[0], p.ty + h[1], z);
 L = null; p.settle = now;
+if (C !== null && air) { off = z - C; air = false; }
 p.leapAt = past ? null : {x: p.tx, y: p.ty, z};
 if (myAt) myAt.z = z;
 jumpDust(p, 4, z < z0 ? 1.3 : 1); sfx(z < z0 ? "thud" : "step", p.tx, p.ty);
@@ -3217,6 +3104,29 @@ const level = () => (L ? [settleAt(L.tx, L.ty, L.z + 1e-6), L.z0] : null);
 return {leapable, can, due, start, frame, body, level, landedOn, after, cam, lift, on: () => !!L, gliding: () => { const p = ents.get("agent" + myId); return !!(p && p.leapAt && landedOn(p) !== null); }, get state() { return L; }};
 })();
 ;
+const BodyPlace = (() => {
+function make(p, now) {
+const e = p.e || {}, boat = !!e.sail;
+const j0 = boat ? null : jumping(p, now), fall = boat ? null : falling(p, now);
+const swim = !boat && !!p.e && swimsAt(p, e) && !(j0 && j0.air), climb = boat || swim ? null : Climb.climbOf(p), jump = swim ? null : j0;
+const air = !!jump && !!(jump.air || jump.tuck);
+if (climb && climb.on) face(p, climb.fx, climb.fy);
+const mode = boat ? "boat" : swim ? "swim" : climb ? "climb" : fall && fall.air ? "fall" : jump && (jump.leap || jump.tuck || jump.pose) ? "jump" : "walk";
+const up = (climb ? climb.lift : 0) + (jump ? Math.round(jump.body) : 0), line = liftOf(p) / zoom;
+const dx = climb ? climb.dx : 0, dy = climb ? climb.dy : 0, [ax, ay, bx, by, la, lb] = Floors.between(p), f = ax === bx ? p.y - ay : p.x - ax;
+return {at: now, tx: Math.round(p.x + dx), ty: Math.round(p.y + dy), mode, air, pose: jump && jump.pose || null, fx: p.fx || 0, fy: p.fy || 0, dx, dy,
+line: Math.abs(la - lb) >= FALL.from || Climb.onLadder(ax, ay, la, bx, by, lb) ? (f < .5 ? la : lb) : la + (lb - la) * f, up, eye: (climb ? climb.lift : 0) + (fall ? fall.body : 0), z: climb ? climb.h : (line + up) / RELIEF_STEP, ground: (line + (jump ? jump.ground : 0)) / RELIEF_STEP, jump, fall, climb};
+}
+const face = (p, fx, fy) => { p.fx = fx; p.fy = fy; };
+function faceAction(p, dir, tid) {
+if (dir && DIRV[dir]) face(p, ...DIRV[dir]);
+if (tid != null) { const q = [...ents.values()].find((q) => q.e && q.e.id == tid); if (q) { const fx = Math.sign(q.x - p.x); face(p, fx, fx ? 0 : Math.sign(q.y - p.y)); } }
+}
+const of = (p) => (p.place && p.place.at === lastT ? p.place : (p.place = make(p, lastT)));
+const over = (p, S) => { const b = of(p); return [b.dx * S, b.dy * S - b.up * zoom]; };
+return {of, over, face, faceAction};
+})();
+;
 const BITES = 3, EAT_S = .9;
 function eatPose(k) {
 const t = k * BITES / EAT_S, n = Math.min(BITES - 1, Math.floor(t)), ph = Math.min(1, t - n);
@@ -3261,8 +3171,7 @@ let x = Math.round(sx(p.x));
 let y = Math.round(bodyY(p, sy));
 if (x < -S * 2 || x > W + S * 2 || y < -S * 2 || y > H + S * 2) return;
 const moving = now - p.moved < 300;
-const j = jumping(p, now);
-const cl = Climb.climbOf(p);
+const pl = BodyPlace.of(p), j = pl.jump, cl = pl.climb;
 if (cl) { x += Math.round(cl.dx * S); y += Math.round(cl.dy * S - cl.lift * z); }
 if (j && e.kind !== "agent") { jumpShadow(j, x, y, S, z, ANIMALS[e.kind] && ANIMALS[e.kind].fw === 32 ? 8 : 5); y -= Math.round(j.body * z); }
 if (e.kind === "agent") {
@@ -3277,8 +3186,6 @@ action = {tool: "attack", t0: p.swing.t0, with: p.swing.with};
 if (e.doing && !p.doingSince) p.doingSince = now;
 if (!e.doing) p.doingSince = 0;
 if (!mine) p.running = !!e.run;
-if (action && action.dir && DIRV[action.dir]) { [p.fx, p.fy] = DIRV[action.dir]; }
-if (action && action.tid != null) { const q = [...ents.values()].find((q) => q.e && q.e.id == action.tid); if (q) { p.fx = Math.sign(q.x - p.x); p.fy = p.fx ? 0 : Math.sign(q.y - p.y); } }
 const sheetImg = wornReady(agentTint(e.name), e.worn, e.race, e.bot); if (!sheetImg) return;
 let bob = j ? Math.round(j.body * z) : 0, anim = "idle", frame, lunge = 0, blow = null;
 const tool = action && action.tool, k = action ? (now - action.t0) / 1000 : 0;
@@ -3329,7 +3236,7 @@ vy: -.3 - Math.random() * .6, g: 9, floor: p.y + .85 - UP + Math.random() * .1, 
 bob = Math.round(Math.sin(Math.min(1, k * 5) * Math.PI) * 3) * z;
 }
 if (frame === undefined && cl && cl.on) {
-p.fx = cl.fx; p.fy = cl.fy; anim = "walk"; frame = Math.floor(cl.u * 24) % 8;
+anim = "walk"; frame = Math.floor(cl.u * 24) % 8;
 if (mine && frame % 4 === 0 && p.lastStep !== Math.floor(cl.u * 6)) { p.lastStep = Math.floor(cl.u * 6); sfx("tock"); }
 }
 if (frame === undefined) {
@@ -3342,7 +3249,7 @@ frame = Math.floor(now / ms) % 8;
 if (frame % 4 === 0 && p.lastStep !== Math.floor(now / ms) && !swimsAt(p, e) && !j) {
 p.lastStep = Math.floor(now / ms);
 if (running) kickDust(p); else burst(p.x, p.y + .35 - UP, "dust", 2, {up: .6, spread: 1.2, g: 2, life: .35});
-if (mine) sfx(Floors.rise(p) ? "tock" : STEP[gndAt(Math.round(p.x), Math.round(p.y))] || "step");
+{ const P = HdLevel.place, C = HdLevel.cover; if (mine && P) sfx(P.L > C.top ? "tock" : STEP[gndAt(P.tx, P.ty)] || "step"); }
 }
 } else {
 frame = Math.floor(now / 140 + e.id * 3) % 8;
@@ -3361,7 +3268,7 @@ ctx.drawImage(bed[0], bed[1], bed[2] + 14, 16, 18, px0, py0 + (bed[6] + 14) * z,
 return;
 }
 }
-if (swimsAt(p, e) && !(j && j.air)) { drawSwimmer(p, e, sheetImg, x, y, z, now, sx, sy); return; }
+if (pl.mode === "swim") { drawSwimmer(p, e, sheetImg, x, y, z, now, sx, sy); return; }
 p.swam = false;
 drawWake(p, now, sx, sy, z);
 if (e.sail) {
@@ -3416,8 +3323,8 @@ drawWild(p, x, y, now);
 }
 }
 function drawNameplate(p, sx, sy, S) {
-const e = p.e, o = overBody(p, S), x = Math.round(sx(p.x) + S / 2 + o[0]); let y = Math.round(bodyY(p, sy) + o[1] - 9 * zoom);
-{ const r = e.kind === "agent" && e.id === myId && typeof HdLook !== "undefined" && HdLook.live && !Build.on && HdLook.aim, nw = e.name.length * 6; if (r && x - nw < r.x + r.w && r.x < x + nw && y - 18 < r.y + r.h && r.y < y + 6) y = Math.round(r.y - 8); }
+const e = p.e, o = BodyPlace.over(p, S), x = onArt(sx(p.x) + S / 2 + o[0]); let y = onArt(bodyY(p, sy) + o[1] - 9 * zoom);
+{ const r = e.kind === "agent" && e.id === myId && typeof HdLook !== "undefined" && HdLook.live && !Build.on && HdLook.aim, nw = e.name.length * 6; if (r && x - nw < r.x + r.w && r.x < x + nw && y - 18 < r.y + r.h && r.y < y + 6) y = onArt(r.y - 8); }
 if (e.kind === "agent" && e.id === myId && ctx !== HdView.sink()) { const nw = opt("names") ? e.name.length * 5.5 + 2 : 0, top = y + 9 * zoom - Math.max(0, 12 - 3 * zoom);
 Prompts.keep = [{x: x - S / 2, y: top, w: S, h: S + Math.max(0, 12 - 3 * zoom) + 2 * zoom}, {x: x - nw, y: y - 18, w: 2 * nw, h: 24}]; }
 if (!opt("names")) return;
@@ -3430,13 +3337,12 @@ if (e.kind === "agent" && e.hp < HP_MAX) { ctx.fillStyle = "#5b3f36"; ctx.fillRe
 ctx.textAlign = "start";
 }
 const AMBLE = {chicken: 1.6, chick: 1.4, cow: 1.2, calf: 1.3, tusker: 1.2, pincer: 4, strawman: 1.2, wisp: 3.3, wyrm: 2.5, mossback: .9, sporeling: 2.2};
-const FLEE_STRIDE = .3;
 function drawProgress(sx, sy, S) {
 if (!progress || !me) return;
 const p = ents.get("agent" + myId); if (!p) return;
 const k = Math.min(1, (performance.now() - progress.t0) / progress.ms);
 if (k >= 1) { progress = null; return; }
-const o = overBody(p, S), x = Math.round(sx(p.x) + S / 2 - 18 + o[0]), y = Math.round(bodyY(p, sy) + o[1] + S + 2);
+const o = BodyPlace.over(p, S), x = onArt(sx(p.x) + S / 2 - 18 + o[0]), y = onArt(bodyY(p, sy) + o[1] + S + 2);
 ctx.fillStyle = "#5b3f36"; ctx.fillRect(x - 2, y - 2, 40, 9);
 ctx.fillStyle = "#e9cfa2"; ctx.fillRect(x, y, 36, 5);
 ctx.fillStyle = "#6aa66f"; ctx.fillRect(x, y, Math.round(36 * k), 5);
@@ -3582,10 +3488,11 @@ function sync(s) { const want = selected || null; if (s && (s.held || null) !== 
 return {art, draw, at, lift, sync};
 })();
 ;
-const BUBBLE = {q: 2, life: 7, after: 3.5, most: 3, wide: 400, lines: 7, pitch: 20, padX: 8, padY: 6, gap: 2, fall: 12, fade: .25,
+const BUBBLE = {q: 2, life: 7, after: 3.5, most: 3, wide: 400, lines: 7, pitch: 10, padX: 4, padY: 3, gap: 1, fall: 12, fade: .25,
 ink: "#5b3f36", paper: "#fff6e2", shout: "#ffe3a3", foot: "#ecd7b0", footShout: "#f2c877", shade: "rgba(60,40,30,.25)", edge: 16};
-function bubbleShape(b) {
-if (b.rows) return b;
+const bubbleQ = () => { const d = window.devicePixelRatio || 1; return Math.max(1, Math.round(BUBBLE.q * d)) / d; };
+function bubbleShape(b, q = bubbleQ()) {
+if (b.rows && b.q === q) return b;
 const words = b.text.trim().split(/\s+/), rows = [""];
 const fits = (s) => ctx.measureText(s).width <= BUBBLE.wide;
 for (let w of words) {
@@ -3601,14 +3508,14 @@ rows.length = BUBBLE.lines; let s = rows[BUBBLE.lines - 1];
 while (s && !fits(s + "…")) s = s.slice(0, -1);
 rows[BUBBLE.lines - 1] = s.trimEnd() + "…";
 }
-const q = BUBBLE.q, even = (v) => Math.ceil(v / q) * q;
-b.rows = rows; b.w = Math.max(even(Math.max(...rows.map((r) => ctx.measureText(r).width))) + 2 * BUBBLE.padX, even(ctx.measureText(b.name).width) + 12 * q);
-b.h = rows.length * BUBBLE.pitch + 2 * BUBBLE.padY - 4;
+const even = (v) => Math.ceil(v / q) * q;
+b.q = q; b.rows = rows; b.w = Math.max(even(Math.max(...rows.map((r) => ctx.measureText(r).width))) + 2 * BUBBLE.padX * q, 16 * q);
+b.h = (rows.length * BUBBLE.pitch + 2 * BUBBLE.padY - 2) * q;
 b.life = Math.max(BUBBLE.life, b.text.length * BABBLE.letter + BUBBLE.after);
 return b;
 }
 function bubbleBox(b, x, y, tx) {
-const q = BUBBLE.q, {w, h} = b, r = (c, X, Y, W_, H_) => { ctx.fillStyle = c; ctx.fillRect(X, Y, W_, H_); };
+const q = b.q, {w, h} = b, r = (c, X, Y, W_, H_) => { ctx.fillStyle = c; ctx.fillRect(X, Y, W_, H_); };
 const paper = b.shout ? BUBBLE.shout : BUBBLE.paper;
 r(BUBBLE.shade, x + q, y + h, w - 2 * q, q);
 r(BUBBLE.ink, x + q, y, w - 2 * q, h); r(BUBBLE.ink, x, y + q, w, h - 2 * q);
@@ -3621,8 +3528,9 @@ r(BUBBLE.ink, tx - 2 * q, y + h + q, 4 * q, q); r(b.shout ? BUBBLE.footShout : B
 r(BUBBLE.ink, tx - q, y + h + 2 * q, 2 * q, q);
 }
 }
-function bubbleTab(name, x, y, mine) {
-const q = BUBBLE.q, w = Math.ceil(ctx.measureText(name).width / q) * q + 6 * q, h = 11 * q;
+function bubbleTab(name, x, y, mine, q, bw) {
+const w = Math.ceil(ctx.measureText(name).width / q) * q + 6 * q, h = 11 * q;
+if (w + 6 * q > bw) x += Math.round((bw - w - 6 * q) / 2 / q) * q;
 ctx.fillStyle = BUBBLE.ink; ctx.fillRect(x + 3 * q, y - h, w, h); ctx.fillRect(x + 2 * q, y - h + q, w + 2 * q, h - q);
 ctx.fillStyle = mine ? "#fff1a8" : BUBBLE.paper; ctx.fillText(name, x + 6 * q, y - 2 * q);
 }
@@ -3632,9 +3540,9 @@ const underBubble = (x, y, w, h) => bubbleBoxes.some((o) => x < o.r && x + w > o
 function drawBubbles(sx, sy, S, t) {
 bubbleBoxes = [];
 if (!opt("bubbles")) { bubbles = []; bubbleT = t; return; }
-const dt = Math.min(.1, Math.max(0, t - bubbleT)), q = BUBBLE.q, snap = (v) => Math.round(v / q) * q; bubbleT = t;
-ctx.font = "18px SproutPixel"; ctx.textAlign = "left";
-bubbles = bubbles.filter((b) => t - b.t < bubbleShape(b).life);
+const dt = Math.min(.1, Math.max(0, t - bubbleT)), q = bubbleQ(), snap = (v) => Math.round(v / q) * q; bubbleT = t;
+ctx.font = 9 * q + "px SproutPixel"; ctx.textAlign = "left";
+bubbles = bubbles.filter((b) => t - b.t < bubbleShape(b, q).life);
 const by = new Map();
 for (const b of bubbles) { if (!by.has(b.name)) by.set(b.name, []); by.get(b.name).push(b); }
 const piles = [];
@@ -3644,9 +3552,9 @@ const p = [...ents.values()].find((e) => e.e && e.e.kind === "agent" && e.e.name
 let up = 0;
 for (const b of mine) {
 b.up = b.up === undefined || b.up < up ? up : Math.max(up, b.up - Math.max(q, (b.up - up) * dt * BUBBLE.fall));
-up += b.h + BUBBLE.gap;
+up += b.h + BUBBLE.gap * q;
 }
-const o = overBody(p, S), tx = snap(sx(p.x) + S / 2 + o[0]), foot = snap(bodyY(p, sy) + o[1] - (p.e.hp < HP_MAX ? 9 * zoom + 4 : 4 * zoom)) - 3 * q,
+const o = BodyPlace.over(p, S), tx = onArt(sx(p.x) + S / 2 + o[0]), foot = onArt(bodyY(p, sy) + o[1] - (p.e.hp < HP_MAX ? 9 * zoom + 4 : 4 * zoom)) - 3 * q,
 w = Math.max(...mine.map((b) => b.w));
 const top = foot - Math.max(...mine.map((b) => b.up + b.h)) - 11 * q, mid = bodyY(p, sy) + o[1] + S / 2;
 const hid = name !== me && HdLook.live && HdLook.hidden(p.x + .5, p.y + .5, p.e.z !== undefined ? p.e.z : floorAt(Math.round(p.x), Math.round(p.y)));
@@ -3656,7 +3564,7 @@ piles.push({mine, tx, foot, w, top, y: p.y, name, mid});
 piles.sort((a, b) => b.y - a.y);
 const placed = [];
 for (const pile of piles) {
-const x0 = (b) => Math.max(4, Math.min(W - 4 - b.w, snap(pile.tx - b.w / 2)));
+const x0 = (b) => Math.max(4, Math.min(W - 4 - b.w, pile.tx - onArt(b.w / 2)));
 for (let n = 0; n < 8; n++) {
 const l = Math.min(...pile.mine.map(x0)), hit = placed.find((o) => l < o.r + 4 && l + pile.w > o.l - 4 && pile.top < o.b + 4 && pile.foot + 3 * q > o.t - 4);
 if (!hit) break;
@@ -3673,9 +3581,9 @@ ctx.globalAlpha = Math.max(0, Math.min(1, (b.life - since) / BUBBLE.fade));
 bubbleBox(b, x, y, n ? null : Math.max(x + 5 * q, Math.min(x + b.w - 5 * q, pile.tx)));
 ctx.fillStyle = BUBBLE.ink;
 let left = written(b.text, since).length;
-b.rows.forEach((row, i) => { if (left > 0) ctx.fillText(row.slice(0, left), x + BUBBLE.padX, y + BUBBLE.padY + 14 + i * BUBBLE.pitch); left -= row.length + 1; });
+b.rows.forEach((row, i) => { if (left > 0) ctx.fillText(row.slice(0, left), x + BUBBLE.padX * q, y + (BUBBLE.padY + 7 + i * BUBBLE.pitch) * q); left -= row.length + 1; });
 b.at = [x, y];
-if (n === pile.mine.length - 1) { ctx.globalAlpha = pile.mine.length > 1 ? 1 : ctx.globalAlpha; bubbleTab(pile.name, x, y, me && pile.name === me); }
+if (n === pile.mine.length - 1) { ctx.globalAlpha = pile.mine.length > 1 ? 1 : ctx.globalAlpha; bubbleTab(pile.name, x, y, me && pile.name === me, q, b.w); }
 });
 }
 ctx.globalAlpha = 1; ctx.textAlign = "start";
@@ -3686,7 +3594,7 @@ const SHADE = {alpha: .3, night: 0, reach: 1.5, fall: .45, fire: 6};
 function hour() {
 const phase = (((clock.phase || 0) % 1) + 1) % 1, day = phase < .75;
 const a = day ? phase / .75 : (phase - .75) / .25;
-const tint = lightAt(phase), dark = Math.min(1, (1 - (.3 * tint[0] + .59 * tint[1] + .11 * tint[2]) / 255) / .36);
+const {dark} = Light.now();
 const much = opt("shadows") / 100, long = opt("shadowlen") / 100;
 return {dark, much, long, alpha: Math.min(.9, (SHADE.alpha + (SHADE.night - SHADE.alpha) * dark) * much), kx: (2 * a - 1) * SHADE.reach * long, ky: SHADE.fall * long};
 }
@@ -3804,18 +3712,18 @@ const VoxSky = (() => {
 const VS = `#version 300 es\nin vec2 p; void main() { gl_Position = vec4(p, .9998, 1.); }`;
 const FS = `#version 300 es
 precision highp float;
-uniform vec2 uRes; uniform float uPx, uK, uLine, uT, uShift, uStars, uAudit; uniform vec3 uTop, uLow, uCloud, uFar, uNear, uOrb, uAt; out vec4 o;
+uniform vec2 uRes; uniform float uPx, uK, uLine, uEdge, uT, uShift, uStars, uAudit; uniform vec3 uTop, uLow, uCloud, uFar, uNear, uOrb, uAt; out vec4 o;
 float hash(vec2 q) { return fract(sin(dot(q, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 q) { vec2 i = floor(q), f = fract(q); f = f * f * (3. - 2. * f);
   return mix(mix(hash(i), hash(i + vec2(1., 0.)), f.x), mix(hash(i + vec2(0., 1.)), hash(i + vec2(1., 1.)), f.x), f.y); }
 float ridge(float x, float seed, float f) { return noise(vec2(x * f + seed, seed)) * .6 + noise(vec2(x * f * 2.7 + seed, 3.)) * .28 + noise(vec2(x * f * 6.1, seed)) * .12; }
 void main() {
   vec2 a = floor(vec2(gl_FragCoord.x, uRes.y * uPx - gl_FragCoord.y) / uPx / uK);      // this px of the paint, from the picture's top left
-  float line = floor(uLine / uK), up = line - a.y, band = max(line, 8.), ax = a.x + floor(uShift);
+  float line = floor(uLine / uK), up = line - a.y, band = max(line, 8.), ax = a.x + floor(uShift), dn = max(line, floor(uEdge / uK)) - a.y;      // (dn: px over the land's edge)
   // (the far hills, the further ones and the clouds slide past as you go, each slower than the one before it, by whole px;
   // under the line, where no land is known: the nearer hills' own colour, not a pale band)
   float ax1 = a.x + floor(uShift * .6), axc = a.x + floor(uShift * .3);
-  if (up <= 0.) { o = vec4(uAudit > .5 && up < 0. ? vec3(1., 0., 1.) : mix(uNear, uLow, .18), 1.); return; }      // (the first px under the line is the hills' still: the land's last row is on the land's own px, up to half a px off the line)
+  if (dn <= 0.) { o = vec4(uAudit > .5 && dn < 0. ? vec3(1., 0., 1.) : mix(uNear, uLow, .18), 1.); return; }      // (the first px under the line is the hills' still: the land's last row is on the land's own px, up to half a px off the line)
   // the sky's colour: seven flat bands, the top of each checkered into the next
   float g = pow(clamp(up / band, 0., 1.), .7) * 6., i = mod(a.x, 2.) + mod(a.y, 2.) * 2., dither = i < .5 ? 0. : i < 1.5 ? .5 : i < 2.5 ? .75 : .25;
   vec3 c = mix(uLow, uTop, min(6., floor(g + dither * .5)) / 6.);
@@ -3831,9 +3739,9 @@ void main() {
   if (disc < r) c = uOrb;
   // far hills in two rows, the far one with snow on its heights
   float far = min(band, 36.), h1 = ridge(ax1, 11., .03), m1 = 2. + floor(far * .62 * h1), m2 = 1. + floor(far * .3 * ridge(ax, 47., .055));      // (as tall from a mountain, where the sky is wide, as from the plain)
-  if (up < m1) c = mix(uFar, uLow, up < m1 * .45 ? .4 : .16);
-  if (up < m1 && up > m1 - 3. && h1 > .56) c = mix(c, uCloud, .6);
-  if (up < m2) c = mix(uNear, uLow, .18);
+  if (dn < m1) c = mix(uFar, uLow, dn < m1 * .45 ? .4 : .16);
+  if (dn < m1 && dn > m1 - 3. && h1 > .56) c = mix(c, uCloud, .6);
+  if (dn < m2) c = mix(uNear, uLow, .18);
   o = vec4(c, 1.);
 }`;
 let prog = null, quad = null, bad = false, gen = 0;
@@ -3849,7 +3757,7 @@ gl.enableVertexAttribArray(prog.at("p")); gl.vertexAttribPointer(prog.at("p"), 2
 }
 const u = prog.u;
 gl.useProgram(prog.pr); gl.disable(gl.DEPTH_TEST); gl.depthMask(false);
-gl.uniform2f(u.uRes, w, h); gl.uniform1f(u.uPx, pw / w); gl.uniform1f(u.uK, k); gl.uniform1f(u.uLine, sky.line); gl.uniform1f(u.uT, sky.t % 3600); gl.uniform1f(u.uShift, sky.shift || 0);
+gl.uniform2f(u.uRes, w, h); gl.uniform1f(u.uPx, pw / w); gl.uniform1f(u.uK, k); gl.uniform1f(u.uLine, sky.line); gl.uniform1f(u.uEdge, sky.edge || sky.line);gl.uniform1f(u.uT, sky.t % 3600); gl.uniform1f(u.uShift, sky.shift || 0);
 gl.uniform1f(u.uStars, sky.stars || 0); gl.uniform1f(u.uAudit, sky.audit ? 1 : 0);
 for (const [name, v] of [["uTop", sky.top], ["uLow", sky.low], ["uCloud", sky.cloud], ["uFar", sky.far], ["uNear", sky.near], ["uOrb", sky.orb], ["uAt", sky.at]]) gl.uniform3f(u[name], v[0], v[1], v[2]);
 gl.bindVertexArray(quad.vao); gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -3877,15 +3785,20 @@ const PORT = "uniform vec4 pw; " +
 "bool sect(ivec2 P, int r) { ivec2 M = textureSize(mk, 0) - 1; for (int k = -1; k <= 1; k += 2) { ivec2 q = clamp(P + ivec2(k * r, 0), ivec2(0), M); if (texelFetch(mk, q, 0).rg != vec2(0.)) continue; for (int n = 1; n <= 48; n++) if (texelFetch(mk, max(q - ivec2(0, n), ivec2(0)), 0).rg != vec2(0.)) return true; } return false; } " +
 "float side(vec2 f) { ivec2 P = ivec2(f), M = textureSize(mk, 0) - 1; if (texelFetch(mk, P, 0).rg == vec2(0.)) return 0.; for (int r = 1; r <= 4; r++) if (texelFetch(mk, clamp(P + ivec2(r, 0), ivec2(0), M), 0).rg == vec2(0.) || texelFetch(mk, clamp(P - ivec2(r, 0), ivec2(0), M), 0).rg == vec2(0.)) return float(r); return 9.; }";
 const VS = `#version 300 es
-  in vec3 p; in vec2 uv; in vec4 a; in float e; uniform mat4 m; uniform vec3 ctr, go; uniform float bend; uniform sampler2D gw; out vec2 vu; out vec4 va, vs; out float ve; out vec3 wp; out highp float vw;
+  in vec3 p; in vec2 uv; in vec4 a; in float e; uniform mat4 m; uniform vec3 ctr, go; uniform float bend; uniform sampler2D gw; out vec2 vu; out vec4 va, vs; out float ve; out vec3 wp; out highp float vw; flat out highp float vo;
   ${SINK}
-  void main() { vec3 q = p; float dn = max(0., ctr.z - 1. - q.z); q.y -= bend * sink(dn); gl_Position = m * vec4(q, 1.); vw = gl_Position.w; vu = uv; va = a; ve = e; wp = p; vs = vec4(0.);
-    if (a.z > .5 && a.z < 1.5) { vec2 tl = floor(p.xz - step(8., mod(uv, 16.)) + .5) - go.xy; if (tl.x >= 0. && tl.y >= 0. && tl.x < go.z && tl.y < go.z) vs = texelFetch(gw, ivec2(tl), 0); } }`;
+  void main() { vec3 q = p; float dn = max(0., ctr.z - 1. - q.z); q.y -= bend * sink(dn); gl_Position = m * vec4(q, 1.); vw = gl_Position.w; vu = uv; vo = uv.y; va = a; ve = e; wp = p; vs = vec4(0.);
+    if ((a.z > .5 && a.z < 1.5) || a.z > 9.5) { vec2 tl = floor(p.xz - step(8., mod(uv, 16.)) + .5) - go.xy; if (tl.x >= 0. && tl.y >= 0. && tl.x < go.z && tl.y < go.z) vs = texelFetch(gw, ivec2(tl), 0); } }`;
 const FS = `#version 300 es
-  precision highp float; in vec2 vu; in vec4 va, vs; in float ve; in highp vec3 wp; in highp float vw; uniform sampler2D t, wt, mk; uniform vec3 lamp, eye, fogc, mc;
-  uniform vec4 cl, wv, wtn[5]; uniform float wa, dep, lr, day, amb, fn, ff, rim, rd, sun, shp, cd, xr; uniform vec3 sc, bd[4]; uniform vec4 sp; uniform float rf, rz, ho, cp, bh, bp; uniform vec3 em; out vec4 o;
+  precision highp float; in vec2 vu; in vec4 va, vs; in float ve; in highp vec3 wp; in highp float vw; flat in highp float vo; uniform sampler2D t, wt, mk; uniform vec3 lamp, eye, fogc, mc;
+  uniform vec4 cl, wv, wtn[5]; uniform float wa, dep, lr, day, amb, fn, ff, rim, rd, sun, shp, cd, xr; uniform vec3 sc, bd[4]; uniform vec4 sp; uniform float rf, rz, cp, bh, bp, ud; uniform vec3 em; out vec4 o;
   ${LVC}
   ${PORT}
+  // (a place of the land on the screen, in px, bent as the painter bends it (VS); is a px in a quad's four corners on the screen: water beside water, waterFaces)
+  uniform mat4 m; uniform vec3 ctr; uniform float bend; uniform vec2 vpx; ${SINK}
+  vec2 scr(vec3 q) { q.y -= bend * sink(max(0., ctr.z - 1. - q.z)); vec4 c = m * vec4(q, 1.); return (c.xy / c.w * .5 + .5) * vpx; }
+  float cr(vec2 a, vec2 b) { return a.x * b.y - a.y * b.x; }
+  bool inq(vec2 p, vec2 a, vec2 b, vec2 c, vec2 d) { float s1 = cr(b - a, p - a), s2 = cr(c - b, p - b), s3 = cr(d - c, p - c), s4 = cr(a - d, p - d); return (s1 >= 0. && s2 >= 0. && s3 >= 0. && s4 >= 0.) || (s1 <= 0. && s2 <= 0. && s3 <= 0. && s4 <= 0.); }
   // STRATA: a wall of your hole by its level under the land round it (rz): each level one flat tone, a step darker than the one over it (to .3), every second one a little darker still: levels can be counted, deep is dark
   float strat(float lv) { return max(.3, .92 - .08 * max(0., rz - lv)) * (mod(floor(lv + .5) + 1024., 2.) < .5 ? 1. : .9); }
   float bit(float v, float k) { return mod(floor(v / k), 2.); }
@@ -3922,8 +3835,7 @@ const FS = `#version 300 es
     bool cov = kind > 7.5 && kind < 8.5 && wp.z >= lamp.z + .3 && wp.y >= lamp.y - .55 && distance(gl_FragCoord.xy, mc.xy + vec2(0., 8.)) < mc.z + 2.;   // (a model's face south of you and over your feet, in the disc round your body)
     if (rd > .5 ? !cov || ck < 1. : cov) discard;   // (what covers you has a hole round you: you and what is behind it are drawn whole there, then (rd) one px in two of it again, 2x2: a checker disc on a roof, a wall, as on a tree (SF). It was the checker laid over you alone: you read as standing on the roof)
     vec2 tu = vu; if (kind < .5) { vec2 b0 = floor(vu / 16.) * 16., l0 = vu - b0; tu = max(length(gx), length(gy)) > 4. ? b0 + vec2(8.5, 15.5) : b0 + vec2(pick(l0.x, length(vec2(gx.x, gy.x))), LV0 + whole(l0.y - LV0, abs(gy.y))) + .5; }   // (a wall: its paint in whole art px; seen edge on (over 4 px of paint a px, its tiles and levels a px or less each): its seam's one dark tone, a side seen thin, as the pack draws one. It was a px of a different tile's paint each px: grey noise down a gorge's side)
-    vec4 c = texture(t, tu / ${AW}.); if (kind > 7.5 && (c.a < .5 || (kind > 8.5 && kind < 9.5 && ck < 1.))) discard; if (kind > 9.5) { float sa = c.a * 255., rm = sa < 200. && sa > 150. ? 1. : 0., fx = sa > 240. || sa < 176. ? 1. : sun; if (rm != shp || fx < .03 || (sj < -.5 && sj > -1.5 && sa < 240. && sa > 176. && bit(ve, 131072.) > .5)) discard; o = vec4(.2, .15, .3, .3 * fx * (1. - .45 * rm)); return; } bool raw = false; if (c.a < .5) { c = vec4(em, 1.); raw = kind < 1.5; }   // (raw: a paint that is not there (it cannot be now: vox_style.js slot): the land's mean colour, flat, never one earth brown; its px are marked (alpha) and counted: HdLook.raw, a test holds it at 0)   // (8: a model's face, host.models: a bridge's planks; its see-through px are holes; 9: a ghost of one, view.ghosts: one px in two; 10: a shadow on the ground, box.shade: a flat shade laid over the land; its paint's alpha says which: 255 a shade that is always there, 224 the sun's (as dark as sun), 192 the sun's soft rim, 160 a rim that is always there; shp: which are drawn now, 0 the full ones, 1 the rims)   // (the sun's (224, 192) is laid on what is seen through the window as on the land round it: the shadow is the world's, the cut is only for the eye (it was never laid there: under the open sky the opened strip was a lit patch in the plateau's shade);
-    // not on a SUNK top (ve 131072, vox_style_land.js: a shaft's floor, a trench's): in the window that is a floor of your space, lit as one under the land (the cliff's shade on a shaft's floor at a passage's end: a dark band across a level way)
+    vec4 c = texture(t, tu / ${AW}.); if (kind > 7.5 && (c.a < .5 || (kind > 8.5 && kind < 9.5 && ck < 1.))) discard; if (kind > 9.5) { float sa = c.a * 255., rm = sa < 200. && sa > 150. ? 1. : 0., fx = sa > 240. || sa < 176. ? 1. : sun; if (rm != shp || fx < .03 || (ud > .5 && fx < 1. && abs(mod(va.w + 1024., 256.) - vs.g * 255.) < .5 && vs.r > 0.)) discard; o = vec4(.2, .15, .3, .3 * fx * (1. - .45 * rm)); return; } bool raw = false; if (c.a < .5) { c = vec4(em, 1.); raw = kind < 1.5; }   // (raw: a paint that is not there (it cannot be now: vox_style.js slot): the land's mean colour, flat, never one earth brown; its px are marked (alpha) and counted: HdLook.raw, a test holds it at 0)   // (8: a model's face, host.models: a bridge's planks; its see-through px are holes; 9: a ghost of one, view.ghosts: one px in two; 10: a shadow on the ground, box.shade: a flat shade laid over the land; its paint's alpha says which: 255 a shade that is always there, 224 the sun's (as dark as sun), 192 the sun's soft rim, 160 a rim that is always there; shp: which are drawn now, 0 the full ones, 1 the rims)   // (the sun's (224, 192) is laid on what is seen through the window as on the land round it: the shadow is the world's, the cut is only for the eye (it was never laid there: under the open sky the opened strip was a lit patch in the plateau's shade);
     float d = distance(wp, lamp) / lr, lan = clamp(1.15 - d * d, 0., 1.), ls = floor(lan * 3. + .5) / 3.;
     float kx = floor(va.x * 20. + .05) / 20.;   // (a face's light and the shade of its corners: in whole steps; it ran smooth from corner to corner: a blurred halo on the ground round every block)
     float l = max(va.y * day, amb + (1. - amb) * lan) * kx;
@@ -3934,9 +3846,9 @@ const FS = `#version 300 es
       else if (wn > 10.5) col = mix(c.rgb * max(day * va.y, amb), vec3(1., .94, .78), .3);
       else { ivec2 P = ivec2(gl_FragCoord.xy), M = textureSize(mk, 0) - 1; int jt = 0; for (int n = 1; n <= 48; n++) if (jt == 0 && texelFetch(mk, min(P + ivec2(0, n), M), 0).ba == vec2(0.)) jt = n; if (jt == 0) jt = 48;   // (jt: rows down from the surface's line: cp of them a level)
         float dl = (float(jt) - 1.) / max(cp, .5); col = texelFetch(t, ivec2(bit(ve, 8388608.) > .5 ? sp.zw : sp.xy) + ivec2(int(mod(floor(gl_FragCoord.x), 16.)), int(LV0 + whole(fract(dl) * LV, LV / max(cp, .5)))), 0).rgb * strat(rz - floor(dl)); } o = vec4(col, 1.); return; }   // the section: the ground's own wall paint, stone or earth as its walls are painted (vox_style_land.js 8388608), level by level from the surface's line down to your ceiling, each level's rows and seam in whole art px, a step darker each level (strat); the land's own top px (grass, snow) as its first line, lit: the cut's lip. (It was the paint's rows run past each other, one tone a level, earth for any ground under level 5)
-    float sw = kind > .5 && kind < 1.5 && abs(mod(va.w + 1024., 256.) - vs.g * 255.) < .5 ? vs.r : 0.; bool snk = va.y > .5 && sw > 0. && bit(ve, 131072.) > .5;   // (snk: a sunk top under the sky that is of your space: a trench's floor, a dug stair's tread)
+    float sw = kind > .5 && kind < 1.5 && abs(mod(va.w + 1024., 256.) - vs.g * 255.) < .5 ? vs.r : 0.; float sk = va.y > .5 ? ud * sw : 0.;   // (UNDER THE LAND (ud: the land over you, eased by the host: hd_level.js place.roof) your lantern is the light of every floor of your space, under the sky or not: no sun's shade on them (kind 10, above), no corner shade. A shaft's floor at a passage's end was lit as the sky's: a dark band across a level way)
     if (kind < .5 && va.y < .5) col = bit(ve, 16.) > .5 ? mix(c.rgb, vec3(.8, .62, .43), .6) * (.95 + .15 * ls) : c.rgb * pit * kx + vec3(.03, .02, .01);   // a wall; the riser of a step you can take: the tread's tone, a wall is rock
-    else if (kind < 1.5 && kind > .5 && (va.y < .5 || snk)) {   // a floor under the land, open now. Of YOUR space (vs: how much, 0..1, eased by the painter: a floor that joins your space warms over 300 ms, one that leaves it cools): lit warm, one rule for a room's and a stair's, a lit lip at a step down, shade at a wall's foot.
+    else if (kind < 1.5 && kind > .5 && (va.y < .5 || sk > 0.)) {   // a floor under the land, open now (or of your space while you are under it: sk). Of YOUR space (vs: how much, 0..1, eased by the painter: a floor that joins your space warms over 300 ms, one that leaves it cools): lit warm, one rule for a room's and a stair's, a lit lip at a step down, shade at a wall's foot.
       // One you cannot walk to from here (a stair's treads over a dead end, a passage past a wall): as it is, at its own height, but cold: grey-blue, no warm light; its lips pale: never the warm lit floor of your space
       float w = sw, nk = va.y < .5 ? 1. : 0., dl = clamp(va.w - (lamp.y - .6) / H + .5, -4., 6.);
       float ue = nk < .5 ? 9. : min(min(mix(9., lu.y, bit(ve, 512.)), mix(9., 15. - lu.x, bit(ve, 1024.))), min(mix(9., 15. - lu.y + 4., bit(ve, 2048.)), mix(9., lu.x, bit(ve, 4096.))));
@@ -3945,18 +3857,20 @@ const FS = `#version 300 es
       vec3 cc = cold(c.rgb) * (1.15 - .5 * cd); cc *= foot(ue); if (lip) cc = mix(cc, vec3(.8, .88, 1.), .45);
       vec3 wc = c.rgb * vec3(1., .9, .7) * (.8 + .1 * (step(.3, lan) + step(.75, lan))) * (1. - .025 * clamp(rz - va.w, 0., 6.)) * (1. + .02 * clamp(dl, -2., 2.)) * (1. - .22 * vs.b);   // (the floor's own paint under the warm light, in three calm steps with distance from you: 5 tiles, 7, the rest; never over the paint's own tones: it was lit up to 1.3 times: a pale floor, stone, sand, was one flat yellow, its texture gone; a floor is darker each level under the land round your hole, six steps of it: down a stair the top treads are light, the bottom ones dark: "down" is read; and a little by its level against yours; vs.b: one you can only drop to: dimmer)
       wc *= foot(ue); if (lip) wc = mix(wc, vec3(1., .93, .75), .5); if (rs < 2.) wc *= .5;   // (the foot of a wall you cannot climb: a dark rim 2 px wide, then its shade 2 px out on your floor (it was 3 and 4: in a passage one tile wide the two walls' feet left two lit rows of sixteen: a thin cream line under a slab of wall); a step up you can take: a dark line at its foot (rs); a step down: the light lip)
-      col = mix(snk ? col : cc, wc, w); if (de < 2.) col *= .42;
+      col = va.y > .5 ? mix(col, wc, sk) : mix(cc, wc, w); if (de < 2.) col *= .42;
     } else if (kind < 1.5 && kind > .5 && rim > 0.) {            // a top at a drop: its lip catches the light
       if (bit(ve, 4.) > .5 && lu.y > 15.) col = mix(col, vec3(1., .94, .78), rim * .7);
       if (bit(ve, 1.) > .5 && lu.y < 1.) col *= 1. - rim * .5;
       float dn = min(mix(9., lu.y, bit(ve, 64.)), mix(9., 15. - lu.y, bit(ve, 2048.))), dr = min(dn, min(mix(9., 15. - lu.x, bit(ve, 128.)), mix(9., lu.x, bit(ve, 256.))));
       if (dr < 2.) col = c.rgb * l * (dr < 1. || dn < 2. ? .5 : .68);   // (a north or south edge: its two px one tone: the eye looks along them, the two are one px of the picture or little more, and which of the two tones it took hung on a fraction of a level of the eye's height: the rim flickered as the eye rose) (the edge over a drop that hurts, three levels or more: a dark rim two px wide all along it, no light lip: a step down has the lip, a cliff has the rim. A fall of 12 looked like the next terrace)
     } else if (kind < .5 && va.y > .5) col *= 1. - .1 * (bit(ve, 64.) + 2. * bit(ve, 128.));   // (and the cliff's face darker every two levels down)
-    if (kind > .5 && kind < 1.5 && va.y > .5 && bit(ve, 262144.) > .5) { vec2 q = floor(lu); float dE = bit(ve, 524288.) > .5 ? 15. - q.x : 99., dW = bit(ve, 1048576.) > .5 ? q.x : 99., dS = bit(ve, 2097152.) > .5 ? 15. - q.y : 99., dN = bit(ve, 4194304.) > .5 ? q.y : 99.;
-      float ax = clamp(1. - min(dE, dW) / 7., 0., 1.), ay = clamp(1. - min(dS, dN) / 7., 0., 1.), a = max(ax, ay) + .5 * min(ax, ay); ivec2 b2 = ivec2(q) & 1;
-      float nr = floor(clamp(2.5 - distance(wp.xz, lamp.xz), 0., 1.) * 3. + .5) / 3.; col *= mix(.7 + .3 * nr, 1., snk ? sw : 0.) * (1. - .1 * min(3., floor(a * 3. + .5))); }   // (a sunk floor of your space, lit as one under the land, is not the step darker: a shaft's floor at a passage's end was, a step that is not there; its walls' feet keep their shade) (a floor in a hole under the sky (vox_style_land.js 262144: a pit's, a trench's, a shaft's): its walls take some of the sky from it, a step darker than the ground round it, by day and by night, less by you, in its own steps out to 2.5 tiles (it was cut at 1.5 tiles from you: an arc of steps; then it was the lantern's whole pool, and by day a pit five tiles off was as light as the meadow, .88 of it; with no corner shade per tile .78 left it at .8: .7); and the foot of each of its walls in shade, 7 px out, in three solid steps (a 2x2 dither once: a checker; the corners' shade, per tile, was nested flat squares). Its pale dug earth was lighter than the grass: at night the holes glowed lavender)
     if (kind > 2.5 && kind < 3.5) {                              // water: the game's own picture of it over a tint (the picture is the clear water, its bed showing: only a little of it over the sea tint)
-      vec2 w = (vec2(wp.x, wp.z) * 16. - wv.xy) / wv.zw; vec4 wc = wv.z > 0. && w == clamp(w, 0., 1.) ? texture(wt, w) : vec4(0.);   // (past the picture's edge: none of it. Clamped, its edge row was stretched over the far water: thin vertical lines)
+      if (vu.x > .5 && (vu.x < 1.5 ? eye.z < wp.z : vu.x < 2.5 ? eye.x < wp.x : eye.x > wp.x)) discard;   // (a side of the water (vox_style_land.js waterFaces: vu.x 1 south, 2 east, 3 west) turned from the eye: it lay over its own top, two tints)
+      if (vu.x < .5 && vo > .5) { float q = floor(vo + .5); vec2 tl = floor(wp.xz);   // (a top whose near part is seen through higher water beside it, south, east, west, south-east or south-west (vo, its uv's v: by how much, eighths, 5 and 4 bits each): the px that water's own top covers on the screen (its corners put where the painter puts them) are that water's, left out here)
+        for (int i = 0; i < 5; i++) { float s = i == 0 ? mod(q, 32.) : i == 1 ? mod(floor(q / 32.), 32.) : i == 2 ? mod(floor(q / 1024.), 32.) : i == 3 ? mod(floor(q / 32768.), 16.) : floor(q / 524288.); if (s < .5) continue;   // (south, east, west, south-east, south-west)
+          vec2 nq = tl + (i == 0 ? vec2(0., 1.) : i == 1 ? vec2(1., 0.) : i == 2 ? vec2(-1., 0.) : i == 3 ? vec2(1., 1.) : vec2(-1., 1.)); float h = wp.y + s / 8. * H;
+          if (inq(gl_FragCoord.xy, scr(vec3(nq.x, h, nq.y)), scr(vec3(nq.x + 1., h, nq.y)), scr(vec3(nq.x + 1., h, nq.y + 1.)), scr(vec3(nq.x, h, nq.y + 1.)))) discard; } }
+      vec2 w = (vec2(wp.x, wp.z) * 16. - wv.xy) / wv.zw; vec4 wc = vu.x < .5 && wv.z > 0. && w == clamp(w, 0., 1.) ? texture(wt, w) : vec4(0.);   // (past the picture's edge: none of it. Clamped, its edge row was stretched over the far water: thin vertical lines. A side has none: the picture is of the face, a side took one row of it down its height)
       vec3 sea = vec3(.36, .64, .8) * max(l, .6);
       col = mix(sea, wc.rgb, wc.a * .3);
       if (wtn[4].a > .5) { vec4 tn = wtn[int(clamp(ve, 0., 4.))]; col = mix(tn.rgb * max(l, .6), wc.rgb, wc.a * .45); o = vec4(mix(col, fogc, smoothstep(fn, ff, distance(wp, eye)) * .4), max(tn.a, wc.a * .45)); return; }   // (light.wtint: clear water: a tint and how much of it for water 0..4 levels deep (ve), the bed showing through; the game's picture of the water, its waves and glints, over it)
@@ -3971,11 +3885,9 @@ const FS = `#version 300 es
       col = pale ? col * (sj < -2.5 ? .78 : .62) : sj < -2.5 ? col : mix(col, vec3(1., .94, .78), .4); }
     // what is seen through the window, by how deep it lies under the land round the hole (D, levels): a floor dimmer past 2.5 and 4.5 tiles from you; a wall darker every two levels, a line every four. (A floor was also shaded along the north and west edges of the window's mask, not of any wall: where the window ended over a level floor, a passage going on north, a dark band lay across it: "is it up or down?" A floor's shade is the walls' own now: their foot (ue) and a hole's (AO, below))
     if (sj < -.5 && sj > -1.5 && !(kind < .5 && dep < .5)) { float D = clamp(rz - wp.y / H, 0., 16.);   // (a floor: one under the land, or sunk in it. The plain ground before a tunnel's mouth is neither: seen through the window's first box under the sky it took the hole's shade, counted from the hill's top: a dark line on the grass beside the hill, at the ceiling's height)
-      if (kind > .5 && kind < 1.5 && D > .5 && (va.y < .5 || snk)) {
+      if (kind > .5 && kind < 1.5 && D > .5 && (va.y < .5 || sk > 0.)) {
         float pd = distance(wp.xz, lamp.xz); col *= 1. - .25 * clamp((D - 3.) / 9., 0., 1.) * (pd < 2.5 ? 0. : pd < 4.5 ? .5 : 1.); }
       else if (kind < .5) col = c.rgb * strat(ceil(wp.y / H - .01)); }
-    else if (ho > 0. && kind < .5 && va.y > .5 && wp.y / H < rz + .01 && distance(wp.xz, lamp.xz) < 6.) { float lv = ceil(wp.y / H - .01), t = max(0., rz - lv + 1.), S = max(0., rz - floor((lamp.y - .6) / H + .5));
-      col = mix(col, c.rgb * max(.4, l * strat(lv) * (1. - .6 * min(1., t / max(S, 2.)))) * (fract(wp.y / H + .001) < .3 ? .75 : 1.), ho); }   // (a level a step, evenly over the hole's depth, down to .4 of the stone's or earth's own paint, the light's dim counted in, its own paint and its seams kept: never black. It went to .04, a seam .6 of that: from 58 degrees a shaft 6 deep was a tall black column, "black slabs")   // (the walls of an open hole you stand in, a shaft, a pit: the same strata, as the eye tips over it; and DARKER THE DEEPER THE HOLE (S: its depth under its rim, t: this level's): you stand at its rim's line and hide its inside, so its walls tell it: 2 deep a light brown, 6 near black from its third level down, 12 black under its first; a thin dark line at the foot of each level: the strata counted)
     if (vl > .5) col = c.rgb * max(day * va.y, amb);
     if (pw.x > .5 && pw.x < 1.5 && xr > .5 && (sj == 0. || sj < -2.5) && wn < .5 && kind < 1.5 && kept(gl_FragCoord.xy, vw)) col = vec3(.44, .275, .227) * clamp(max(day, amb + (1. - amb) * lan), .8, 1.);   // A: the kept land's last px at a cut's side, the land's brown (112, 70, 58)
     o = vec4(mix(col, fogc, .55 * smoothstep(fn, ff, distance(wp, eye))), bp > .5 ? fa : raw ? .97 : 1.);   // (the haze tints the far land, never more than half: it took it whole to the haze's one colour, the far land's px gone: pale flat slabs)
@@ -4069,14 +3981,14 @@ const slot = (k, paint) => { const s = P.slot(k, paint); if (into && P.mk) into.
 const lim = (z) => Math.max(cfg.levels[0], Math.min(cfg.levels[1], z)), ck = (x, y) => Math.floor(x / CH) + "," + Math.floor(y / CH);
 const paintOf = new WeakMap(), QC = new Float64Array(12);
 const sheet = () => { if (!msh) { const q = host.modelSheet(); msh = q.px ? q : {px: new Uint32Array(q.getContext("2d").getImageData(0, 0, q.width, q.height).data.buffer), w: q.width}; } return msh; };
-const model = (x, y, b, dst, se = 0) => { const X = x + b.x / C, Y = y + b.y / C, X1 = X + b.w / C, Y1 = Y + b.d / C, Z0 = b.z / cfg.up, Z1 = (b.z + b.h) / cfg.up, Zn = Z1 + (b.tilt ? b.tilt[0] / cfg.up : 0), Zs = Z1 + (b.tilt ? b.tilt[1] / cfg.up : 0);
+const model = (x, y, b, dst) => { const X = x + b.x / C, Y = y + b.y / C, X1 = X + b.w / C, Y1 = Y + b.d / C, Z0 = b.z / cfg.up, Z1 = (b.z + b.h) / cfg.up, Zn = Z1 + (b.tilt ? b.tilt[0] / cfg.up : 0), Zs = Z1 + (b.tilt ? b.tilt[1] / cfg.up : 0);
 const face = (uv, w, h, k) => { if (!uv) return; w = Math.min(C, w); h = Math.min(C, h); const wi = b.win ? b.win[0] : 0, wj = b.win ? b.win[1] : 0, ins = b.shade ? .02 : 0, pw = b.win ? C : w, ph = b.win ? C : h, id = b.sheet ? b.sheet.id : "";
 const ob = typeof uv === "object"; let pk = ob ? paintOf.get(uv) : null; if (!pk || pk.id !== id || pk.pw !== pw || pk.ph !== ph) { const ms = b.sheet; pk = {id, pw, ph, k: "m" + id + uv + "," + pw + "," + ph, paint: (px, at, st) => { const m = ms || sheet(); for (let j = 0; j < ph; j++) for (let i = 0; i < pw; i++) px[at + j * st + i] = m.px[(uv[2] ? uv[1] : uv[1] + j) * m.w + (uv[2] ? uv[0] : uv[0] + i)]; }}; if (ob) paintOf.set(uv, pk); }
 const sl = slot(pk.k, pk.paint), u0 = (sl % SL) * C + wi, v0 = (sl / SL | 0) * C + wj, kind = b.shade ? 10 : b.ghost ? 9 : 8;
-for (let t = 0; t < 6; t++) { const n = TRI[t], o = n * 3; emit(dst, QC[o], QC[o + 2] * H, QC[o + 1], u0 + (n === 0 || n === 3 ? ins : w - ins), v0 + (n < 2 ? ins : h - ins), k, 1, kind, Z1, b.shade ? se : 0); } };
+for (let t = 0; t < 6; t++) { const n = TRI[t], o = n * 3; emit(dst, QC[o], QC[o + 2] * H, QC[o + 1], u0 + (n === 0 || n === 3 ? ins : w - ins), v0 + (n < 2 ? ins : h - ins), k, 1, kind, Z1, 0); } };
 const cq = (a, b2, c, d, e, f, g, h, i, j, k, l) => { QC[0] = a; QC[1] = b2; QC[2] = c; QC[3] = d; QC[4] = e; QC[5] = f; QC[6] = g; QC[7] = h; QC[8] = i; QC[9] = j; QC[10] = k; QC[11] = l; };
-cq(X, Y, Zn, X1, Y, Zn, X1, Y1, Zs, X, Y1, Zs); face(b.top, b.w, b.d, b.k || 1); const fh = b.fh || b.h; if (b.h) { cq(X, Y1, Zs, X1, Y1, Zs, X1, Y1, Z0, X, Y1, Z0); face(b.front, b.w, fh, .85);
-cq(X, Y, Zn, X, Y1, Zs, X, Y1, Z0, X, Y, Z0); face(b.west, b.d, fh, .68); cq(X1, Y1, Zs, X1, Y, Zn, X1, Y, Z0, X1, Y1, Z0); face(b.east, b.d, fh, .74); } };
+cq(X, Y, Zn, X1, Y, Zn, X1, Y1, Zs, X, Y1, Zs); face(b.top, b.w, b.d, b.k || 1); const fh = b.fh || b.h; if (b.h) { cq(X, Y1, Zs, X1, Y1, Zs, X1, Y1, Z0, X, Y1, Z0); face(b.front, b.w, fh, FACES[2].k);
+cq(X, Y, Zn, X, Y1, Zs, X, Y1, Z0, X, Y, Z0); face(b.west, b.d, fh, FACES[5].k); cq(X1, Y1, Zs, X1, Y, Zn, X1, Y, Z0, X1, Y1, Z0); face(b.east, b.d, fh, FACES[4].k); } };
 const tones = new Map(), tmp = new Uint32Array(C * C);
 const tone = (lv) => { let v = tones.get(lv); if (v === undefined) { host.paintFront(lv, 0, tmp, 0, C); const n = new Map(); for (let i = 0; i < C * cfg.up; i++) n.set(tmp[i], (n.get(tmp[i]) || 0) + 1); v = [...n].sort((a, b) => b[1] - a[1])[0][0]; tones.set(lv, v); } return v; };
 function topPaint(x, y, z, px, at, st) { host.paintTop(x, y, z, px, at, st); if (!host.paintFront) return; let v = 0;
@@ -4092,12 +4004,26 @@ for (let y = y0 - 1; y <= y1 + 1; y++) for (let x = x0 - 1; x <= x1 + 1; x++) { 
 for (let by = Math.floor((y0 - 6) / CH); by <= Math.floor((y1 + 6) / CH); by++) for (let bx = Math.floor((x0 - 6) / CH); bx <= Math.floor((x1 + 6) / CH); bx++) { const k = bx + "," + by; store.delete(k); if (making) late.add(k); }
 stamp++; farDirty.push([x0, y0, x1, y1]);
 }
-function wet(x, y) { const k = ck(x, y); store.delete(k); if (making) late.add(k); stamp++; }
-const wq = (dst, q, lv, e) => { for (const t of TRI) { const p = q[t]; emit(dst, p[0], p[2] * H, p[1], 0, 0, 1, 1, 3, lv, e); } };
-function flowFaces(dst, x, y, fw, solidAt) { let n = 0;
-for (const [z, v] of fw) { const full = fw.has(z + 1), top = z - 1 + (full ? 1 : v / 8); let d = 0; while (fw.has(z - d)) d++; const e = !full && v <= 2 ? 0 : Math.min(2, d);
-if (!full) { wq(dst, [[x, y, top], [x + 1, y, top], [x + 1, y + 1, top], [x, y + 1, top]], z, e); n++; }
-if (!solidAt(x, y + 1, z)) { const s = host.flow(x, y + 1), sv = s ? s.get(z) || 0 : 0, st = sv ? z - 1 + (s.has(z + 1) ? 1 : sv / 8) : z - 1; if (st < top - .01) { wq(dst, [[x, y + 1, top], [x + 1, y + 1, top], [x + 1, y + 1, st], [x, y + 1, st]], z, e); n++; } } }
+function wet(x, y) { for (const k of new Set([[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => ck(x + dx, y + dy)))) { store.delete(k); if (making) late.add(k); } stamp++; }
+const wq = (dst, q, lv, e, s = 0, oc = 0) => { for (const t of TRI) { const p = q[t]; emit(dst, p[0], p[2] * H, p[1], s, oc, 1, 1, 3, lv, e); } };
+const SIDES = [[0, 1, 1, (x, y, a, b) => [[x, y + 1, a], [x + 1, y + 1, a], [x + 1, y + 1, b], [x, y + 1, b]]], [1, 0, 2, (x, y, a, b) => [[x + 1, y + 1, a], [x + 1, y, a], [x + 1, y, b], [x + 1, y + 1, b]]], [-1, 0, 3, (x, y, a, b) => [[x, y, a], [x, y + 1, a], [x, y + 1, b], [x, y, b]]]];
+const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+function wetOf(x, y, col) {
+const fw = host.flow && host.flow(x, y), still = host.water && host.water(x, y); if (!fw && !still) return null; const w = new Map(fw || []);
+if (still) { const wz = host.waterTop ? host.waterTop(x, y) : 0, c = col(x, y), bt = c && c.length ? c[c.length - 1] : wz - 1; let hi = wz; for (const z of w.keys()) if (z > hi) hi = z;
+for (let z = Math.min(wz, Math.max(bt + 1, wz - 8)); z <= wz; z++) w.set(z, 8);
+for (let z = wz + 1; z < wz + 64; z++) { if (w.has(z)) continue; if (z < hi || N4.some(([dx, dy]) => { const n = host.flow && host.flow(x + dx, y + dy); return n && n.get(z) === 8; })) w.set(z, 8); else break; } }
+return w; }
+const surf = (w, z) => { while (w.has(z + 1)) z++; return z - 1 + w.get(z) / 8; };
+function waterFaces(dst, x, y, col, solidAt, fromZ) { const w = wetOf(x, y, col); if (!w) return 0; let n = 0; const still = host.water && host.water(x, y), oc0 = still ? col(x, y) : null, own = still && oc0 && oc0.length ? (host.waterTop ? host.waterTop(x, y) : 0) - oc0[oc0.length - 1] : 0, runs = !!host.flow && (!!host.flow(x, y) || N4.some(([dx, dy]) => host.flow(x + dx, y + dy))),
+nb = SIDES.map(([dx, dy]) => (runs ? wetOf(x + dx, y + dy, col) : null)), nd = runs ? [wetOf(x + 1, y + 1, col), wetOf(x - 1, y + 1, col)] : [null, null];
+for (const [z, v] of w) { if (z < fromZ) continue; const full = w.has(z + 1), top = z - 1 + (full ? 1 : v / 8); let f = z; while (w.has(f - 1)) f--; const e = Math.max(1, Math.min(top - (f - 1), still ? Math.max(3, own) : 2));
+if (!full) { let oc = 0; [...nb, ...nd].forEach((o, i) => { if (!o) return; let c = z; if (!o.has(c)) { c = [...o.keys()].filter((k) => k > z).sort((a, b) => a - b)[0]; if (c === undefined) return; }
+oc += Math.max(0, Math.min(i < 3 ? 31 : 15, Math.round((surf(o, c) - top) * 8))) * (i < 3 ? 32 ** i : 32768 * 16 ** (i - 3)); });
+wq(dst, [[x, y, top], [x + 1, y, top], [x + 1, y + 1, top], [x, y + 1, top]], z + 1, e, 0, oc); n++; }
+SIDES.forEach(([dx, dy, s, q], i) => { const X = x + dx, Y = y + dy; if (solidAt(X, Y, z) || (still && !(host.flow && host.flow(X, Y)))) return;
+const o = nb[i], ov = o && o.get(z), b = Math.max(z - 1, ov ? (o.has(z + 1) ? z : z - 1 + ov / 8) : z - 1);
+if (b < top - .01) { wq(dst, q(x, y, top, b), z + 1, e, s); n++; } }); }
 return n; }
 const farForget = () => { for (const [x0, y0, x1, y1] of farDirty) for (let by = Math.floor((y0 - 16) / CH); by <= Math.floor((y1 + 7) / CH); by++) for (let bx = Math.floor((x0 - 16) / CH); bx <= Math.floor((x1 + 7) / CH); bx++) { const m = farOf.get(bx + "," + by); if (m) { farN -= m.size; farOf.delete(bx + "," + by); } } farDirty.length = 0; };
 const farClear = () => { farOf.clear(); farDirty.length = 0; farN = 0; };
@@ -4110,7 +4036,7 @@ function quad(out, x, y, z, F, k, sky, kind, lv, e, s, solid, isTop) {
 const u0 = (s % SL) * C, v0 = (s / SL | 0) * C, top = isTop ? 0 : C - cfg.up, I = .01, A = AOV[FACES.indexOf(F)], ox = x + F.n[0], oy = y + F.n[1], oz = z + 1 + F.n[2];
 for (let i = 0; i < 4; i++) {
 const q = F.q[i], o = i * 10; let ao = 1;
-if (solid && !(isTop && sky && e & 262144)) { const [a, b, c] = A[i], s1 = +solid(ox + a[0], oy + a[1], oz + a[2]), s2 = +solid(ox + b[0], oy + b[1], oz + b[2]), cc = +solid(ox + c[0], oy + c[1], oz + c[2]); ao = AOK[s1 && s2 ? 3 : s1 + s2 + cc]; }
+if (solid) { const [a, b, c] = A[i], s1 = +solid(ox + a[0], oy + a[1], oz + a[2]), s2 = +solid(ox + b[0], oy + b[1], oz + b[2]), cc = +solid(ox + c[0], oy + c[1], oz + c[2]); ao = AOK[s1 && s2 ? 3 : s1 + s2 + cc]; }
 vq[o] = x + q[0]; vq[o + 1] = (z + q[2]) * H; vq[o + 2] = y + q[1]; vq[o + 3] = u0 + (i === 0 || i === 3 ? I : C - I); vq[o + 4] = v0 + (i < 2 ? top + I : C - I); vq[o + 5] = k * ao; vq[o + 6] = sky; vq[o + 7] = kind; vq[o + 8] = lv; vq[o + 9] = e;
 }
 if (!sky) { const m = (vq[5] + vq[15] + vq[25] + vq[35]) / 4; vq[5] = vq[15] = vq[25] = vq[35] = m; }
@@ -4129,7 +4055,7 @@ const floorOf = (x0, y0, x, y, f0) => { const c = col(x, y); if (!c || !c.length
 if (solidC(c, f0 + 1)) return hop(x0, y0, x, y, f0) || (host.water && host.water(x0, y0) && !solidC(c, f0 + 2)) ? f0 + 1 : null; for (let dz = 0; dz <= 8; dz++) if (solidC(c, f0 - dz)) return f0 - dz + (dz > 1 ? .5 : 0); return null; };
 const inTo = (x0, y0, x, y, f) => { if (host.water && host.water(x, y)) return null; const g = floorOf(x0, y0, x, y, f); return g !== null && g % 1 === 0 && topOf(x, y) > g + 1 ? g : null; };
 const mouth = (ox, oy, f, mx, my) => { if (host.water && host.water(ox, oy)) return false; const g = inTo(ox, oy, mx, my, f); return g !== null && inTo(mx, my, 2 * mx - ox, 2 * my - oy, g) !== null; };
-const mouths = (x, y, z) => { let m = 0; for (let d = 0; d < 4; d++) { const X = x + MD[d][0], Y = y + MD[d][1], t = topOf(X, Y); if (t > z + 1 && mouth(x, y, z, X, Y)) m |= 1 << d; else if (d !== 2 && t < z - 1 && !sunkAt(X, Y, t) && mouth(X, Y, t, x, y)) m |= 16 << d; } return m; };
+const mouths = (x, y, z) => { let m = 0; for (let d = 0; d < 4; d++) { const X = x + MD[d][0], Y = y + MD[d][1], t = topOf(X, Y); if (t > z + 1 && mouth(x, y, z, X, Y)) m |= 1 << d; else if (d !== 2 && t < z - 1 && !walled(X, Y, t) && mouth(X, Y, t, x, y)) m |= 16 << d; } return m; };
 const upsOf = (x0, y0, x, y, f0) => { const c = col(x, y), l = []; if (c) for (let j = 0; j < c.length; j += 2) { const f = c[j]; if (f > f0 && f <= f0 + 8) { const g = floorOf(x, y, x0, y0, f); if (g !== null && Math.floor(g) === f0) l.push(f); } } return l; };
 if (pt) { let L0 = L; const c0 = col(cx, cy); if (c0 && !(host.water && host.water(cx, cy))) for (let n = 0; n < 8 && !solidC(c0, L0); n++) L0--;
 const i0 = at(cx, cy), lim = pt.reach, nodes = [[cx, cy, L0, 0]], seenN = new Set([i0 * 2048 + L0 + 1024]); reachA[i0] = L0; clsA[i0] = 1; nearA[i0] = 1; reached.push(i0);
@@ -4148,8 +4074,7 @@ if (pt && !pt.walk) { const own = new Set(win.map((t) => t[0] + "," + t[1])); le
 for (let d = 0; d < 3 && fr.length; d++) { const nx = []; for (const [x, y, lo, hi] of fr) for (const [dx, dy] of DIR) { const X = x + dx, Y = y + dy, k = X + "," + Y, c = own.has(k) || !inBox(X, Y) ? null : col(X, Y); if (!c) continue;
 for (let j = 0; j + 2 < c.length; j += 2) if (c[j] >= lo - 4 && c[j] <= hi + 6) { own.add(k); const t = [X, Y, c[j], Math.min(c[j] + 6, c[j + 1])]; win.push(t); nx.push(t); break; } } fr = nx; } }
 const solidIn = (x, y, z) => { const c = col(x, y); if (!inBox(x, y)) return solidC(c, z); if (z <= L - deep) return true; return solidC(c, z); };
-const narrow = (x, y) => { const t = topOf(x, y), up = (dx, dy) => { for (let d = 1; d <= 3; d++) if (topOf(x + dx * d, y + dy * d) > t) return true; return false; }; return (up(1, 0) && up(-1, 0)) || (up(0, 1) && up(0, -1)); };
-const sunkAt = (x, y, z) => { const wl = DIR.map(([dx, dy]) => +solidIn(x + dx, y + dy, z + 1)); return (wl[0] && wl[1]) || (wl[2] && wl[3]) || wl[0] + wl[1] + wl[2] + wl[3] >= 3; };
+const walled = (x, y, z) => { const wl = DIR.map(([dx, dy]) => +solidIn(x + dx, y + dy, z + 1)); return (wl[0] && wl[1]) || (wl[2] && wl[3]) || wl[0] + wl[1] + wl[2] + wl[3] >= 3; };
 const front = (x, y, z, top, two) => { const lv = lim(VoxMesh.rock(cfg, top, z, !host.rock || host.rock(x, y))), v = VoxMesh.pick(x, y, z, cfg.variants), b = host.built && host.built(x, y) ? 1 : 0; return slot((two ? "F" : "f") + lv + "," + v + (b ? "b" : ""), (px, at, st) => { host.paintFront(lv, v, px, at + (C - cfg.up) * st, st, b); if (two) host.paintFront(lv, v, px, at, st, b); }); };
 const rx = Math.min(r, o.rx || r), X0 = cx - rx, X1 = cx + rx, Y0 = cy - r, Y1 = cy + Math.min(r, o.rs || r);
 const good = (ch, bx, by) => !!ch && ch.mk === (host.chunkKey ? host.chunkKey(bx * CH, by * CH, CH) : "") && (ch.low ? ch.L === L : ch.lo - 1 > L - deep);
@@ -4162,14 +4087,12 @@ const F = FACES[f], nx = x + F.n[0], ny = y + F.n[1], nz = z + F.n[2];
 if (f === 1 || solidIn(nx, ny, nz)) continue;
 const nc = col(nx, ny); let sky = (f === 0 ? z >= open : !nc || z > nc[nc.length - 1]) ? 1 : 0, s, kind = f === 0 ? 1 : 0, e = 0;
 if (f === 0) {
-const sunk = sky && sunkAt(x, y, z), mo = sky && !sunk ? mouths(x, y, z) : 0; s = topSlot(x, y, z, (px, at, st) => { topPaint(x, y, z, px, at, st); if (mo) mouthShade(px, at, st, mo); }, mo);
+const mo = sky && !walled(x, y, z) ? mouths(x, y, z) : 0; s = topSlot(x, y, z, (px, at, st) => { topPaint(x, y, z, px, at, st); if (mo) mouthShade(px, at, st, mo); }, mo);
 { [[0, -1, 1], [1, 0, 2], [0, 1, 4], [-1, 0, 8]].forEach(([dx, dy, b]) => { if (!solidIn(x + dx, y + dy, z) && (sky || solidIn(x + dx, y + dy, z - 1))) e |= b; });
-if (sky) [[0, -1, 64], [1, 0, 128], [-1, 0, 256], [0, 1, 2048]].forEach(([dx, dy, b]) => { if (!solidIn(x + dx, y + dy, z) && !solidIn(x + dx, y + dy, z - 1) && !solidIn(x + dx, y + dy, z - 2) && !narrow(x + dx, y + dy)) e |= b; });
+if (sky) [[0, -1, 64], [1, 0, 128], [-1, 0, 256], [0, 1, 2048]].forEach(([dx, dy, b]) => { if (!solidIn(x + dx, y + dy, z) && !solidIn(x + dx, y + dy, z - 1) && !solidIn(x + dx, y + dy, z - 2)) e |= b; });
 if (!sky) [[0, -1, 64], [1, 0, 128], [-1, 0, 256]].forEach(([dx, dy, b]) => { if (!solidIn(x + dx, y + dy, z) && !solidIn(x + dx, y + dy, z - 1)) e |= b; });
 if (!sky) [[0, -1, 512], [1, 0, 1024], [0, 1, 2048], [-1, 0, 4096]].forEach(([dx, dy, b]) => { if (solidIn(x + dx, y + dy, z + 1) && !hop(x, y, x + dx, y + dy, z)) e |= b; });
-{ const wl = DIR.map(([dx, dy]) => +solidIn(x + dx, y + dy, z + 1)); if (sunk) e |= 131072;
-if (!sky || sunk) [[0, -1, 8192], [1, 0, 16384], [-1, 0, 65536]].forEach(([dx, dy, b]) => { if (hop(x, y, x + dx, y + dy, z)) e |= b; });
-if (sky && DIR.filter(([dx, dy]) => { for (let d = 1; d <= 2; d++) if (topOf(x + dx * d, y + dy * d) > z) return true; return false; }).length >= 2) { e |= 262144; wl.forEach((w, i) => { if (w) e += 524288 * 2 ** i; }); } }
+if (!sky) [[0, -1, 8192], [1, 0, 16384], [-1, 0, 65536]].forEach(([dx, dy, b]) => { if (hop(x, y, x + dx, y + dy, z)) e |= b; });
 }
 } else { s = front(x, y, z, top); if (!sky && !solidC(c, z + 1) && hop(nx, ny, x, y, z - 1)) e |= 16; else if (sky && nc && top - nc[nc.length - 1] >= 3) e |= 64 * Math.min(3, (top - z) >> 1); }
 if (cfg.rock && VoxMesh.rock(cfg, top, top, !host.rock || host.rock(x, y)) >= cfg.rock.from) e += 8388608;
@@ -4178,14 +4101,14 @@ quad(dst, x, y, z - 1, F, F.k, sky, kind, z, e, s, solidIn, f === 0);
 };
 const lowOf = (x, y) => { const c = col(x, y); return c && c.length ? c[0] : -1e9; };
 for (let y = by * CH; y < by * CH + CH; y++) for (let x = bx * CH; x < bx * CH + CH; x++) {
-const c = col(x, y); if (!c) continue; yield; const cz = c[c.length - 1]; { const ms = host.models && host.models(x, y, cz); if (ms) { const se = ms.some((b) => b.shade) && sunkAt(x, y, cz) ? 131072 : 0; for (const b of ms) model(x, y, b, b.shade ? out.shade : out.model, se); } }
+const c = col(x, y); if (!c) continue; yield; const cz = c[c.length - 1]; { const ms = host.models && host.models(x, y, cz); if (ms) for (const b of ms) model(x, y, b, b.shade ? out.shade : out.model); }
 const wt = host.water && host.water(x, y), wz = wt ? (host.waterTop ? host.waterTop(x, y) : 0) : null;
 const z0 = Math.min(lowOf(x, y), lowOf(x - 1, y), lowOf(x + 1, y), lowOf(x, y - 1), lowOf(x, y + 1)); if (z0 < lo) lo = z0; if (z0 - 1 <= L - deep) low = true;
 for (let z = Math.max(L - deep + 1, z0); z <= Math.max(cz, wt ? wz + 1 : -1e9); z++) {
-if (!solidIn(x, y, z)) { if (wt && z === wz + 1) { quad(out.water, x, y, z - 2, FACES[0], 1, 1, 3, z, Math.max(0, wz - c[c.length - 1]), 0, null, true); wet++; } continue; }
+if (!solidIn(x, y, z)) continue;
 faces(x, y, z, out.main);
 }
-{ const fw = host.flow && host.flow(x, y); if (fw) wet += flowFaces(out.water, x, y, fw, solidIn); }
+wet += waterFaces(out.water, x, y, col, solidIn, L - deep);
 }
 const ch = {mk: host.chunkKey ? host.chunkKey(bx * CH, by * CH, CH) : "", lo, low, L, wet}; for (const k of KINDS) ch[k] = new Float32Array(out[k]); return ch;
 }
@@ -4381,7 +4304,7 @@ const e = host.paintFront ? ws(cl(Math.min(top, fr - 1))) : 0, r = host.paintFro
 const bd = NOBODY;
 const un = UB[lastU === UB[0] ? 1 : 0]; ub = un.f; uq = 0;
 uP(RW); uP(RH); uA(bd); uA(m); uA(eye); uA(lamp); uP(v.bend || 0); uA(L.fogc); uP(L.lr); uP(L.day); uP(L.amb); uP(L.fog[0]); uP(L.fog[1]); uP(L.rim); uP(L.wa ?? .62); uP(v.dep || 0); uP(L.sun ?? 1);
-uA(L.wtint || Z20); uA(wv); uA(disc); uA(pw); uA(clip); uA(L.clear); uP(L.ca ?? 1); uP(sver); uA(sorg); uP(wxr); uP(W_.ver); uA(sectAt); uP(rimz); uP(v.hole || 0); uP(cpx); uP(v.behind || 0);
+uA(L.wtint || Z20); uA(wv); uA(disc); uA(pw); uA(clip); uA(L.clear); uP(L.ca ?? 1); uP(sver); uA(sorg); uP(wxr); uP(W_.ver); uA(sectAt); uP(rimz); uP(cpx); uP(v.behind || 0); uP(v.under || 0);
 if (hr) { uP(1); uA(hr.wash); uA(hr.tint || NOTINT); uP(hr.lit ? (hr.lit._v === undefined ? NaN : hr.lit._v) : -1); } else uP(0); un.n = uq;
 const gSame = sameW(gh, lastG), dSame = sameW(sd, lastD);
 why = again ? "land" : sized ? "size" : stale || dirty.length ? "paints" : S.un ? "pictures" : wup ? "water" : !gSame ? "ghosts" : !dSame ? "shadows" : !sameN(S.d, S.n, lastS, lastSn) ? "sprites" : !sameW(un, lastU) ? "view " + firstOff(un, lastU) : "";
@@ -4400,8 +4323,8 @@ for (let i = 0; i < S.un; i++) { const c = S.ups[i]; gl.texSubImage2D(gl.TEXTURE
 gl.activeTexture(gl.TEXTURE0);
 gl.useProgram(pr); const u = (n) => U[n] || (U[n] = gl.getUniformLocation(pr, n)), us = (n) => U["s" + n] || (U["s" + n] = gl.getUniformLocation(sp, n));
 gl.uniformMatrix4fv(u("m"), false, m); gl.uniform1i(u("t"), 0); gl.uniform1i(u("wt"), 2); gl.uniform1i(u("gw"), 3); gl.uniform1i(u("mk"), 4); gl.uniform1f(u("xr"), wxr); gl.uniform3fv(u("sc"), (v.sect || SECT)[0]); gl.uniform4fv(u("sp"), sectAt); gl.uniform1f(u("rf"), cfg.rock ? cfg.rock.from : 1e9); gl.uniform3fv(u("go"), sorg); gl.uniform3fv(u("lamp"), [lamp[0], lamp[1] + .6, lamp[2]]); gl.uniform3fv(u("eye"), eye);
-gl.uniform3fv(u("em"), mean); gl.uniform3fv(u("ctr"), lamp); gl.uniform1f(u("bend"), v.bend || 0); gl.uniform3fv(u("fogc"), L.fogc); gl.uniform4fv(u("cl"), clip);
-{ const f1 = (n, x) => gl.uniform1f(u(n), x); f1("lr", L.lr); f1("day", L.day); f1("amb", L.amb); f1("fn", L.fog[0]); f1("ff", L.fog[1]); f1("rim", L.rim); f1("wa", L.wa ?? .62); f1("dep", v.dep || 0); f1("rd", 0); f1("sun", L.sun ?? 1); f1("shp", 0); f1("cd", cdv); f1("rz", rimz); f1("ho", v.hole || 0); f1("cp", cpx); f1("bh", v.behind || 0); }
+gl.uniform3fv(u("em"), mean); gl.uniform3fv(u("ctr"), lamp); gl.uniform1f(u("bend"), v.bend || 0); gl.uniform2f(u("vpx"), RW, RH); gl.uniform3fv(u("fogc"), L.fogc); gl.uniform4fv(u("cl"), clip);
+{ const f1 = (n, x) => gl.uniform1f(u(n), x); f1("lr", L.lr); f1("day", L.day); f1("amb", L.amb); f1("fn", L.fog[0]); f1("ff", L.fog[1]); f1("rim", L.rim); f1("wa", L.wa ?? .62); f1("dep", v.dep || 0); f1("rd", 0); f1("sun", L.sun ?? 1); f1("shp", 0); f1("cd", cdv); f1("rz", rimz); f1("cp", cpx); f1("bh", v.behind || 0); f1("ud", v.under || 0); }
 gl.uniform4fv(u("wtn[0]"), L.wtint || Z20); gl.uniform4fv(u("wv"), wv); gl.uniform3fv(u("mc"), disc); gl.uniform3fv(u("bd[0]"), bd); gl.uniform4fv(u("pw"), pw); gl.uniform1f(u("bp"), 0);
 gl.useProgram(sp); gl.uniform1i(us("t"), 1); gl.uniform1i(us("mk"), 4); gl.uniform2f(us("nf"), .5, 200); gl.uniform3fv(us("mc"), disc); gl.uniform4fv(us("pw"), pw); gl.useProgram(pr);
 const go = (b, from, n) => { if (n > 0) { gl.bindVertexArray(b.vao); gl.drawArrays(gl.TRIANGLES, from, n); calls++; } };
@@ -4445,30 +4368,12 @@ return {create};
 ;
 const VoxPaint = (() => {
 const rgb = (c) => (255 << 24 | (c[2] | 0) << 16 | (c[1] | 0) << 8 | (c[0] | 0)) >>> 0;
-const EARTH = 2, STONE = "rock", wallOf = (z) => (z > 4 ? STONE : z > 0 ? EARTH : z), bands = (z) => colsOf(hillSheet(wallOf(z))).bands, sheetOf = (z) => hillSheet(z < 0 ? z : Math.max(1, z));
+const EARTH = 2, STONE = "rock", wallOf = (z) => (z > 4 ? STONE : EARTH), bands = (z) => colsOf(hillSheet(wallOf(z))).bands, sheetOf = (z) => hillSheet(Math.max(1, z));
 const browns = (sheet) => { const d = sheetData(sheet), [cx, cy] = blobCell(N_ | E_ | W_ | NE | NW), set = new Set(); for (let j = 0; j < 16; j++) for (let i = 0; i < 16; i++) { const v = d.px[(cy * 16 + j) * d.w + cx * 16 + i]; if (v >>> 24 === 255 && (v & 255) > (v >>> 8 & 255)) set.add(v); }
 return [...set].sort((a, b) => (a & 255) - (b & 255)); };
 const earths = new Map(), earth = (z) => { if (!(z > EARTH && z < 5)) return null; let m = earths.get(z); if (!m) { const to = browns(hillSheet(EARTH)); m = new Map(browns(hillSheet(z)).map((v, i) => [v, to[Math.min(i, to.length - 1)]])); earths.set(z, m); } return m; };
-let seen = -1; const mass = new Map(), cores = new Map(), REACH = 3;
-function core(x, y) {
-const k = x + "," + y; let r = cores.get(k); if (r !== undefined) return r;
-r = false; for (let oy = -2; oy <= 0 && !r; oy++) for (let ox = -2; ox <= 0 && !r; ox++) { r = true; for (let j = 0; j < 3 && r; j++) for (let i = 0; i < 3 && r; i++) r = topAt(x + ox + i, y + oy + j) > 4; }
-cores.set(k, r); return r;
-}
-const cut = (x, y) => { const s = [[0, -1], [1, 0], [0, 1], [-1, 0]].map(([dx, dy]) => { for (let d = 1; d <= 4; d++) if (topAt(x + dx * d, y + dy * d) > 4) return rocky(x + dx * d, y + dy * d) ? d : 9; return 9; });
-return s[0] + s[2] <= 4 || s[1] + s[3] <= 4 || Math.max(...s) <= 4; };
-function rocky(x, y) {
-const m = matAt(x, y); if (m) return m === "s" ? 2 : false;
-if (seen !== landVer) { mass.clear(); cores.clear(); seen = landVer; }
-const k = x + "," + y; let r = mass.get(k); if (r !== undefined) return r;
-if (topAt(x, y) < 5) { r = cut(x, y) ? 2 : false; mass.set(k, r); return r; }
-r = core(x, y);
-for (let at = [x, y], d = 0, met = new Set([k]); !r && d < REACH; d++) { const next = [];
-for (let i = 0; i < at.length && !r; i += 2) for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = at[i] + dx, ny = at[i + 1] + dy, nk = nx + "," + ny; if (met.has(nk) || topAt(nx, ny) < 5) continue; met.add(nk); if (core(nx, ny)) { r = true; break; } next.push(nx, ny); }
-at = next; }
-mass.set(k, r); return r;
-}
-const level = (x, y, z) => (z < 5 && rocky(x, y) === 2 ? 5 + (z + 512) % 4 : z > 4 && !rocky(x, y) ? 4 : z);
+const rocky = (x, y) => { const m = matAt(x, y); return m ? (m === "s" ? 2 : false) : rockAt(x, y) ? 2 : false; };
+const level = (x, y, z) => (z < 5 && rocky(x, y) === 2 ? 5 : z > 4 && !rocky(x, y) ? 4 : z);
 const ids = new Map(), cells = [null];
 const QUARTER = [[N_, W_, NW, NE, SW], [N_, E_, NE, NW, SE], [S_, W_, SW, SE, NW], [S_, E_, SE, SW, NE]];
 const SLIM = {x: [0, 1, 3, 4, 5, 8, 8, 8], n: [0, 1, 2, 3, 6, 6, 6, 6], s: [6, 9, 10, 11, 12, 13, 14, 15], q: [6, 6, 6, 6, 9, 10, 14, 15]};
@@ -4497,26 +4402,12 @@ return [a, q];
 }
 function shape(x, y, z) {
 if (z < 0) return 0;
-let m = 0;
-for (let k = 0; k < 24; k += 3) {
-const nx = x + AROUND[k], ny = y + AROUND[k + 1];
-if (!blockOf(nx, ny) || (z <= 0 && wet(gndAt(nx, ny) || ".")) || (colHas(colAt(nx, ny), z) && !(z > 0 && topAt(nx, ny) === z && wet(gndAt(nx, ny) || ".")))) m |= AROUND[k + 2];
-}
+let m = maskOf(x, y, (_, g, nx, ny) => (z <= 0 && wet(g)) || (colHas(colAt(nx, ny), z) && !(z > 0 && topAt(nx, ny) === z && wet(g))));
 if (reduce(m) === 255) return 0;
 if (!(reduce(m) & 240) && m & N_ && !(m & S_) && topAt(x, y - 1) === z + 1 && topAt(x, y + 1) === z - 1) m |= 256;
 const zz = level(x, y, z), sheet = sheetOf(zz), [cx, cy] = blobCell(m & 255), q = quarters(m, m & 256), key = (zz <= 2 ? 0 : zz <= 4 ? 1 : 2) * 4096 + (q.slim ? 2048 + reduce(m & 255) + (m & 256) : cy * 64 + cx);
 if (!ids.has(key)) { if (cells.length > 255) return 0; ids.set(key, cells.length); cells.push([cap(sheet, m)[0], sheet, q]); }
 return ids.get(key);
-}
-function profile(id) {
-const out = new Uint8Array(16), a = id ? cells[id][0] : null;
-if (a) for (let i = 0; i < 16; i++) { let j = 15; while (j >= 0 && !a[j * 16 + i]) j--; out[i] = 15 - j; }
-return out;
-}
-function crown(id) {
-const a = id ? cells[id][0] : null, out = [0, 0]; if (!a) return out;
-for (const k of [0, 1]) for (let n = 0; n < 16; n++) { const i = k ? 15 - n : n; let j = 0; while (j < 16 && !a[j * 16 + i]) j++; if (j < 16) { out[k] = j; break; } }
-return out;
 }
 const lips = new Map();
 function lip(id) {
@@ -4568,7 +4459,7 @@ if (h(1, 9, 95) < .5) { let i = (h(2, 9, 96) * 14) | 0, j = 2 + ((h(3, 9, 97) * 
 }
 function front(z, v, px, at, stride, built) {
 const [L, M, D] = bands(z).map(rgb), n = RELIEF_STEP, h = (i, j, s) => hash(i + v * 16, j + z * 8, s), m = mottle(z), stone = wallOf(z) === STONE, put = (i, j, c) => { if (i >= 0 && i < 16 && j >= 0 && j < n) px[at + j * stride + i] = c; };
-const sh = Array.from({length: n >> 1}, (_, k) => (h(k, 0, 64) * 16) | 0), row = (i, j) => m.rows[(j >> 1) & 1][(i + sh[(j >> 1) % sh.length]) & 15];
+const sh = Array.from({length: n >> 1}, (_, k) => (h(k, 0, 64) * 16) | 0), row = (i, j) => m.rows[j & 1][(i + sh[(j >> 1) % sh.length]) & 15];
 for (let j = 0; j < n; j++) for (let i = 0; i < 16; i++) {
 let c = row(i, j);
 if (j === n - 1) c = D; else if (j === n - 2 && h(i >> 1, 0, 61) < .3) c = D;
@@ -4584,17 +4475,10 @@ for (let k = 0; k < 2; k++) if (h(k, 1, 71) < .45) { let i = (h(k, 2, 72) * 16) 
 } else {
 for (let k = 0; k < n; k += 8) if (h(k, 1, 65) < .6) { const st = k + 2 + ((h(k, 2, 66) * 3) | 0); for (let i = 0; i < 16; i++) if (h(i >> 2, 3 + k, 67) < .85) put(i, st + (h(i >> 2, 4 + k, 68) < .35 ? 1 : 0), m.dark); }
 for (let j = 1; j < n - 3; j++) for (let i = 0; i < 15; i += 2) if (h(i, j, 69) < .07) { put(i + (j & 1), j, L); put(i + (j & 1) + 1, j, L); put(i + (j & 1), j + 1, D); put(i + (j & 1) + 1, j + 1, m.dark); }
+deepen(px, at, stride, n, z, "wall");
 }
 }
-let ink = null;
-function shadow() {
-if (ink) return ink;
-const d = sheetData(IMG.hill1), [ex, ey] = blobCell(N_ | E_ | W_ | NE | NW);
-for (let j = 15; j >= 0 && !ink; j--) { const v = d.px[(ey * 16 + j) * d.w + ex * 16 + 8], a = v >>> 24; if (a && a < 255) ink = [v & 255, v >>> 8 & 255, v >>> 16 & 255, a / 255]; }
-return ink || (ink = [80, 64, 134, .25]);
-}
-const side = (z) => { const b = bands(z), s = shadow(); return {band: b[0], body: b[1], foot: b[2], shadow: z > 4 || z <= 0 ? [s[0], s[1], s[2], 0] : s}; };
-return {shape, profile, crown, lip, rim, front, side, shadow, cap, rocky, level};
+return {shape, rim, front, rocky, level};
 })();
 ;
 const CURVE = {near: {from: .55, horizon: .8, floor: .5}, far: {from: .55, horizon: .86, floor: .5}, lean: .3, foot: 13 / 16, fade: .5, depth: 1.5, tuft: 2, short: 6};
@@ -4634,10 +4518,11 @@ function sky(t) {
 const p = (((clock.phase || 0) % 1) + 1) % 1, day = p < .75, way = day ? p / .75 : (p - .75) / .25;
 const night = p < .5 ? 1 - smooth((p + .035) / .07) : Math.min(smooth((p - .72) / .08), 1 - smooth((p - .965) / .07));
 const dusk = p < .3 ? 1 - smooth((p - .035) / .125) : smooth((p - .56) / .14);
-const lift = opt("night") / 100 * .6, tint = lightAt(p).map((v) => (v + (255 - v) * lift) / 255);
+const tint = Light.now().lit.map((v) => v / 255);
 const col = (q) => q.map((v, i) => Math.min(1, v / tint[i])), pick = (q) => col(q[0].map((v, i) => { const d = v + (q[1][i] - v) * dusk; return d + (q[2][i] - d) * night; }));
 const line = c.line, band = Math.max(8, line / zoom);
-return {line, t, shift: cam.x * P * .12, top: pick(CURVE_SKY.top), low: pick(CURVE_SKY.low), cloud: pick(CURVE_SKY.cloud), far: pick(CURVE_SKY.far), near: pick(CURVE_SKY.near),
+return {line, t, shift: ((myId !== null && ents.get("agent" + myId)) || cam).x * P * .12,
+top: pick(CURVE_SKY.top), low: pick(CURVE_SKY.low), cloud: pick(CURVE_SKY.cloud), far: pick(CURVE_SKY.far), near: pick(CURVE_SKY.near),
 orb: col(day ? CURVE_SKY.sun : CURVE_SKY.moon), at: [.88 - .76 * way, -.14 + .92 * Math.sin(way * Math.PI), Math.min(day ? 5.5 : 4.5, band * .2)], stars: night, audit};
 }
 return {frame, sy, sky, get on() { return !!c; }, get c() { return c; }, get line() { return c ? c.line : 0; },
@@ -4720,9 +4605,9 @@ function paintBed(x, y, z, px, at, stride) {
 if (!pad) { const c = document.createElement("canvas"); c.width = c.height = 16; pad = c.getContext("2d", {willReadFrequently: true}); }
 const d = topAt(x, y) - z; G(x, y).sh[gi] = d;
 bedTile(pad, x, y, Math.max(1, Math.min(4, d)), 0, 0, () => 0, () => false);
-const img = pad.getImageData(0, 0, 16, 16).data, data = new Uint32Array(img.buffer), hd = hash(x, y, 41);
-if (gndAt(x, y) === "~" && hd < .09 && (hd < .015 || [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => isLand(gndAt(x + dx, y + dy))))) {
-const on = floats ? floats[Math.floor(hash(x, y, 42) * 7)] : null;
+const img = pad.getImageData(0, 0, 16, 16).data, data = new Uint32Array(img.buffer), f = floatAt(x, y);
+if (f >= 0) {
+const on = floats ? floats[f] : null;
 if (on) for (let j = 0; j < 16; j++) for (let i = 0; i < 15; i++) if (on[j * 16 + i]) { const q = (j * 16 + i + 1) * 4; img[q] *= .74; img[q + 1] *= .8; img[q + 2] *= .86; }
 }
 for (let j = 0; j < 16; j++) for (let i = 0; i < 16; i++) px[at + j * stride + i] = data[j * 16 + i] | 0xff000000;
@@ -4763,13 +4648,13 @@ if (on !== cfg.clear) { cfg.clear = on; grids.clear(); hx = NaN; pending.length 
 if (!on) return null;
 if (!floats && IMG.water_objects && IMG.water_objects.complete && IMG.water_objects.naturalWidth) {
 const c = document.createElement("canvas"); c.width = 16 * 12; c.height = 16; const g = c.getContext("2d", {willReadFrequently: true}); g.drawImage(IMG.water_objects, 0, 0, 16 * 12, 16, 0, 0, 16 * 12, 16);
-const d = g.getImageData(0, 0, 16 * 12, 16).data; floats = [8, 9, 10, 11, 6, 7, 0].map((n) => Uint8Array.from({length: 256}, (_, k) => (d[((k >> 4) * 16 * 12 + n * 16 + (k & 15)) * 4 + 3] > 127 ? 1 : 0)));
+const d = g.getImageData(0, 0, 16 * 12, 16).data; floats = FLOATS.map((n) => Uint8Array.from({length: 256}, (_, k) => (d[((k >> 4) * 16 * 12 + n * 16 + (k & 15)) * 4 + 3] > 127 ? 1 : 0)));
 }
 if (!tint) { const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)), deepest = WATER.tint[4], sand = hex(WATER.sand[4]);
 tint = new Float32Array([...TINT.map(([r, g, b, a]) => [r / 255, g / 255, b / 255, a]),
 [...deepest.slice(0, 3).map((v, i) => (v * deepest[3] + sand[i] * (1 - deepest[3])) / 255), 1], [...hex(WATER.sand[0]).map((v) => v / 255), BAND],
 ...WATER.sand.map((h) => [...hex(h).map((v) => v / 255), 1])].flat()); }
-const l = lightAt((((clock.phase || 0) % 1) + 1) % 1), night = Math.max(0, Math.min(1, (1 - (.3 * l[0] + .59 * l[1] + .11 * l[2]) / 255) / .36));
+const night = Light.now().dark;
 return {t, tint, bend: opt("shimmer") ? 1.4 : 0, light: opt("shimmer") ? 1 : 0, far: [5, 16, .8], night, dark: [.38, .58, .54], foam: .55, foamAt: 1, shade: [.7, .8, .92], shadow: .16};
 }
 function under(sheet, a, b, w, h, x, y, z, tx, ty) {
@@ -4792,13 +4677,13 @@ flow: Flow.col,
 models: Models.at, modelSheet: Models.sheet,
 paintTop(x, y, z, px, at, stride) {
 const g0 = gndAt(x, y) || ".", sea = wet(g0) || g0 === ":"; if (sea && WaterBed.on && z < topAt(x, y)) return WaterBed.paintBed(x, y, z, px, at, stride);
-const was = peek; maskOf.plain = true; peek = one; one.set(x + "," + y, sea ? 0 : VoxPaint.level(x, y, z));
-try { drawTile0(x, y, {px, o: at, w: stride}); } finally { maskOf.plain = false; peek = was; one.clear(); }
+const was = peek; peek = one; one.set(x + "," + y, sea ? 0 : VoxPaint.level(x, y, z));
+try { drawTile0(x, y, {px, o: at, w: stride}); } finally { peek = was; one.clear(); }
 if (!wet(gndAt(x, y) || ".")) VoxPaint.rim(x, y, z, px, at, stride);
 },
 built: (x, y) => matAt(x, y) === "s",
 rock: VoxPaint.rocky,
-paintFront: VoxPaint.front, shape: VoxPaint.shape, profile: VoxPaint.profile, crown: VoxPaint.crown, lip: VoxPaint.lip, side: VoxPaint.side,
+paintFront: VoxPaint.front,
 };
 const engine = {ready: () => !!VoxGL.start(), forget() {}, touch() {}};
 const made = (b) => !!b.px && !!b.water;
@@ -4838,8 +4723,8 @@ for (const p of ents.values()) {
 if (p.e && p.e.kind === "agent" && p.e.id === myId && Leap.on()) { Leap.frame(p, dt, now); continue; }
 if (p.e && p.e.kind === "agent" && p.e.id === myId && walking && p.walking) { walkOn(p, dt, now); continue; }
 const dx = p.tx - p.x, dy = p.ty - p.y, d = Math.hypot(dx, dy);
-const amble = p.e && AMBLE[p.e.kind] ? Math.max(p.e.scared ? 1 / FLEE_STRIDE : AMBLE[p.e.kind], p.pace || 0, p.e.kind === "tusker" && p.e.act ? 8 : 0) : 0;
-const pace = Climb.paceOf(p) || (p.running || (p.e && p.e.run) ? 10 : amble || 5);
+const amble = p.e && AMBLE[p.e.kind] ? Math.max(p.e.scared ? 1 / RULES.flee_stride : AMBLE[p.e.kind], p.pace || 0, p.e.kind === "tusker" && p.e.act ? 8 : 0) : 0;
+const pace = Climb.paceOf(p) || (p.running || (p.e && p.e.run) ? RULES.pace.sprint : amble || RULES.pace.walk);
 const jp = d > 0 && d <= 1.5 && !p.leapAt ? jumpPace(p, p.tx - (Math.abs(dx) > 1e-3 ? Math.sign(dx) : 0), p.ty - (Math.abs(dy) > 1e-3 ? Math.sign(dy) : 0), p.tx, p.ty) : Infinity;
 const mine = p.e && p.e.kind === "agent" && p.e.id === myId, far = d > (mine ? LEAD[1] + 2 : 2.5);
 const step = (far ? d * 8 : Math.min(pace, jp) * (d > (mine ? 1.5 : 1) ? 1.3 : 1.05)) * dt;
@@ -4854,10 +4739,9 @@ if (me && myId !== null) {
 if (HdLook.eye && HdLook.eye.watch) HdLook.eye = null;
 const p = ents.get("agent" + myId);
 if (p) {
-const fall = falling(p, now);
 const pan = Build.pan(dt);
-const cl = Climb.climbOf(p);
-cam.x = camT.x = p.x + pan.x + (cl ? cl.dx : 0); cam.lift = liftOf(p) / zoom + (cl ? cl.lift : 0) + (fall ? fall.body : 0) + fallShake(now); cam.y = camT.y = p.y + pan.y + (cl ? cl.dy : 0) - cam.lift / P;
+const pl = BodyPlace.of(p);
+cam.x = camT.x = p.x + pan.x + pl.dx; cam.lift = liftOf(p) / zoom + pl.eye + fallShake(now); cam.y = camT.y = p.y + pan.y + pl.dy - cam.lift / P;
 const z = liftOf(p) / zoom / RELIEF_STEP, tx = Math.round(p.x), ty = Math.round(p.y), lt = RELIEF_STEP / 16, r = ty - z * lt;
 let found = null, high = topAt(tx, ty), low = 1e9;
 for (const dx of [0, -1, 1, -2, 2]) for (let y2 = ty - APART * lt, last = null; y2 <= ty + APART * lt && found === null; y2++) { const top = topAt(tx + dx, y2), r2 = y2 - top * lt; if (Math.abs(r2 - r) <= 1 || (last !== null && last < r && r < r2)) found = top; last = r2; }
@@ -4961,13 +4845,13 @@ LIGHT.pats.set(color, c);
 }
 return LIGHT.pats.get(color);
 }
-function lamp(g, cx, cy, r, color, a, shift) {
+function lamp(g, cx, cy, r, color, a, shift, steps = LIGHT.steps) {
 cx = Math.round(cx); cy = Math.round(cy);
 const pat = g.createPattern(checker(color), "repeat"); pat.setTransform(new DOMMatrix([1, 0, 0, 1, shift[0], shift[1]]));
-const n = LIGHT.steps.length;
+const n = steps.length;
 for (let k = n; k >= 1; k--) {
 const rk = Math.round(r * k / n), ro = rk + LIGHT.edge;
-g.globalAlpha = Math.min(1, a * LIGHT.steps[k - 1]);
+g.globalAlpha = Math.min(1, a * steps[k - 1]);
 for (let dy = -ro; dy <= ro; dy++) {
 const ho = Math.floor(Math.sqrt(ro * ro - dy * dy)), hi = Math.abs(dy) <= rk ? Math.floor(Math.sqrt(rk * rk - dy * dy)) : -1;
 g.fillStyle = pat;
@@ -4977,6 +4861,19 @@ else { g.fillRect(cx - ho, cy + dy, ho - hi, 1); g.fillRect(cx + hi + 1, cy + dy
 }
 g.globalAlpha = 1;
 }
+const Light = (() => {
+const LAMPS = .2, NIGHT_AT = .75, FIRE = new Set(["^", "x", "fire"]);
+const darkOf = (t) => Math.max(0, Math.min(1, (1 - (.3 * t[0] + .59 * t[1] + .11 * t[2]) / 255) / .36)), DUSK = darkOf(lightAt(NIGHT_AT));
+let key = "", v = null;
+function now() {
+const phase = (((clock.phase || 0) % 1) + 1) % 1, n = opt("night"), k = phase + "," + n; if (k === key) return v; key = k;
+const tint = lightAt(phase), dark = darkOf(tint), lift = n / 100 * .6;
+return (v = {tint, wash: washAt(phase), dark, lift, lit: tint.map((c) => Math.round(c + (255 - c) * lift)), lamps: dark > LAMPS, k: Math.max(0, (dark - LAMPS) / (1 - LAMPS)),
+open: Math.max(0, (dark - DUSK) / (1 - DUSK)) * (1 - n / 100)});
+}
+const lamp = (what, roof) => (what === "person" ? (roof ? 2 : 1) : FIRE.has(what) ? 2 : 0);
+return {now, lamp};
+})();
 ;
 const F3 = (() => {
 const q = new URLSearchParams(location.search), was = (k) => localStorage.getItem("megastructure-" + k) === "1";
@@ -5150,7 +5047,7 @@ if (ACCOUNT.url && !ticket) { agentWs.close(); return; }
 const r = await rpc("hello", {name, token, persona: "human", race: myRace, ...(ticket ? {ticket} : {})});
 if (r.error === "bad_ticket") accountDrop();
 if (!r.ok) { toast(r.error === "bad_token" ? `“${name}” is already someone else. Pick another name.` : (r.detail || r.error), true); agentWs.close(); return; }
-me = r.agent.name; myId = r.agent.id; follow = null; localStorage.setItem("megastructure-name", me);
+me = r.agent.name; myId = r.agent.id; follow = null; sendSpec({op: "me", id: myId}); localStorage.setItem("megastructure-name", me);
 camT.x = cam.x = r.agent.x; camT.y = cam.y = r.agent.y;
 $("joinbox").style.display = "none"; $("hud").style.display = "flex"; document.body.classList.add("playing"); if (typeof zoomForTitle === "function") zoomForTitle(false);
 $("help").style.display = localStorage.getItem("megastructure-help") === "on" ? "block" : "none";
@@ -5163,7 +5060,7 @@ agentWs.onmessage = (m) => {
 const d = JSON.parse(m.data);
 if (d.type === "progress") {
 if (pendingAside && pendingAside.tool === d.tool) myAside = {...pendingAside, t0: performance.now()};
-else if (pendingAct && pendingAct.tool === d.tool) myAction = {...pendingAct, t0: performance.now()};
+else if (pendingAct && pendingAct.tool === d.tool) { myAction = {...pendingAct, t0: performance.now()}; const q = ents.get("agent" + myId); if (q) BodyPlace.faceAction(q, myAction.dir, myAction.tid); }
 if (d.ticks / d.tick_hz >= .35) progress = {t0: performance.now(), ms: d.ticks / d.tick_hz * 1000, tool: d.tool};
 return;
 }
@@ -5197,9 +5094,7 @@ if ($("craft").style.display === "block") drawRecipes();
 }
 setInterval(refresh, 700);
 let myAction = null, pendingAct = null;
-const ASIDE = ["eat"];
 let myAside = null, pendingAside = null;
-const MEANWHILE = ["walk", "stop", "step", "move_to", "say", "shout", "jump"];
 const eating = () => !!(pendingAside || myAside);
 let actTarget = null;
 function facingTo(p) {
@@ -5208,14 +5103,14 @@ const dx = p.x - s.x, dy = p.y - s.y;
 return Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? "E" : dx < 0 ? "W" : null) : dy > 0 ? "S" : "N";
 }
 async function act(tool, args, quiet) {
-if (!me || (eating() && !MEANWHILE.includes(tool))) return null;
+if (!me || (eating() && !RULES.meanwhile.includes(tool))) return null;
 while (pred && performance.now() < pred.until) await new Promise((ok) => setTimeout(ok, 16));
 if (actTarget && "dir" in args) { args = {...args, x: actTarget.x, y: actTarget.y}; delete args.dir; }
 const look = actTarget ? facingTo(actTarget) : args.dir;
 const s0 = myPos(), dv = args.dir && DIRV[args.dir];
 const at = "x" in args && "y" in args && tool !== "move_to" ? [args.x, args.y] : dv && s0 ? [s0.x + dv[0], s0.y + dv[1]] : null;
 actTarget = null;
-const aside = ASIDE.includes(tool);
+const aside = RULES.aside.includes(tool);
 if (aside) pendingAside = {tool, item: args.item};
 else { busy = true; pendingAct = {tool, dir: look, at, tid: args.target, with: args.with, item: args.item}; }
 const r = await rpc("act", {tool, args});
@@ -5249,39 +5144,26 @@ return r;
 const DIRV = {N: [0, -1], E: [1, 0], S: [0, 1], W: [-1, 0]};
 function myPos() { const p = ents.get("agent" + myId); return p ? {x: p.tx, y: p.ty} : meObs ? meObs.self : null; }
 function dirTo(p) { const s = myPos(); if (!s) return null; for (const [d, [dx, dy]] of Object.entries(DIRV)) if (s.x + dx === p.x && s.y + dy === p.y) return d; return null; }
-function plainWalk(x, y) {
-const t = tile(x, y); if (!t) return false;
-if (wet(t[1])) return t[0] === "V" || !SOLID.has(t[0]);
-return WALKABLE_GROUND.has(t[1]) && !SOLID.has(t[0]);
-}
 function walkable(x, y, fx, fy) {
-if (fx === undefined) return plainWalk(x, y);
-const z = landAt(myZ(fx, fy), x, y, fx, fy, springs(x, y)), c = z === null ? null : Floors.get(x, y, z);
-return z !== null && (c && FLOORS ? !SOLID.has(c[1]) : plainWalk(x, y));
+const z = landAt(myZ(fx, fy), x, y, fx, fy, springs(x, y));
+return z !== null && stand(x, y, z);
 }
-const FILLS = {dirt: {o: ",", u: ",", "~": ",", "(": "~", "=": "(", ")": "="}, path: {".": "_", ",": "_", "'": "_"}, plank: {"~": ":", ".": "n", ",": "n", "'": "n"}};
 const FILL_TEXT = {",": "Fill with dirt", "~": "Raise the bottom", "(": "Raise the bottom", "=": "Raise the bottom", _: "Lay path", ":": "Build bridge", n: "Lay floor"};
-const FILL_HELP = {dirt: "Dirt fills holes and shallow water", path: "Paths go on grass or dirt", plank: "Planks: bridge over water, floor on land"};
-const PLACEABLE_BLOCK = {mailbox: "X", boat: "V", wood_wall: "W", flower: "f", bed: "B", chair: "h", table: "L", plant: "p", clock: "K", rug: "r", gate: "g", fence: "#", stone_wall: "%", door: "+", campfire: "^", workbench: "&", sign: "?", flag: "!", chest: "C", well: "Y", coop: "J", picnic_blanket: "m", basket: "q", trough: "e", hay: "y"};
-PLACEABLE_BLOCK.roof = "roof"; PLACEABLE_BLOCK.stairs = "stairs"; PLACEABLE_BLOCK.ladder = "l";
+const FILL_HELP = {dirt: "Dirt fills holes and shallow water", stone_block: "Stone fills holes and shallow water", path: "Paths go on grass or dirt", plank: "Planks: bridge over water, floor on land"};
 const HARVEST = {t: "Dig up stump", U: "Chop tree", v: "Cut bush", e: "Take down trough", y: "Take hay bale", Y: "Take down well", J: "Take down coop", m: "Roll up blanket", q: "Take basket", X: "Take down mailbox", V: "Take boat", W: "Take down wall", l: "Take ladder", f: "Pick flower", B: "Take down bed", h: "Take down chair", L: "Take down table", p: "Take plant",
 K: "Take down clock", r: "Roll up rug", g: "Take down gate", F: "Pick fruit", ";": "Uproot sprout", T: "Chop tree", b: "Pick berries", M: "Mine rock", R: "Mine rock wall", "*": "Mine ore", H: "Cut thicket", Q: "Pick mushroom",
 w: "Harvest wheat", "\"": "Uproot young wheat", "#": "Take down fence", "%": "Take down wall", "+": "Take down door",
 "^": "Take down campfire", "&": "Take down workbench", "?": "Take down sign", "!": "Take down flag", C: "Break chest open", x: "Fire!"};
-const TOOL_FOR = {t: "axe", U: "axe", T: "axe", M: "pickaxe", "*": "pickaxe", H: "axe", "#": "axe", "%": "pickaxe", "+": "axe", "&": "axe", C: "axe", B: "axe", h: "axe",
-L: "axe", K: "axe", g: "axe", W: "axe", V: "axe", X: "axe", Y: "pickaxe", J: "axe", e: "axe", l: "axe"};
-const WEAPON_DMG = {sword: 6, spear: 4, axe: 3, pickaxe: 2};
 const inHand = () => (selected && meObs && meObs.self.inventory[selected] ? selected : null);
 function entityAt(p) {
-const s = myPos(), h = s ? myZ(s.x, s.y) : null, others = [...ents.values()].filter((q) => q.e && !(q.e.kind === "agent" && q.e.id === myId) && (h === null || Math.abs(standsAt(q) - h) <= 4));
+const s = myPos(), h = s ? myZ(s.x, s.y) : null, others = [...ents.values()].filter((q) => q.e && !(q.e.kind === "agent" && q.e.id === myId) && (h === null || Math.abs(standsAt(q) - h) <= RULES.bite_high));
 return others.find((q) => q.tx === p.x && q.ty === p.y) || others.find((q) => Math.round(q.x) === p.x && Math.round(q.y) === p.y);
 }
-const reachOf = (weapon) => (weapon === "spear" ? 3 : 2);
 const TALL = "TFU";
 function aimAt(p, brk) {
 if (!GROUND.has(combAt(p.x, p.y)) || entityAt(p)) return p;
 if (p.fy > 1 - (4 + STAND) / 16 && entityAt({x: p.x, y: p.y + 1})) return {x: p.x, y: p.y + 1};
-const forGround = selected && !brk && (PLACEABLE_BLOCK[selected] || FILLS[selected] || ["seed", "hoe", "watering_can"].includes(selected));
+const forGround = selected && !brk && (placeable(selected) || ["hoe", "watering_can"].includes(selected));
 if (forGround) return p;
 for (const dy of [1, 2]) {
 const c = combAt(p.x, p.y + dy);
@@ -5306,22 +5188,21 @@ if (res && foot && !res.foot && !res.walk && !res.here) res.foot = foot;
 if (res && !res.ent && res.z === undefined && !res.walk && !res.here) res.at = floorAt(p.x, p.y);
 return res;
 }
-const CAN_SIZE = 12;
 const GATHER = "bFQfw";
 function intent0(p, brk, t, c, g, flower, ent, s) {
-const placing = selected && !brk && (PLACEABLE_BLOCK[selected] || FILLS[selected] || selected === "seed");
+const placing = selected && !brk && placeable(selected);
 const hasBlock = !GROUND.has(c) && !(flower && placing);
 const isMe = p.x === s.x && p.y === s.y;
 if (ent) {
-const who = ent.e.name || ent.e.kind, w = inHand(), weapon = w && WEAPON_DMG[w] ? w : null;
+const who = ent.e.name || ent.e.kind, w = inHand(), weapon = w && RULES.weapons[w] ? w : null;
 if (ent.e.kind !== "agent" && selected === "name_tag" && !brk)
-return {ent, text: ent.e.name ? `Rename ${ent.e.name}` : `Name the ${label(ent.e.kind)}`, near: USE_R, diag: true, run: () => nameAnimal(ent.e)};
+return {ent, text: ent.e.name ? `Rename ${ent.e.name}` : `Name the ${label(ent.e.kind)}`, reach: "animal", diag: true, run: () => nameAnimal(ent.e)};
 if (ANIMALS[ent.e.kind] && selected && FEEDS.includes(selected) && !brk)
-return {ent, text: `Feed ${label(ent.e.kind)}`, near: USE_R, diag: true, uses: true, run: () => act("feed", {target: ent.e.id, item: selected})};
+return {ent, text: `Feed ${label(ent.e.kind)}`, reach: "animal", diag: true, uses: true, run: () => act("feed", {target: ent.e.id, item: selected})};
 if (ent.e.kind === "agent" && selected && !weapon && !brk)
-return {ent, text: `Give to ${ent.e.name}`, near: 2, uses: "faced", run: (d) => act("give", {target: ent.e.id, item: selected, n: 1})};
+return {ent, text: `Give to ${ent.e.name}`, reach: "give", uses: "faced", run: (d) => act("give", {target: ent.e.id, item: selected, n: 1})};
 if (!brk) {
-if (ent.e.kind === "cow") return {ent, text: "Milk cow", near: USE_R, diag: true, run: () => act("milk", {target: ent.e.id})};
+if (ent.e.kind === "cow") return {ent, text: "Milk cow", reach: "animal", diag: true, run: () => act("milk", {target: ent.e.id})};
 if (ent.e.kind === "agent") return {ent, text: `${ent.e.name}: hold a thing to give it`, info: true};
 return {ent, text: {chicken: "Chicken: feed it for eggs", chick: "A chick", calf: "A calf",
 tusker: "A tusker: it charges, step aside", pincer: "A pincer: it snaps up close",
@@ -5329,20 +5210,20 @@ strawman: "A strawman: it fears firelight", wisp: "A wisp",
 wyrm: "A wyrm: stay out of its line",
 mossback: "Old Mossback: hit the neck", sporeling: "A sporeling: one hit"}[ent.e.kind] || who, info: true};
 }
-return {ent, text: weapon ? `Attack ${who}` : `Punch ${who}`, near: reachOf(weapon), diag: true, attack: true,
+return {ent, text: weapon ? `Attack ${who}` : `Punch ${who}`, reach: "melee", diag: true, attack: true,
 run: () => act("attack", weapon ? {target: ent.e.id, with: weapon} : {target: ent.e.id})};
 }
 const up = Climb.intent(p, brk) || Floors.intent(p, brk);
 if (up) return up;
 const underfoot = isMe && hasBlock && !SOLID.has(c);
-if (isMe && !underfoot && !(selected && !brk && (PLACEABLE_BLOCK[selected] || FILLS[selected] || selected === "seed")))
+if (isMe && !underfoot && !placing)
 return {text: "Pick up", run: () => act("pick_up", {}), here: true};
 if (selected && !brk) {
 const it = selected, block = PLACEABLE_BLOCK[it];
-if ((block || FILLS[it] || it === "seed") && rimAt(p.x, p.y)) return {text: "Nothing stays on the edge of a hill", ghost: it, ok: false};
-if (c === "e" && it !== "torch") return FEEDS.includes(it) ? {text: "Fill trough", near: 1, uses: true, run: (d) => act("store", {dir: d, item: it, n: meObs.self.inventory[it] || 1})}
+if (placeable(it) && rimAt(p.x, p.y)) return {text: "Nothing stays on the edge of a hill", ghost: it, ok: false};
+if (c === "e" && it !== "torch") return FEEDS.includes(it) ? {text: "Fill trough", uses: true, run: (d) => act("store", {dir: d, item: it, n: meObs.self.inventory[it] || 1})}
 : {text: "Troughs take hay, grain or greens", ok: false};
-if ((c === "C" || c === "q") && it !== "torch") return {text: `Store in ${c === "q" ? "basket" : "chest"}`, near: 1, uses: "faced", run: (d) => act("store", {dir: d, item: it, n: meObs.self.inventory[it] || 1})};
+if ((c === "C" || c === "q") && it !== "torch") return {text: `Store in ${c === "q" ? "basket" : "chest"}`, uses: "faced", run: (d) => act("store", {dir: d, item: it, n: meObs.self.inventory[it] || 1})};
 const free = !hasBlock && WALKABLE_GROUND.has(g);
 if (FOOT[block]) {
 const f = footprint(block, p.x, p.y, s.x, s.y);
@@ -5352,77 +5233,75 @@ return !tq || !(GROUND.has(tq[0]) || tq[0] === "f") || !WALKABLE_GROUND.has(tq[1
 const near = [[0, 1], [0, -1], [1, 0], [-1, 0]].map(([dx, dy]) => ({x: p.x + dx, y: p.y + dy}))
 .filter((q) => !f.tiles.some((r) => r.x === q.x && r.y === q.y));
 return {text: bad.length ? (bad.some((q) => q.x === s.x && q.y === s.y) ? "Step aside first" : bad.some((q) => entityAt(q)) ? "Something is in the way" : `Needs a clear ${FOOT[block].join("×")} spot`) : `Place ${label(it)}`,
-ghost: it, ok: !bad.length, bad, foot: f.tiles, anchor: {x: f.ax, y: f.ay}, from: near, near: 1, run: (d) => act("place", {dir: d, item: it})};
+ghost: it, ok: !bad.length, bad, foot: f.tiles, anchor: {x: f.ax, y: f.ay}, from: near, run: (d) => act("place", {dir: d, item: it})};
 }
-if (block === "V") return !hasBlock && wet(g) ? {text: "Launch boat", ghost: it, ok: true, near: 1, run: (d) => act("place", {dir: d, item: it})}
+if (block === "V") return !hasBlock && wet(g) ? {text: "Launch boat", ghost: it, ok: true, run: (d) => act("place", {dir: d, item: it})}
 : {text: "Boats go on shallow water", ghost: it, ok: false};
-if (block) return free ? {text: `Place ${label(it === "hay" ? "hay_bale" : it)}`, ghost: it, ok: true, near: 1,
+if (block) return free ? {text: `Place ${label(it === "hay" ? "hay_bale" : it)}`, ghost: it, ok: true,
 run: (d) => (it === "sign" || it === "flag" ? placeWritten(d, it) : act("place", {dir: d, item: it}))}
 : {text: `Can't place ${label(it)} here`, ghost: it, ok: false};
-if (it === "seed") {
-if (!hasBlock && (g === "o" || g === "u")) return {text: "Plant seed", ghost: it, ok: true, near: 1, run: (d) => act("place", {dir: d, item: it})};
+if (RULES.sown[it]) {
+if (!hasBlock && RULES.sown[it].includes(g)) return {text: "Plant seed", ghost: it, ok: true, run: (d) => act("place", {dir: d, item: it})};
 return {text: "Seeds need tilled soil", ghost: it, ok: false};
 }
 if (FILLS[it]) {
 const res = !hasBlock && FILLS[it][g];
-return res ? {text: FILL_TEXT[res], ghost: it, ghostGround: res, ok: true, near: 1, run: (d) => act("place", {dir: d, item: it})}
+return res ? {text: FILL_TEXT[res], ghost: it, ghostGround: res, ok: true, run: (d) => act("place", {dir: d, item: it})}
 : {text: FILL_HELP[it], ghost: it, ghostGround: Object.values(FILLS[it])[0], ok: false};
 }
 if (it === "torch") {
-const burnable = (!GROUND.has(c) && "TFbH#+&?!\";wCBhLrgWVXJmqeyUv".includes(c)) || (GROUND.has(c) && g === ".");
-return burnable ? {text: "Set on fire", ok: true, near: 1, run: (d) => act("ignite", {dir: d, with: "torch"})}
+return tileOf(GROUND.has(c) ? g : c).burns ? {text: "Set on fire", ok: true, run: (d) => act("ignite", {dir: d, with: "torch"})}
 : {text: "That won't burn", ok: false};
 }
 if (it === "hoe" && !hasBlock && (g === "." || g === ","))
-return {text: "Till soil", near: 1, run: (d) => act("dig", {dir: d, with: "hoe"})};
+return {text: "Till soil", run: (d) => act("dig", {dir: d, with: "hoe"})};
 if (it === "watering_can" && (c === "Y" || (wet(g) && GROUND.has(c)) || Flow.col(p.x, p.y)))
-return {text: `Fill can (${meObs ? meObs.self.can ?? CAN_SIZE : "?"}/${CAN_SIZE})`, near: 1, run: (d) => act("water", {dir: d, with: "watering_can"})};
+return {text: `Fill can (${meObs ? meObs.self.can ?? RULES.can_size : "?"}/${RULES.can_size})`, run: (d) => act("water", {dir: d, with: "watering_can"})};
 if (it === "watering_can" && (c === ";" || c === '"') && meObs && meObs.self.can === 0) return {text: "The can is empty", ok: false};
 if (it === "watering_can" && (c === ";" || c === '"')) return g === "u" ? {text: "Already watered", ok: false}
-: {text: "Water crop", near: 1, run: (d) => act("water", {dir: d, with: "watering_can"})};
+: {text: "Water crop", run: (d) => act("water", {dir: d, with: "watering_can"})};
 if (it === "watering_can" && !hasBlock && WALKABLE_GROUND.has(g) && !isMe)
-return meObs && (meObs.self.can ?? CAN_SIZE) >= CAN_SIZE ? {text: "Pour water", near: 1, run: (d) => act("water", {dir: d, with: "watering_can", pour: true})} : {text: "Pouring takes a full can", ok: false};
+return meObs && (meObs.self.can ?? RULES.can_size) >= RULES.can_size ? {text: "Pour water", run: (d) => act("water", {dir: d, with: "watering_can", pour: true})} : {text: "Pouring takes a full can", ok: false};
 }
 const sailing = !!(meObs && meObs.self.sailing);
 if (c === "V" && !brk && !sailing) return {text: "Board the boat", walk: true, run: () => act("move_to", {x: p.x, y: p.y})};
 if (sailing && !hasBlock && wet(g)) return {text: "Sail here", walk: true, run: () => act("move_to", {x: p.x, y: p.y})};
-if (!hasBlock && wet(g) && inHand() === "pickaxe" && brk && g !== ")") return {text: "Dig deeper", near: 1, run: (d) => act("dig", {dir: d, with: "pickaxe"})};
+if (!hasBlock && wet(g) && inHand() === "pickaxe" && brk && g !== ")") return {text: "Dig deeper", run: (d) => act("dig", {dir: d, with: "pickaxe"})};
 if (!sailing && !hasBlock && wet(g) && !placingItem()) return {text: "Swim here", walk: true, run: () => act("move_to", {x: p.x, y: p.y})};
 if (sailing && !hasBlock && WALKABLE_GROUND.has(g)) return {text: "Go ashore", walk: true, run: () => act("move_to", {x: p.x, y: p.y})};
 if (hasBlock) {
-if ((c === "C" || c === "q") && !brk) return {text: c === "q" ? "Open basket" : "Open chest", near: 1, run: (d) => act("take", {dir: d})};
+if ((c === "C" || c === "q") && !brk) return {text: c === "q" ? "Open basket" : "Open chest", run: (d) => act("take", {dir: d})};
 if (c === "e" && !brk) return {text: troughAt.has(p.x + "," + p.y) ? "Trough: feeds animals nearby" : "Empty trough: fill it with hay",
-near: 1, run: (d) => act("take", {dir: d})};
+run: (d) => act("take", {dir: d})};
 if (c === "Y" && !brk) return {text: "Well: fills watering cans", info: true};
 if (c === "J" && !brk) return {text: "Coop: hens lay here", info: true};
 if (c === "m" && !brk) return {text: "Picnic blanket: food fills you more", info: true};
-if ((c === "?" || c === "!") && !brk) return {text: "Read", near: 1, run: (d) => act("read_sign", {dir: d})};
-if (c === "X" && !brk) return {text: mailAt.has(p.x + "," + p.y) ? "Read mail" : "Mailbox", near: 1, run: () => openMailPanel(actTarget)};
-if (c === "B" && !brk) return {text: "Sleep", near: 1, run: (d) => act("sleep", {dir: d})};
-if ((c === "&" || c === "^") && !brk) return {text: c === "&" ? "Craft" : "Cook", near: 2, run: () => openCraft()};
+if ((c === "?" || c === "!") && !brk) return {text: "Read", run: (d) => act("read_sign", {dir: d})};
+if (c === "X" && !brk) return {text: mailAt.has(p.x + "," + p.y) ? "Read mail" : "Mailbox", run: () => openMailPanel(actTarget)};
+if (c === "B" && !brk) return {text: "Sleep", run: (d) => act("sleep", {dir: d})};
+if ((c === "&" || c === "^") && !brk) return {text: c === "&" ? "Craft" : "Cook", run: () => openCraft()};
 const crop = cropSpecies(p.x, p.y);
 const text = c === "w" ? `Harvest ${crop}` : c === '"' ? `Uproot ${crop}` : c === ";" ? `Uproot ${crop} sprout` : HARVEST[c] || label(CH[c]);
 if (brk === GATHER.includes(c)) return {text: label(CH[c]), info: true, quiet: true};
 const tool = TOOL_FOR[c], w = inHand();
-if (c === "*" && w !== "pickaxe")
-return {text: meObs && meObs.self.inventory.pickaxe ? "Ore: hold your pickaxe" : "Ore: needs a pickaxe", ok: false};
+const needs = tileOf(c).needs, Name = label(CH[c]).replace(/^./, (l) => l.toUpperCase());
+if (needs && w !== needs) return {text: meObs && meObs.self.inventory[needs] ? `${Name}: hold your ${needs}` : `${Name}: needs a ${needs}`, ok: false};
 const how = tool && w !== tool ? " (slow)" : "";
-return {text: text + how, near: 1, gather: !brk, run: (d) => act("dig", w ? {dir: d, with: w} : {dir: d})};
+return {text: text + how, gather: !brk, run: (d) => act("dig", w ? {dir: d, with: w} : {dir: d})};
 }
 if (wet(g)) return {text: label(CH[g]), info: true};
 if (brk) {
 const takeUp = {_: "Take up the path", n: "Take up the floor", ":": "Take up the bridge"}[g];
-if (takeUp) return {text: takeUp, near: 1, ground: true, run: (d) => act("dig", {dir: d})};
+if (takeUp) return {text: takeUp, ground: true, run: (d) => act("dig", {dir: d})};
 }
 return {text: "Walk here", walk: true, run: () => act("move_to", {x: p.x, y: p.y})};
 }
-const USE_R = 2;
+const reach = (kind, weapon, who) => RULES.reach[kind] + (RULES.long[weapon] || 0) + (RULES.wide[who] || 0);
 const SWING_MS = 420;
 let lastSwing = 0;
-const LAYER = .5;
 function reaches(x, y, r, z, flat) {
 const s = myPos(); if (!s) return false;
-const h = myZ(s.x, s.y), dz = flat ? 0 : ((z === undefined ? settleNear(x, y, h) : z) - h) * LAYER;
+const h = myZ(s.x, s.y), dz = flat ? 0 : ((z === undefined ? settleNear(x, y, h) : z) - h) * RULES.layer;
 return (x - s.x) ** 2 + (y - s.y) ** 2 + dz * dz <= (r + .5) ** 2;
 }
 function landBetween(s, p, z) {
@@ -5436,9 +5315,9 @@ const standsAt = (o) => (o.e && o.e.z !== undefined ? o.e.z : floorAt(o.tx, o.ty
 function inReach(p, it, flat = it.flat) {
 const s = myPos(); if (!s) return false;
 const tiles = it.foot && !it.from ? it.foot : [p];
-const reach = it.attack ? it.near : USE_R, z = it.ent ? standsAt(it.ent) : it.z !== undefined ? it.z : it.at;
+const r = reach(it.reach || "use", it.attack && inHand(), it.ent && it.ent.e.kind), z = it.ent ? standsAt(it.ent) : it.z !== undefined ? it.z : it.at;
 if (!flat && !it.ent && it.z === undefined && it.at !== undefined && !it.ghost && landBetween(s, p, it.at)) return false;
-return tiles.some((q) => reaches(q.x, q.y, reach, z, flat))
+return tiles.some((q) => reaches(q.x, q.y, r, z, flat))
 && !(it.foot && it.from && it.foot.some((q) => q.x === s.x && q.y === s.y));
 }
 const TOO_HIGH = "Out of reach: too high up, or too far down.";
@@ -5489,7 +5368,6 @@ boat: ["boats", 8, 36, 32, 24], mailbox: ["mailbox", 0, 16, 16, 32], fence: ["fe
 sign: ["signs", 0, 0], flag: ["gen", "flag"], bed: ["furniture", 0, 16, 16, 32], chair: ["furniture", 64, 32],
 table: ["furniture", 48, 48], plant: ["furniture", 48, 0, 16, 32], clock: ["furniture", 96, 48], rug: ["furniture", 0, 80], well: ["well", 0, 0, 32, 32], coop: ["coop", 160, 80, 32, 44], picnic_blanket: ["blanket", 2, 8, 44, 32], basket: ["basket", 0, 0], trough: ["barn", 0, 0], hay: ["barn", 0, 16],
 };
-FILLS.stone_block = FILLS.dirt; FILL_HELP.stone_block = "Stone fills holes and shallow water";
 const smalls = new Map();
 function smallArt(img, x, y, w, h, size = 16) {
 const src = document.createElement("canvas"); src.width = w; src.height = h;
@@ -5524,7 +5402,7 @@ function iconCanvas(name) {
 const c = document.createElement("canvas"); c.width = 16; c.height = 16; const g = c.getContext("2d", {willReadFrequently: BARE.has(name)});
 const ic = ICONS[name];
 if (CubeIcon.is(name)) { const im = CubeIcon.px(name, CubeIcon.CELL); if (im) { const [x, y] = CubeIcon.mid(im, 16); g.putImageData(im, x, y); return c; } }
-if (!ic && WEAR[name]) return wearIcon(name);
+if (!ic && RULES.wear[name]) return wearIcon(name);
 if (!ic) { g.fillStyle = "#8a6a55"; g.fillRect(4, 4, 8, 8); return c; }
 if (ic[0] === "gen") { g.drawImage(IMG.gen, GEN[ic[1]] * 16, 0, 16, 16, 0, 0, 16, 16); return BARE.has(name) ? bare(c) : c; }
 const [img, x, y, w = 16, h = 16] = ic;
@@ -5592,7 +5470,7 @@ const el = $("hotbar");
 const order = slotOrder(inv).slice(0, BAR);
 handSync(inv);
 const extra = Object.keys(inv).filter((n) => !order.includes(n));
-const can = meObs ? meObs.self.can ?? CAN_SIZE : CAN_SIZE;
+const can = meObs ? meObs.self.can ?? RULES.can_size : RULES.can_size;
 if (meObs) Held.sync(meObs.self);
 if (selected !== hotWas) { if (hotWas !== undefined && selected) heldName(selected); hotWas = selected; }
 const sig = JSON.stringify(inv) + order.join() + handSlot + can; if (el.dataset.sig === sig) return; el.dataset.sig = sig;
@@ -5602,10 +5480,10 @@ const d = document.createElement("div"); d.className = "slot" + (i === handSlot 
 d.onclick = () => selectSlot(i);
 if (name) {
 d.appendChild(slotIcon(name));
-const how = WEAR[name] ? ` · ${capOf("use")} to wear` : FOODS.includes(name) ? ` · ${capOf("use")} to eat, or feed animals` : name === "watering_can" ? ` · ${can}/${CAN_SIZE} water · click a crop; refill at a well or water`
-: (PLACEABLE_BLOCK[name] || FILLS[name] || name === "seed") ? " · select, click the ground to place" : name === "name_tag" ? " · select, use it on an animal to name it" : "";
+const how = RULES.wear[name] ? ` · ${capOf("use")} to wear` : FOODS.includes(name) ? ` · ${capOf("use")} to eat, or feed animals` : name === "watering_can" ? ` · ${can}/${RULES.can_size} water · click a crop; refill at a well or water`
+: placeable(name) ? " · select, click the ground to place" : name === "name_tag" ? " · select, use it on an animal to name it" : "";
 d.insertAdjacentHTML("beforeend", `<span class="c">${inv[name]}</span><span class="tip">${esc(label(name) + how)}</span>`);
-if (name === "watering_can") d.insertAdjacentHTML("beforeend", `<span class="lvl"><i style="width:${Math.round(can / CAN_SIZE * 100)}%"></i></span>`);
+if (name === "watering_can") d.insertAdjacentHTML("beforeend", `<span class="lvl"><i style="width:${Math.round(can / RULES.can_size * 100)}%"></i></span>`);
 d.ondblclick = () => useSelected(name);
 }
 d.insertAdjacentHTML("beforeend", `<span class="k">${(i + 1) % 10}</span>`);
@@ -5614,7 +5492,12 @@ el.appendChild(d);
 drawBag();
 }
 let hotWas, nameTimer;
-function heldName(n) { const e = $("heldname"); e.textContent = label(n); e.classList.add("on"); clearTimeout(nameTimer); nameTimer = setTimeout(() => e.classList.remove("on"), 1400); }
+const NAME_MS = 1400, BAR_NOTE_MS = 2500;
+function overBar(html, cls, ms) {
+const e = $("heldname"); e.innerHTML = html; e.className = "on" + (cls ? " " + cls : ""); e.dataset.t = Date.now();
+clearTimeout(nameTimer); nameTimer = setTimeout(() => e.classList.remove("on"), ms);
+}
+function heldName(n) { overBar(esc(label(n)), "", NAME_MS); }
 ready.then(() => { const im = IMG.slot; if (!im) return; (() => {
 const c = document.createElement("canvas"); c.width = c.height = 34; const g = c.getContext("2d"), cut = [[0, 15, 0, 15], [15, 1, 15, 4], [16, 14, 19, 15]];
 for (const [sx, sw, dx, dw] of cut) for (const [sy, sh, dy, dh] of cut) g.drawImage(im, sx, sy, sw, sh, dx, dy, dw, dh);
@@ -5664,7 +5547,7 @@ cv.classList.toggle("low", value <= one * 2.5);
 }
 function foodPreview() {
 if (!meObs) return;
-const h = meObs.self.hunger, gain = selected && foodValue[selected] && h < FOOD_MAX ? foodValue[selected] : 0;
+const h = meObs.self.hunger, gain = selected && RULES.food[selected] && h < FOOD_MAX ? RULES.food[selected] : 0;
 drawIcons($("foods"), "food", h, gain && Math.floor(performance.now() / 450) % 2 === 0 ? gain : 0);
 }
 function drawVitals(s) {
@@ -5674,12 +5557,10 @@ const status = s.hunger <= 0 || (SPRINT_FOOD < 0 && s.hunger < 25) ? `Starving: 
 if (walking && walking.run !== sprinting()) syncWalk();
 $("status").textContent = status; $("status").style.display = status ? "block" : "none";
 }
-const FEEDS = ["pumpkin", "cauliflower", "lettuce", "eggplant", "carrot", "fruit", "berries", "mushroom", "wheat", "bread", "hay"];
-const FOODS = ["pumpkin", "cauliflower", "lettuce", "eggplant", "carrot", "fruit", "berries", "mushroom", "egg", "milk", "meat", "cooked_meat", "wheat", "bread"];
 function useSelected(name = selected) {
 if (!name) return toast("Nothing selected.", true);
 if (FOODS.includes(name)) return act("eat", {item: name});
-if (WEAR[name]) return act("wear", {item: name});
+if (RULES.wear[name]) return act("wear", {item: name});
 toast(TOUCH ? `Face a tile and tap the big button to use the ${label(name)}.` : `Face a tile and press ${capOf("use")} (or click it) to use the ${label(name)}.`);
 }
 let mailAtTile = null;
@@ -5708,7 +5589,8 @@ clearTimeout(bannerTimer); bannerTimer = setTimeout(() => $("banner").style.disp
 let toastTimer;
 const NOTE_MS = 6000;
 function toast(msg, bad, stay = NOTE_MS, chat = !msg.includes("`")) {
-if (me && chat && typeof chatLine === "function") { chatLine(msg, bad ? "note bad" : "note sys"); $("chatlog").lastElementChild.dataset.t = Date.now() - (chatKeep() * 1000 - Math.min(stay, chatSmall() ? chatKeep() * 1000 : stay)); }
+if (me && chat && !msg.includes("`") && typeof rich === "function") overBar(rich(msg), bad ? "note bad" : "note", BAR_NOTE_MS);
+else if (me && chat && typeof chatLine === "function") { chatLine(msg, bad ? "note bad" : "note sys"); $("chatlog").lastElementChild.dataset.t = Date.now() - (chatKeep() * 1000 - Math.min(stay, chatSmall() ? chatKeep() * 1000 : stay)); }
 if (bad) sfx("buzz"); $("toastt").textContent = typeof plain === "function" ? plain(msg) : msg; const t = $("toast"); t.style.display = "block"; $("toastt").style.color = bad ? "var(--warn)" : "var(--ink)"; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.style.display = "none", 3200); }
 const isOpen = (id) => $(id).style.display === "block";
 ;
@@ -5835,14 +5717,12 @@ const other = Object.keys(recipes).filter((n) => !listed.has(n));
 return [...RECIPE_GROUPS, ...(other.length ? [["Other", "chest", other]] : [])].map(([t, ic, n]) => [t, ic, n.filter((r) => recipes[r])]);
 }
 function craftState(name) {
-const rc = recipes[name], inv = meObs ? meObs.self.inventory : {};
-const st = rc.station, near = !st || (meObs && meObs.grid.some((row, j) => [...row].some((ch, i) => Math.abs(i - 10) <= 2 && Math.abs(j - 10) <= 2 && CH[ch] === st)));
-const n = Math.min(...Object.entries(rc.inputs).map(([k, v]) => Math.floor((inv[k] || 0) / v)));
-return {have: n >= 1, near, n, inv};
+const s = meObs ? meObs.self : {inventory: {}, craftable: {}, stations: []}, st = recipes[name].station, n = s.craftable[name] || 0;
+return {have: n >= 1, near: !st || s.stations.includes(st), n, inv: s.inventory};
 }
 function craftWhy(name) {
 const s = craftState(name), st = recipes[name].station;
-return !s.have ? "Missing materials" : s.near ? "Enter or the button to make it" : `Go within 2 tiles of a ${label(st)} to make it`;
+return !s.have ? "Missing materials" : s.near ? "Enter or the button to make it" : `Go within ${reach("station")} tiles of a ${label(st)} to make it`;
 }
 const craftOk = (name) => { const s = craftState(name); return s.have && s.near; };
 const capital = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -6206,12 +6086,12 @@ row.appendChild(b);
 function pickRace(key) { myRace = key; localStorage.setItem("megastructure-race", myRace); drawRacePick(); }
 (() => { const row = document.createElement("div"); row.id = "racepick"; $("raceslot").appendChild(row); drawRacePick(); })();
 ;
-const WEAR = {
-straw_hat: ["head", "straw"], sporecap_hat: ["head", "sporecap"], wizard_hat: ["head", "wizard"], gold_crown: ["head", "crown"], iron_helmet: ["head", "iron"], mossback_helm: ["head", "shell"], wool_beanie: ["head", "beanie"], flower_crown: ["head", "flowers"], bandana: ["head", "bandana"], sprout: ["head", "sprout"],
-linen_shirt: ["top", "linen"], red_scarf: ["top", "scarf"], wool_sweater: ["top", "wool"], overalls: ["top", "overalls"], leather_vest: ["top", "leather"], wizard_robe: ["top", "robe"], iron_chestplate: ["top", "iron"], gold_chestplate: ["top", "gold"], mossback_plate: ["top", "moss"],
-linen_shorts: ["pants", "linen"], denim: ["pants", "denim"], red_trousers: ["pants", "red"], leather_chaps: ["pants", "leather"], robe_skirt: ["pants", "robe"], iron_greaves: ["pants", "iron"], gold_greaves: ["pants", "gold"], moss_kilt: ["pants", "moss"],
-leather_boots: ["shoes", "leather"], red_sneakers: ["shoes", "red"], rain_boots: ["shoes", "rain"], blue_slippers: ["shoes", "blue"], iron_boots: ["shoes", "iron"], gold_boots: ["shoes", "gold"], moss_slippers: ["shoes", "moss"],
-sparkle_charm: ["effect", "sparkle"], firefly_charm: ["effect", "fireflies"], leaf_charm: ["effect", "leaves"], heart_charm: ["effect", "hearts"], flame_charm: ["effect", "flame"], frost_charm: ["effect", "frost"], halo_charm: ["effect", "halo"], spore_charm: ["effect", "spores"], flower_charm: ["effect", "flowers"],
+const LOOK = {
+straw_hat: "straw", sporecap_hat: "sporecap", wizard_hat: "wizard", gold_crown: "crown", iron_helmet: "iron", mossback_helm: "shell", wool_beanie: "beanie", flower_crown: "flowers", bandana: "bandana", sprout: "sprout",
+linen_shirt: "linen", red_scarf: "scarf", wool_sweater: "wool", overalls: "overalls", leather_vest: "leather", wizard_robe: "robe", iron_chestplate: "iron", gold_chestplate: "gold", mossback_plate: "moss",
+linen_shorts: "linen", denim: "denim", red_trousers: "red", leather_chaps: "leather", robe_skirt: "robe", iron_greaves: "iron", gold_greaves: "gold", moss_kilt: "moss",
+leather_boots: "leather", red_sneakers: "red", rain_boots: "rain", blue_slippers: "blue", iron_boots: "iron", gold_boots: "gold", moss_slippers: "moss",
+sparkle_charm: "sparkle", firefly_charm: "fireflies", leaf_charm: "leaves", heart_charm: "hearts", flame_charm: "flame", frost_charm: "frost", halo_charm: "halo", spore_charm: "spores", flower_charm: "flowers",
 };
 const WearParts = (() => {
 const rgb0 = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
@@ -6349,7 +6229,7 @@ let analysis = null, measuring = null, pumping = false;
 function made(tint, worn, race = "cat", bot = false, now = true) {
 if (!worn) { const plain = Races.made(race, tint, bot, now); if (!plain && !pumping) pump(); return plain; }
 const o = {head: "none", top: "none", pants: "none", shoes: "none"};
-for (const [slot, item] of Object.entries(worn)) if (WEAR[item] && slot in o) o[slot] = WEAR[item][1];
+for (const [slot, item] of Object.entries(worn)) if (LOOK[item] && slot in o) o[slot] = LOOK[item];
 const key = tint + race + (bot ? "bot" : "") + Object.values(o).join();
 if (sheets.has(key)) return sheets.get(key);
 let job = jobs.get(key); if (!job) { jobs.set(key, job = steps(tint, o, race, bot, key)); if (!pumping) pump(); }
@@ -6487,10 +6367,10 @@ for (const [key, c] of L) if (c === null) L.set(key, line);
 return L;
 }
 const LISTS = {head: HEADS, top: TOPS, pants: PANTS, shoes: SHOES, effect: EFFECTS};
-const look = (name) => LISTS[WEAR[name][0]].find((o) => o.id === WEAR[name][1]);
+const look = (name) => LISTS[RULES.wear[name]].find((o) => o.id === LOOK[name]);
 const icons = new Map();
 function icon(name) {
-if (!icons.has(name)) icons.set(name, itemIcon(WEAR[name][0], look(name)));
+if (!icons.has(name)) icons.set(name, itemIcon(RULES.wear[name], look(name)));
 const c = document.createElement("canvas"); c.width = c.height = 16;
 const g = c.getContext("2d");
 for (const [key, col] of icons.get(name)) { g.fillStyle = col; g.fillRect(key % 16, Math.floor(key / 16), 1, 1); }
@@ -6499,7 +6379,7 @@ return c;
 const STAGE = 64, OX = 8, OY = 14, stage = document.createElement("canvas");
 stage.width = stage.height = STAGE;
 function fx(phase, e, sheet, idx, x0, y0, z, now, walking, back) {
-const item = e.worn && e.worn.effect, fn = item && WEAR[item] && look(item)[phase];
+const item = e.worn && e.worn.effect, fn = item && LOOK[item] && look(item)[phase];
 if (!fn) return;
 const s = stage.getContext("2d");
 s.clearRect(0, 0, STAGE, STAGE);
@@ -6511,7 +6391,7 @@ ctx.drawImage(stage, Math.round(x0 - OX * z), Math.round(y0 - OY * z), STAGE * z
 return {icon, fx};
 })();
 const wearIcon = WearItems.icon, wearFx = WearItems.fx;
-const wearOf = (slots, pick = () => true) => Object.keys(WEAR).filter((n) => slots.includes(WEAR[n][0]) && pick(n));
+const wearOf = (slots, pick = () => true) => Object.keys(LOOK).filter((n) => slots.includes(RULES.wear[n]) && pick(n));
 const isArmor = (n) => /^(iron|gold|leather|moss)/.test(n);
 RECIPE_GROUPS.find(([t]) => t === "Wear")[2].push(...wearOf(["head", "top", "pants", "shoes"], (n) => !isArmor(n)), ...wearOf(["head", "top", "pants", "shoes"], isArmor), ...wearOf(["effect"]));
 const wearingEl = document.createElement("div");
@@ -6537,6 +6417,7 @@ wearingEl.appendChild(d);
 const SWIM = {sink: 5, line: 27, stroke: 260, tread: 700, wakeEvery: 110, wakeLife: 1400, dashStroke: 130, dashEvery: 45, dashLife: 2100};
 function swimsAt(p, e) {
 if (e.sail) return false;
+if (e.kind === "agent" && e.id === myId && Leap.on()) return false;
 const t = tile(Math.round(p.x), Math.round(p.y));
 return t ? (wet(t[1]) && t[0] !== "V") || !!(e.swim && Flow.col(Math.round(p.x), Math.round(p.y))) : !!e.swim;
 }
@@ -6680,7 +6561,7 @@ $("whoat").textContent = s ? `${s.x}, ${s.y}${s.sheltered ? " · sheltered" : ""
 $("whocount").textContent = `${up.length} awake` + (more > 0 ? ` (${more} more)` : "") + (asleep ? ` · ${asleep} asleep` : "");
 }
 ;
-const BAG = {cols: 10, rows: 3, wear: ["head", "top", "pants", "shoes", "effect"],
+const BAG = {cols: 10, rows: 3, get wear() { return RULES.slots; },
 ghost: {head: "straw_hat", top: "linen_shirt", pants: "linen_shorts", shoes: "leather_boots", effect: "sparkle_charm"}};
 const PACK = BAG.cols * BAG.rows;
 let bagAt = {zone: "bar", i: 0}, bagMove = null, bagPage = 0;
@@ -6709,12 +6590,12 @@ const from = bagIndex(bagAt);
 if (from >= BAR) bagSwap(from, handSlot);
 selectItem(name); toggleBag();
 }
-const bagUses = (name, worn) => worn ? "Take off" : FOODS.includes(name) ? "Eat" : WEAR[name] ? "Wear" : "";
+const bagUses = (name, worn) => worn ? "Take off" : FOODS.includes(name) ? "Eat" : RULES.wear[name] ? "Wear" : "";
 function bagUse() {
 const name = bagItem(bagAt); if (!name) return;
 if (bagAt.zone === "wear") act("unwear", {slot: BAG.wear[bagAt.i]});
 else if (FOODS.includes(name)) act("eat", {item: name});
-else if (WEAR[name]) act("wear", {item: name});
+else if (RULES.wear[name]) act("wear", {item: name});
 }
 function bagCarry() {
 if (bagAt.zone === "wear") return;
@@ -6722,6 +6603,20 @@ if (bagMove == null) { if (bagItem(bagAt)) { bagMove = bagIndex(bagAt); sfx("ui"
 else { const to = bagIndex(bagAt); if (to !== bagMove) bagSwap(bagMove, to); bagMove = null; }
 bagDraw(true);
 }
+const facingName = () => { const p = ents.get("agent" + myId); return p ? Object.keys(DIRV).find((k) => DIRV[k][0] === p.fx && DIRV[k][1] === p.fy) : undefined; };
+function dropItem(item, n) { act("drop", {item, n, dir: facingName()}); }
+function dropHeld(all) {
+const inv = meObs ? meObs.self.inventory : {}, n = selected ? inv[selected] || 0 : 0;
+if (!n) return toast("Nothing in hand to drop.", true);
+dropItem(selected, all ? n : 1);
+}
+function bagDrop(idx, all = true) {
+const name = slots[idx], n = name && meObs ? meObs.self.inventory[name] || 0 : 0;
+if (n) dropItem(name, all ? n : 1);
+}
+let bagDragged = null;
+addEventListener("dragover", (e) => { if (bagDragged != null && !e.target.closest("#bag")) e.preventDefault(); });
+addEventListener("drop", (e) => { if (bagDragged == null || e.target.closest("#bag")) return; e.preventDefault(); const i = bagDragged; bagDragged = null; bagDrop(i); });
 function bagCell(at, name, n) {
 const d = name ? craftCell(name, n > 1 ? n : null) : Object.assign(document.createElement("div"), {className: "cell"});
 const idx = at.zone === "wear" ? -1 : bagIndex(at);
@@ -6735,7 +6630,8 @@ d.onclick = () => { bagAt = at; if (bagMove != null) bagCarry(); else bagDraw(tr
 d.ondblclick = () => { bagAt = at; bagHold(); };
 if (at.zone !== "wear") {
 d.draggable = !!name;
-d.ondragstart = (e) => { e.dataTransfer.setData("text/plain", String(idx)); };
+d.ondragstart = (e) => { e.dataTransfer.setData("text/plain", String(idx)); bagDragged = idx; };
+d.ondragend = () => { bagDragged = null; };
 d.ondragover = (e) => e.preventDefault();
 d.ondrop = (e) => { e.preventDefault(); const from = +e.dataTransfer.getData("text/plain"); bagAt = at; bagMove = null; if (from !== idx) bagSwap(from, idx); else bagDraw(true); };
 }
@@ -6769,6 +6665,7 @@ key("Enter", isWorn ? "take off" : "hold", bagHold, !name);
 key("E", isWorn || !use ? "use" : use.toLowerCase(), bagUse, !use || isWorn);
 key("X", "move", bagCarry, !name || isWorn);
 key("1-0", "to bar", null, !name || isWorn);
+key(capOf("drop"), "drop", () => bagDrop(bagIndex(bagAt)), !name || isWorn);
 key("Esc", "close", toggleBag);
 }
 }
@@ -6782,6 +6679,7 @@ sfx("ui");
 } else if (k === "enter" || k === " ") { if (e.repeat) return true; if (bagMove != null) return bagCarry(), true; bagHold(); return true; }
 else if (k === "e") { if (!e.repeat) bagUse(); return true; }
 else if (k === "x") { if (!e.repeat) bagCarry(); return true; }
+else if (k === keyOf("drop")) { if (!e.repeat && bagAt.zone !== "wear") bagDrop(bagIndex(bagAt), e.shiftKey); return true; }
 else if (/^[0-9]$/.test(k)) { if (bagAt.zone !== "wear" && bagItem(bagAt)) { const to = (+k + 9) % 10; if (to !== bagIndex(bagAt)) bagSwap(bagIndex(bagAt), to); bagMove = null; } }
 else if (k === "pagedown" || k === "pageup") bagPage = Math.max(0, Math.min(bagPages() - 1, bagPage + (k === "pagedown" ? 1 : -1)));
 else if (k === "escape" && bagMove != null) bagMove = null;
@@ -6902,15 +6800,13 @@ if (hash(x, y, 20) < .4) glints.push([lx * 16 + Math.floor(hash(x, y, 21) * 14),
 }
 if ((ly & 3) === 3) yield;
 }
-const s = document.createElement("canvas"); s.width = s.height = B + 2;
-const sg = s.getContext("2d"), img = sg.createImageData(B + 2, B + 2);
-for (let j = 0; j < B + 2; j++) for (let i = 0; i < B + 2; i++) {
-const u = under(x0 + i - 1, y0 + j - 1), [r, gg, bb, a] = WATER.tint[u < 0 ? 0 : u];
-img.data.set([r, gg, bb, Math.round(255 * a)], (j * (B + 2) + i) * 4);
-}
-sg.putImageData(img, 0, 0);
-g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high";
-g.drawImage(s, .5, .5, B + 1, B + 1, -8, -8, n + 16, n + 16);
+const m2 = B + 2, tn = new Float32Array(m2 * m2 * 4), img = g.createImageData(n, n), D = img.data;
+for (let j = 0; j < m2; j++) for (let i = 0; i < m2; i++) { const u = under(x0 + i - 1, y0 + j - 1), t = WATER.tint[u < 0 ? 0 : u]; tn.set([t[0], t[1], t[2], 255 * t[3]], (j * m2 + i) * 4); }
+const K = new Int16Array(n), F = new Float32Array(n); for (let v = 0; v < n; v++) { const t = (v - 8) / 16 + 1; K[v] = Math.floor(t); F[v] = Math.round((t - K[v]) * 4) / 4; }
+for (let j = 0; j < n; j++) { const ky = K[j], fy = F[j];
+for (let i = 0; i < n; i++) { const kx = K[i], fx = F[i], a = (ky * m2 + kx) * 4, o = (j * n + i) * 4;
+for (let q = 0; q < 4; q++) D[o + q] = Math.round((tn[a + q] * (1 - fx) + tn[a + 4 + q] * fx) * (1 - fy) + (tn[a + m2 * 4 + q] * (1 - fx) + tn[a + m2 * 4 + 4 + q] * fx) * fy); } }
+g.putImageData(img, 0, 0);
 b.water = {un, land, canvas: c, bed, any, foam, glints, rows, box: box.map((v, i) => (v + (i > 1)) * 16)};
 }
 let waterCv = null, waterView = null;
@@ -7056,11 +6952,10 @@ function facingTile() {
 const p = ents.get("agent" + myId), s = myPos(); if (!p || !s) return null;
 return {x: s.x + (p.fx || 0), y: s.y + (p.fy || (p.fx ? 0 : 1))};
 }
-const INSTANT_DIG = "bFQf;\"w?!rmqyp";
 function isQuick(f) {
 if (f.it.attack || f.it.here) return true;
 const c = combAt(f.p.x, f.p.y);
-return !placingItem() && !!c && INSTANT_DIG.includes(c);
+return !placingItem() && !!c && !!tileOf(c).quick;
 }
 const useful = (it) => it && !it.walk && !it.info && it.ok !== false;
 let foe = null;
@@ -7075,7 +6970,7 @@ function noteFight(e) {
 if (e.attacker === me) foe = {key: entKey(e.target), until: performance.now() + FOE_MS};
 else if (e.target === me) foe = {key: entKey(e.attacker), until: performance.now() + FOE_MS};
 }
-const placingItem = () => selected && (PLACEABLE_BLOCK[selected] || FILLS[selected] || selected === "seed");
+const placingItem = () => selected && placeable(selected);
 const FACED = [{}, {}];
 function facingIntent(alt) {
 const m = FACED[alt ? 1 : 0], p = ents.get("agent" + myId), s = myPos(), hot = !!foe && performance.now() < foe.until;
@@ -7084,12 +6979,12 @@ const out = facingNow(alt);
 Object.assign(m, {clock, obs: meObs, land: landVer, built: Floors.ver, sel: selected, x: s && s.x, y: s && s.y, fx: p && p.fx, fy: p && p.fy, foe, hot, out});
 return out;
 }
-const eatsInHand = () => { const w = inHand(); return w && (FOODS.includes(w) || WEAR[w]) ? w : null; };
+const eatsInHand = () => { const w = inHand(); return w && (FOODS.includes(w) || RULES.wear[w]) ? w : null; };
 function facingNow(alt) {
 const f = facingAny(alt), w = !alt && eatsInHand(), q = facingTile();
 if (!w || (f && f.it.uses && (f.it.uses !== "faced" || (q && f.p.x === q.x && f.p.y === q.y)))) return f;
 const s = myPos();
-return s && {p: {x: s.x, y: s.y}, it: {text: `${WEAR[w] ? "Wear" : "Eat"} ${label(w)}`, self: true, run: () => useSelected(w)}};
+return s && {p: {x: s.x, y: s.y}, it: {text: `${RULES.wear[w] ? "Wear" : "Eat"} ${label(w)}`, self: true, run: () => useSelected(w)}};
 }
 function facingAny(alt) {
 const q = facingTile(), s = myPos(); if (!q || !s) return null;
@@ -7099,9 +6994,9 @@ if (it && it.own) return it.none ? null : {p: it.own, it};
 if (entityAt(q)) return {p: q, it: {text: "Something is in the way", ok: false, ghost: selected}};
 return it ? {p: q, it: it.ok === false || inReach(q, it) ? it : {...it, ok: false, text: TOO_HIGH}} : null;
 }
-const reach = reachOf(inHand()), dist = (o) => Math.abs(o.tx - s.x) + Math.abs(o.ty - s.y);
+const dist = (o) => Math.abs(o.tx - s.x) + Math.abs(o.ty - s.y);
 const near = [...ents.values()]
-.filter((o) => o.e && !(o.e.kind === "agent" && o.e.id === myId) && reaches(o.tx, o.ty, reach, standsAt(o)))
+.filter((o) => o.e && !(o.e.kind === "agent" && o.e.id === myId) && reaches(o.tx, o.ty, reach("melee", inHand(), o.e && o.e.kind), standsAt(o)))
 .sort((a, b) => dist(a) - dist(b));
 const hit = (o) => { const p = {x: o.tx, y: o.ty}, it = intent(p, true); return useful(it) && it.attack ? {p, it} : null; };
 if (alt && foe && performance.now() < foe.until) {
@@ -7117,8 +7012,8 @@ if (useful(faced) && inReach(q, faced) && level(q, faced)) return {p: q, it: fac
 for (const o of near) { const p = {x: o.tx, y: o.ty}, it = intent(p, alt); if (useful(it) && inReach(p, it)) return {p, it}; }
 if (alt) { const d = digAhead(q, hs, s); if (d) return d; }
 const p0 = ents.get("agent" + myId), ring = [];
-for (let dy = -USE_R; dy <= USE_R; dy++) for (let dx = -USE_R; dx <= USE_R; dx++) {
-if ((!dx && !dy) || !reaches(s.x + dx, s.y + dy, USE_R)) continue;
+for (let R = reach("use"), dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
+if ((!dx && !dy) || !reaches(s.x + dx, s.y + dy, R)) continue;
 ring.push({x: s.x + dx, y: s.y + dy, d: Math.max(Math.abs(dx), Math.abs(dy)) + Math.abs(dx) * .01 + Math.abs(dy) * .01 - (dx * p0.fx + dy * p0.fy) * .1});
 }
 ring.sort((a, b) => a.d - b.d);
@@ -7132,7 +7027,7 @@ const elsewhere = wall && floorAt(q.x, q.y) !== z;
 if (z < hs - 2 || entityAt(q) || (top && !elsewhere && !(g && GROUND.has(g) && !":n".includes(g) && !wet(g)))) return null;
 const pick = inHand() === "pickaxe";
 const text = !wall ? "Dig down" : s && topAt(s.x, s.y) > hs ? "Dig on" : s && inHole(s, q, hs) ? "Dig into the wall" : "Dig into the hill";
-return {p: q, it: {text, flat: true, near: 1, cell: z, low: !wall, run: () => act("dig", {dir: dirTo(q), z, ...(pick ? {with: "pickaxe"} : {})})}};
+return {p: q, it: {text, flat: true, cell: z, low: !wall, run: () => act("dig", {dir: dirTo(q), z, ...(pick ? {with: "pickaxe"} : {})})}};
 }
 function inHole(s, q, h) {
 const dx = q.x - s.x, dy = q.y - s.y, wall = (x, y) => landSolid(s.x + x, s.y + y, h + 1);
@@ -7203,7 +7098,7 @@ perform(f.p, f.it);
 }
 function turn(dir) {
 const p = ents.get("agent" + myId); if (!p) return;
-[p.fx, p.fy] = DIRV[dir];
+BodyPlace.face(p, ...DIRV[dir]);
 }
 function selectSlot(i) {
 const was = selected; handSlot = ((i % BAR) + BAR) % BAR; localStorage.setItem("megastructure-hand", handSlot);
@@ -7224,7 +7119,6 @@ $("hotbar").dataset.sig = ""; drawHotbar(inv);
 function cycleHand(step) {
 if (!meObs) return;
 selectSlot(handSlot + step);
-if (selected) toast(`In hand: **${label(selected)}**`);
 }
 let barWheel = 0;
 $("hotbar").addEventListener("wheel", (e) => { e.preventDefault(); barWheel += e.deltaY; if (Math.abs(barWheel) >= 50) { cycleHand(Math.sign(barWheel)); barWheel = 0; } }, {passive: false});
@@ -7245,6 +7139,7 @@ keyq: () => useFacing(true), x: () => useFacing(true),
 r: () => DigUp.run(),
 " ": () => jumpKey(),
 f: () => act("pick_up", {}),
+keyy: (ev) => dropHeld(!!(ev && ev.shiftKey)),
 tab: (ev) => cycleHand(ev && ev.shiftKey ? -1 : 1),
 "`": () => { selectItem(null); },
 c: () => { $("bag").style.display = "none"; toggleCraft(); },
@@ -7338,7 +7233,7 @@ function paintOf(item) {
 if (paints.has(item)) return paints.get(item);
 let px = null;
 try {
-const stone = item === "stone_block", lv = stone ? 5 : 1, d = sheetData(stone ? hillSheet(lv) : dugSheet("soil", 0)), [bx, by] = blobCell(255), ox = stone ? bx * 16 : 0, oy = stone ? by * 16 : 80;
+const stone = item === "stone_block", lv = stone ? 5 : 1, d = sheetData(stone ? hillSheet(lv) : IMG.soil), [bx, by] = blobCell(255), ox = stone ? bx * 16 : 0, oy = stone ? by * 16 : 80;
 px = new Uint32Array(16 * (16 + RELIEF_STEP));
 for (let j = 0; j < 16; j++) for (let i = 0; i < 16; i++) px[j * 16 + i] = d.px[(oy + j) * d.w + ox + i];
 VoxPaint.front(lv, 0, px, 256, 16, 1);
@@ -7568,7 +7463,7 @@ const BLOCK = (it) => it === "roof" || it === "plank";
 const planned = (x, y, z) => { const j = S.plans.get(x + "," + y + "," + z); return !!j && !j.take && j.up && (BLOCK(j.item) || LAND_BLOCKS.has(j.item)) && j.state !== "bad"; };
 const landFits = (x, y, z, soon = planned) => { const s = myPos(); return solidAt(x, y, z) ? "Something is there" : s && s.x === x && s.y === y && z > myZ(x, y) && z <= myZ(x, y) + 2 ? "You stand there"
 : ((N) => N.some(([i, j, k]) => solidAt(x + i, y + j, z + k) || soon(x + i, y + j, z + k)) && N.some(([i, j, k]) => !solidAt(x + i, y + j, z + k)))([[0, 0, -1], [0, 0, 1], ...Object.values(DIRV).map(([dx, dy]) => [dx, dy, 0])]) ? "" : "Nothing holds it"; };
-const piece = () => (selected && meObs && meObs.self.inventory[selected] && (PLACEABLE_BLOCK[selected] || FILLS[selected] || selected === "seed") ? selected : null);
+const piece = () => (selected && meObs && meObs.self.inventory[selected] && placeable(selected) ? selected : null);
 const todo = () => [...S.plans.values()].filter((j) => j.state !== "bad");
 const UNHELD = new Set(["Nothing holds it", "Needs a wall under it", "Stairs go up to something higher beside them", "Needs something taller behind"]);
 function hint(p) { const h = says(p); return h.ok === false && UNHELD.has(h.text) ? {...h, text: "", far: true} : h; }
@@ -7596,7 +7491,7 @@ return why ? {text: why, ok: false, ghost: it, z} : {text: `Place ${label(it)}${
 if (S.plans.has(key(p, L))) return {text: "Planned", ok: false, ghost: it};
 if (!on) return {text: solidAt(p.x, p.y, L) ? "Nothing can go there" : "No floor there: lay one", ok: false, ghost: it, z: L};
 if (SWAP[it] && SWAP[it].includes(what)) return {text: `Place ${label(it)} in its place`, ok: true, ghost: it, swap: true, ...(c ? {z: L} : {})};
-if (c) return what ? {text: "Something is there", ok: false, ghost: it, z: L} : Floors.UP.has(PLACEABLE_BLOCK[it]) ? {text: `Place ${label(it)}`, ok: true, ghost: it, z: L} : {text: "It needs the ground", ok: false, ghost: it, z: L};
+if (c) return what ? {text: "Something is there", ok: false, ghost: it, z: L} : tileOf(PLACEABLE_BLOCK[it]).upstairs ? {text: `Place ${label(it)}`, ok: true, ghost: it, z: L} : {text: "It needs the ground", ok: false, ghost: it, z: L};
 const say = intent(p, false) || {text: "Nothing can go there", ok: false};
 return {...say, text: say.ok === false ? say.text.replace(/^Can't place .* here$/, "Can't go there") : say.text};
 }
@@ -7658,26 +7553,25 @@ const flat = (c) => c.x + "," + c.y, shut = new Set([...S.plans.values()].filter
 for (let i = 0; i < line.length && i < 400; i++) {
 const c = line[i];
 if (Math.max(Math.abs(c.x - j.x), Math.abs(c.y - j.y)) >= 10) return true;
-for (const [dx, dy] of Object.values(DIRV)) { const n = {x: c.x + dx, y: c.y + dy}, k = flat(n); if (!seen.has(k) && !shut.has(k) && plainWalk(n.x, n.y)) { seen.add(k); line.push(n); } }
+for (const [dx, dy] of Object.values(DIRV)) { const n = {x: c.x + dx, y: c.y + dy}, k = flat(n); if (!seen.has(k) && !shut.has(k) && stand(n.x, n.y)) { seen.add(k); line.push(n); } }
 }
 return false;
 }
-const stands = (q, h) => { const c = FLOORS ? Floors.get(q.x, q.y, h) : null; return c ? !SOLID.has(c[1]) : h === groundAt(q.x, q.y) ? plainWalk(q.x, q.y) : surfacesAt(q.x, q.y).includes(h); };
 async function build(j) {
 if (!j.take && !(meObs.self.inventory[j.item] > 0)) return `No ${label(j.item)} left`;
 const at = myPos(); if (j.dig && !j.up && at && at.x === j.x && at.y === j.y && myZ(at.x, at.y) === j.z) { const r = await act("dig_down", meObs.self.inventory.pickaxe ? {with: "pickaxe"} : {}, true); return r && r.ok ? null : (r && (r.detail || r.error)) || "It could not be done"; }
 for (let i = 0; j.tunnel && !j.tried && i < 24 && !open(j.x, j.y, j.z); i++) await new Promise((done) => setTimeout(done, 25));
 if (j.tunnel && !open(j.x, j.y, j.z)) return "It could not be reached";
 const here = () => { const s = myPos(); return {...s, z: myZ(s.x, s.y)}; };
-const ok = (q, h) => (q.x - j.x) ** 2 + (q.y - j.y) ** 2 + ((j.z - h) * LAYER) ** 2 <= (USE_R + .5) ** 2
+const ok = (q, h) => (q.x - j.x) ** 2 + (q.y - j.y) ** 2 + ((j.z - h) * RULES.layer) ** 2 <= (reach("use") + .5) ** 2
 && !(q.x === j.x && q.y === j.y && (j.up ? j.z - h >= 0 && j.z - h <= 2 : true))
 && !(j.steps || []).some(([x, y]) => x === q.x && y === q.y)
 && (!j.tunnel || (Math.abs(q.x - j.x) + Math.abs(q.y - j.y) === 1 && j.z >= h && j.z <= h + 2));
 if (!ok(here(), here().z) || (solid(j) && !wayOut(here(), j))) {
 const s = here(), spots = [];
-for (let dy = -USE_R; dy <= USE_R; dy++) for (let dx = -USE_R; dx <= USE_R; dx++) for (const h of surfacesAt(j.x + dx, j.y + dy)) {
+for (let R = reach("use"), dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) for (const h of surfacesAt(j.x + dx, j.y + dy)) {
 const q = {x: j.x + dx, y: j.y + dy, z: h, far: Math.abs(dx) + Math.abs(dy) > 1 ? 3 : 0};
-if (stands(q, h) && ok(q, h) && !entityAt(q)) spots.push(q);
+if (stand(q.x, q.y, h) && ok(q, h) && !entityAt(q)) spots.push(q);
 }
 const cost = (q) => (solid(j) && !wayOut(q, j) ? 200 : 0) + ([...S.plans.values()].some((o) => o.x === q.x && o.y === q.y) ? 60 : 0) + q.far + Math.abs(q.z - s.z) * 2 + Math.abs(q.x - s.x) + Math.abs(q.y - s.y);
 spots.sort((a, b) => cost(a) - cost(b));
@@ -7896,7 +7790,7 @@ const low = s && !walking;
 if (Leap.can(p) && !low) { Leap.start(p, now, null); return; }
 if (!s) { if (now - p.hop < HOP.ms) return; p.hop = now; rpc("act", {tool: "jump", args: {}}); return; }
 for (const [k, t] of spring) if (t < now) spring.delete(k);
-spring.set(s.x + "," + s.y, now + 3000);
+spring.set(s.x + "," + s.y, now + RULES.spring_s * 1000);
 if (s.way) turn(s.d);
 jumpGoing = !walking;
 rpc("act", {tool: "jump", args: walking ? {at: [s.x, s.y]} : {dir: s.d, at: [s.x, s.y], jump: autoJump()}}).then(() => { jumpGoing = false; if (walking === null && [...keys].some((k) => KEYDIR[k])) syncWalk(); });
@@ -7932,14 +7826,14 @@ if (ox || oy) args.from = mark(p.tx, p.ty);
 const bx = Math.sign(p.x - p.tx), by = Math.sign(p.y - p.ty);
 if (pred && bx === dx && by === dy && trail.length === 1 && srv && (dx ? srv.y : srv.x) === want.lane) { want.at = null; args.cut = true; trail.length = 0; }
 }
-p.fx = dx; p.fy = dy; p.walking = true; p.running = want.run; p.moved = now;
+BodyPlace.face(p, dx, dy); p.walking = true; p.running = want.run; p.moved = now;
 }
 myAction = null; pred = null;
 const mine = want, from = p ? p.tx + "," + p.ty : "";
 rpc("act", {tool: "walk", args}).then((r) => {
 if (walking !== mine) return;
 walking = null; if (p) p.walking = false;
-if (r.ok && r.result.stopped === "blocked") { const q = ents.get("agent" + myId); if (q) { q.fx = dx; q.fy = dy; if (q.tx + "," + q.ty === from) WayShow.mine(); } }
+if (r.ok && r.result.stopped === "blocked") { const q = ents.get("agent" + myId); if (q) { BodyPlace.face(q, dx, dy); if (q.tx + "," + q.ty === from) WayShow.mine(); } }
 });
 }
 function srvAt(now) {
@@ -7959,7 +7853,7 @@ if (at) return d + Math.abs(ax) + Math.abs(ay);
 const al = ax * wx + ay * wy, off = Math.abs(ax * wy) + Math.abs(ay * wx);
 return d || off > .01 ? d + Math.abs(al) + off : al;
 }
-const speedAt = (x, y, p) => { const t = tile(x, y); return (walking.run && !onWater(x, y, p) ? 10 : 5) / (t && wet(t[1]) && !(p.e && p.e.sail) ? SWIM_PACE : 1) / (eating() ? EAT_PACE : 1); };
+const speedAt = (x, y, p) => { const t = tile(x, y); return RULES.pace[walking.run && !onWater(x, y, p) ? "sprint" : "walk"] / (t && wet(t[1]) && !(p.e && p.e.sail) ? SWIM_PACE : 1) / (eating() ? EAT_PACE : 1); };
 const onWater = (x, y, p) => { const t = tile(x, y); return (!SWIM_SPRINT && !!t && wet(t[1])) || !!(p.e && p.e.sail); };
 function walkOn(p, dt, now) {
 const [wx, wy] = DIRV[walking.dir], s = wx || wy, side = wx ? "y" : "x", along = wx ? "x" : "y", lead = leadOf(p, now);
@@ -8076,7 +7970,7 @@ let gen = null, genKey = "", res = null, posKey = "", stoodAt = 0, cur = null, c
 const api = {ms: 0, n: 0, runs: 0, get res() { return res; }, get cur() { return fresh(); }, get busy() { return !!gen; }, get led() { return led; }};
 const W = {solid: (x, y, z) => solidAt(x, y, z), top: (x, y) => topAt(x, y), land: (x, y, z) => z > LOW + 2 && landSolid(x, y, z) && !Floors.built(x, y, z),
 step: (h, x, y, fx, fy) => landAt(h, x, y, fx, fy), ladder: (x, y, z, qx, qy, z2) => Climb.onLadder(x, y, z, qx, qy, z2),
-enter: (x, y, z) => { const c = Floors.get(x, y, z); return c && FLOORS ? !SOLID.has(c[1]) : z !== floorAt(x, y) || plainWalk(x, y); },
+enter: (x, y, z) => stand(x, y, z),
 can: (x, y, h, dx, dy) => topAt(x, y) > h || inHole({x, y}, {x: x + dx, y: y + dy}, h),
 on: (x, y, z, qx, qy) => GROUND.has(combAt(qx, qy)) || floorAt(qx, qy) !== z + 1,
 down: (x, y) => { const c = combAt(x, y); return !!c && GROUND.has(c) && !":n".includes(c); }};
@@ -8216,7 +8110,7 @@ const UP = RELIEF_STEP, bms = new Map(), sils = new Map(), poses = new Map(), SU
 let H = {on: false, night: false, kx: 0, ky: 0, sun: 0}, sid = "";
 function hour() {
 const h = SunLand.hour(), want = !!opt("shadows") && !!opt("depth");
-H = {on: want && h.alpha > .02, night: want && h.dark > .35, kx: Math.round(h.kx * 8) / 8, ky: Math.round(h.ky * 8) / 8, sun: Math.min(1, h.alpha / SunLand.SHADE.alpha)};
+H = {on: want && h.alpha > .02, night: want && Light.now().lamps, kx: Math.round(h.kx * 8) / 8, ky: Math.round(h.ky * 8) / 8, sun: Math.min(1, h.alpha / SunLand.SHADE.alpha)};
 return H;
 }
 const key = () => { hour(); return H.on ? H.kx + "," + H.ky : H.night ? "n" + fireAt.length : "-"; };
@@ -8372,21 +8266,16 @@ if (L !== undefined && c !== "^" && c !== "x") HdSun.thing(out, x, y, L, P, spr[
 const cast = (out, x, y, zl, r, h0, h1, built) => { if (!ghosting && (built || zl === floorAt(x, y))) HdSun.box(out, x, y, built ? floorAt(x, y) : zl, r, h0, h1, built); };
 function shadow(w, d, z) { const l = []; push(l, {x: -Math.round(w / 2), y: -Math.round(d / 2), z, w, d, h: 0, top: oval(w, d), shade: true}); return l; }
 function decal(out, c, x, y, base) { const spr = objectSprite(c, x, y, 0); if (!spr || !spr[0] || !spr[0].width) return; push(out, {x: spr[5] - 1, y: spr[6] - 1, z: base + .5, w: spr[3] + 2, d: spr[4] + 2, h: 0, top: flat(0xff000000, spr[3] + 2, spr[4] + 2, 0xff000000), shade: true}); push(out, {x: spr[5], y: spr[6], z: base + 1, w: spr[3], d: spr[4], h: 0, top: cut(pix(spr[0], spr[1], spr[2], spr[3], spr[4]), 0, spr[3], 0, spr[4])}); }
-const tints = new Map(), L0 = 5, R0 = 11;
-function tint(c, x, y, at) {
-let t = tints.get(c); if (t) return t;
-const P = pix(painted(16, 16, () => Structures.drawWall(c === "+" ? "W" : c, x, y, () => 0, () => 4, 16, 0, 1, at)), 0, 0, 16, 16), cap = P.px[2 * 16 + 8], ink = [P.px[8], P.px[2 * 16 + 5], P.px[2 * 16]].find((v) => solid(v) && v !== cap);
-if (!solid(cap) || !ink) return {ink: 0xff604c75, cap: 0xff6c9ac4}; t = {ink, cap}; tints.set(c, t); return t;
-}
+const L0 = 5, R0 = 11, tint = (c) => Structures.look(c);
 const flat = (v, w, h, inkv, edges = "") => room("f" + [v, w, h, inkv, edges], w, h, (put) => { for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) put(i, j, (edges.includes("n") && !j) || (edges.includes("s") && j === h - 1) || (edges.includes("w") && !i) || (edges.includes("e") && i === w - 1) ? inkv : v); });
 function planks(c, X, w, h) {
-const stone = c === "%", g = stone ? genCell("stone_wall") : null, P = stone ? pix(IMG.gen, g[0], g[1] + 2, 16, 12) : pix(IMG.house_walls, 56, 4, 16, 12);
+const stone = c === "%", P = pix(...Structures.look(c).front, 16, 12);
 return room("p" + [stone, X, w, h], w, h, (put) => { for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) { const v = P.px[((j + 12 - (h % 12)) % 12) * 16 + X + i]; put(i, j, solid(v) ? v : P.px[5 * 16 + 1]); } });
 }
 let ghosting = false; const isWall = (x, y, z) => Structures.WALLS.includes(Floors.thingAt(x, y, z) || "-") || (ghosting && plans.has(x + "," + y + "," + z));
 const doorsAt = new Map(), doorOpen = (x, y) => doorsAt.set(x + "," + y, [x, y]) && [[0, 0], [0, -1], [0, 1], [1, 0], [-1, 0]].some(([dx, dy]) => occupied.has((x + dx) + "," + (y + dy)));
 function wall(out, c, x, y, zl, h) {
-const n = isWall(x, y - 1, zl), s = isWall(x, y + 1, zl), w = isWall(x - 1, y, zl), e = isWall(x + 1, y, zl), T = tint(c, x, y, zl), z = zl * UP;
+const n = isWall(x, y - 1, zl), s = isWall(x, y + 1, zl), w = isWall(x - 1, y, zl), e = isWall(x + 1, y, zl), T = tint(c), z = zl * UP;
 const rows = (hh) => Math.max(1, Math.round(hh * KF()));
 const part = (x0, x1, y0, y1, hh, ed, front, pc = c) => { cast(out, x, y, zl, [x0 - 1, y0 - 1, x1 + 1, y1 + 1], 0, hh); push(out, {x: x0, y: y0, z, w: x1 - x0, d: y1 - y0, h: hh, fh: rows(hh), top: flat(T.cap, x1 - x0, y1 - y0, T.ink, ed), front: front ? planks(pc, x0, x1 - x0, rows(hh)) : null,
 west: x0 === 0 ? null : flat(planksTone(pc), Math.min(16, y1 - y0), rows(hh), T.ink, "n"), east: x1 === 16 ? null : flat(planksTone(pc), Math.min(16, y1 - y0), rows(hh), T.ink, "n")}); };
@@ -8422,7 +8311,7 @@ for (let i = 0; i < 256; i++) { const v = P.px[i]; if (!solid(v)) continue; if (
 push(out, {x: 6, y: -4, z: base + 2 * UP / 12, w: 4, d: 24, h: 9 * UP / 12, fh: 9, top: flat(wood, 4, 24, dark, "wens"), front: flat(wood, 4, 9, dark, "wens"), west: flat(wood, 24, 9, dark, "ns"), east: flat(wood, 24, 9, dark, "ns")});
 }
 let roomK = "", room0 = null, roomZ = 0, roomS = 0;
-function roomNow() { const p = myPos(); if (!p) return null; const L = myZ(p.x, p.y), k = [p.x, p.y, L, Floors.ver, landVer].join(); if (k === roomK) return room0; roomK = k; room0 = null; roomZ = L; roomS = -1e9;
+function roomNow() { const P = HdLevel.place; if (!P || P.free) return null; const p = {x: P.tx, y: P.ty}, L = P.L, k = [p.x, p.y, L, Floors.ver, landVer].join(); if (k === roomK) return room0; roomK = k; room0 = null; roomZ = L; roomS = -1e9;
 const over = (x, y) => { const c = Floors.cells(x, y); if (c) for (const z of c.keys()) if (z > L) return true; return false; }; if (!over(p.x, p.y)) return null;
 const seen = new Set([p.x + "," + p.y]), q = [[p.x, p.y, 0]];
 for (let n = 0; n < q.length && q.length < 120; n++) { const [x, y, d] = q[n]; if (d < 10) for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + dx, Y = y + dy, k2 = X + "," + Y; if (seen.has(k2) || !over(X, Y) || [0, 1, 2, 3].some((dz) => Structures.WALLS.includes(Floors.thingAt(X, Y, L - dz) || "-"))) continue; seen.add(k2); q.push([X, Y, d + 1]); } }
@@ -8435,7 +8324,7 @@ const g = (dx, dy, dz = 0) => { const c = Floors.get(x + dx, y + dy, z + dz); re
 if (kind === "roof") {
 const {up, down, yr, hat} = pitch(x, y, z), w = same(-1, 0), e = same(1, 0);
 const rz = (z - 1) * UP + 7; cast(out, x, y, 0, [-1, -1, 17, 17], 0, rz - floorAt(x, y) * UP + hat(up + .5), true);
-const P = shotOf("roof" + [up, down, w, e], 16, 30, () => Structures.drawRoof(0, 7, 16, up, down, w, e)), E = pix(IMG.house_roof, 16, 64, 16, 7);
+const P = Structures.roofPx(up, down, w, e), E = pix(IMG.house_roof, 16, 64, 16, 7);
 const eave = room("eave", 16, 7, (put) => { for (let j = 0; j < 7; j++) for (let i = 0; i < 16; i++) put(i, j, E.px[j * 16 + i]); }), S = {px: sheet.px, w: SW, key: "eaveS"};
 for (const [y0, y1] of up === Math.floor(yr) ? [[0, 8], [8, 16]] : [[0, 16]]) { const d = y1 - y0, last = y1 === 16;
 push(out, {x: 0, y: y0, z: rz - 7, w: 16, d, h: 7, tilt: [hat(up + y0 / 16), hat(up + y1 / 16)], k: up + y0 / 16 < yr ? .7 : 1, top: cut(P, 0, 16, 7 + y0, 7 + y1), front: last && !down ? eave : null,
@@ -8452,9 +8341,13 @@ push(out, {x: x0, y: y0, z: (z - 1) * UP, w, d, h, top: cut(P, x0, x0 + w, y0, y
 return;
 }
 cast(out, x, y, 0, [-1, -1, 17, 17], 0, (z - floorAt(x, y)) * UP, true);
-const P = shotOf(stairs ? "st" + [x, y, z, Floors.ver, landVer] : "cell" + kind + bits, 16, FH, () => Floors.cell(kind, x, y, z, () => 0, () => shOf(z), 16, 1));
-const tone = P.px[(16 + UP / 2) * 16 + 7] || P.px[8 * 16 + 7] || 0xff5d6290;
-push(out, {x: 0, y: 0, z: (z - 1) * UP, w: 16, d: 16, h: UP, top: g(0, 0, 1) ? null : cut(P, 0, 16, 0, 16), front: g(0, 1) ? null : cut(P, 0, 16, 16, FH), west: g(-1, 0) ? null : flat(tone, 16, UP, tone), east: g(1, 0) ? null : flat(tone, 16, UP, tone)});
+if (stairs) { const P = shotOf("st" + [x, y, z, Floors.ver, landVer], 16, FH, () => Floors.cell(kind, x, y, z, () => 0, () => shOf(z), 16, 1)), tone = P.px[(16 + UP / 2) * 16 + 7] || P.px[8 * 16 + 7] || 0xff5d6290;
+push(out, {x: 0, y: 0, z: (z - 1) * UP, w: 16, d: 16, h: UP, top: null, front: g(0, 1) ? null : cut(P, 0, 16, 16, FH), west: g(-1, 0) ? null : flat(tone, 16, UP, tone), east: g(1, 0) ? null : flat(tone, 16, UP, tone)}); return; }
+const T = pix(IMG.house_walls, 16, 16, 16, 16), F = pix(IMG.house_walls, 56, 9, 16, 7), ink = Structures.look("W").ink, [n, w, e] = [g(0, -1), g(-1, 0), g(1, 0)], ends = (i) => (!w && i === 0) || (!e && i === 15);
+const top = room("plankT" + bits, 16, 16, (put) => { for (let j = 0; j < 16; j++) for (let i = 0; i < 16; i++) put(i, j, (!n && j === 0) || ends(i) ? ink : T.px[j * 16 + i]); });
+const front = room("plankF" + bits, 16, UP, (put) => { for (let j = 0; j < UP; j++) for (let i = 0; i < 16; i++) put(i, j, j === 0 || j === UP - 1 || ends(i) ? ink : F.px[(j % 7) * 16 + i]); });
+const tone = F.px[((UP / 2) % 7) * 16 + 7];
+push(out, {x: 0, y: 0, z: (z - 1) * UP, w: 16, d: 16, h: UP, top: g(0, 0, 1) ? null : top, front: g(0, 1) ? null : front, west: w ? null : flat(tone, 16, UP, tone), east: e ? null : flat(tone, 16, UP, tone)});
 }
 const is = (c, x, y) => "W%+#rm".includes(c) || (c === "g" && x !== undefined && gateSide(x, y));
 function stand(out, c, x, y, zl) {
@@ -8485,13 +8378,13 @@ else run(x, y, (l) => stand(l, PLACEABLE_BLOCK[item], x, y, z === undefined ? fl
 return out;
 }
 function loose(x, y) { const cells = Floors.cells(x, y), out = []; if (cells) for (const [z, [, ch]] of cells) if (ch && !is(ch) && !hid(x, y, z)) out.push([ch, z]); return out; }
-function key(near = true) { const s = near && myAt; let d = ""; if (doorsAt.size > 300) doorsAt.clear(); for (const [x, y] of doorsAt.values()) if ("+g".includes(combAt(x, y) || "-") && doorOpen(x, y)) d += x + "," + y + ";"; return [Floors.ver, s ? [s.x, s.y, s.z] : "", Build.on ? Build.level() : "", sheet.id, d, HdSun.key(), HdLook.cam.pitch].join("|"); }
+function key(near = true) { const P = near && HdLevel.place, s = P && !P.free && {x: P.tx, y: P.ty, z: P.L}; let d = ""; if (doorsAt.size > 300) doorsAt.clear(); for (const [x, y] of doorsAt.values()) if ("+g".includes(combAt(x, y) || "-") && doorOpen(x, y)) d += x + "," + y + ";"; return [Floors.ver, s ? [s.x, s.y, s.z] : "", Build.on ? Build.level() : "", sheet.id, d, HdSun.key(), HdLook.cam.pitch].join("|"); }
 return {at, is, loose, key, painted, ghost, pieced, card, shadow, foot, plans, CARD, sheet, room, pix, pitch};
 })();
 ;
 const HdView = (() => {
 let el = null, g = null, sk = null, skyKey = "", skyVer = 0, one = null, lastKey = "", wordsKey = null, wordsAt = 0, tmp = null;
-const Z = () => zoom * DPR, PAINT = new Set(["fillRect", "clearRect", "strokeRect", "fillText", "strokeText", "drawImage", "fill", "stroke", "putImageData"]), ids = new WeakMap(), strs = new Map(); let nid = 0;
+const Z = () => artPx() * DPR, PAINT = new Set(["fillRect", "clearRect", "strokeRect", "fillText", "strokeText", "drawImage", "fill", "stroke", "putImageData"]), ids = new WeakMap(), strs = new Map(); let nid = 0;
 const sink = () => one || (one = document.createElement("canvas").getContext("2d"));
 const call = (t, k, n, a, b, c, d, e, f, g, h, i) => { const m = t[k];
 switch (n) { case 0: return m.call(t); case 1: return m.call(t, a); case 2: return m.call(t, a, b); case 3: return m.call(t, a, b, c); case 4: return m.call(t, a, b, c, d); case 5: return m.call(t, a, b, c, d, e);
@@ -8520,39 +8413,40 @@ wordsKey = k; wordsAt = now; real.setTransform(1, 0, 0, 1, 0, 0); real.globalAlp
 }
 let recM = null;
 function marks(fn) {
-if (!g) return 0; recM = recM || recorder(g, true); recM.reset(); const keep = ctx; g.setTransform(1 / zoom, 0, 0, 1 / zoom, 0, 0);
+if (!g) return 0; recM = recM || recorder(g, true); recM.reset(); const keep = ctx, u = artPx(); g.setTransform(1 / u, 0, 0, 1 / u, 0, 0);
 ctx = recM.proxy; try { fn(); } finally { ctx = keep; g.setTransform(1, 0, 0, 1, 0, 0); } return recM.hash;
 }
 function fit(w, h) {
 if (!el) { el = document.createElement("canvas"); el.id = "hd"; cv.before(el); g = el.getContext("2d"); }
 if (el.width !== w || el.height !== h) { el.width = w; el.height = h; lastKey = ""; }
-const sw = w * zoom + "px", sh = h * zoom + "px"; if (el.style.width !== sw || el.style.height !== sh) { el.style.width = sw; el.style.height = sh; el.style.transformOrigin = W / 2 + "px " + H / 2 + "px"; }
+const u = artPx(), sw = w * u + "px", sh = h * u + "px";
+if (el.style.width !== sw || el.style.height !== sh) { el.style.width = sw; el.style.height = sh; el.style.transformOrigin = W / 2 + "px " + H / 2 + "px"; }
 if (el.style.display !== "block") { el.style.display = "block"; lastKey = ""; wordsKey = null; }
 }
 function hide() { if (el && el.style.display !== "none") { el.style.display = "none"; wordsKey = null; } }
-function skyOf(w, h, line, sky) {
-const ph = clock.phase || 0, ws = washAt(ph), lf = opt("night") / 100 * .6, light = lightAt(ph).map((v) => Math.round(v + (255 - v) * lf)), step = sky.stars > 0 ? .1 : .5, tq = Math.floor(sky.t / step);
-const c8 = (q) => q.map((v) => Math.round(v * 255)), k = [w, h, line, W, zoom, tq, Math.floor(sky.shift), Math.floor(sky.shift * .6), Math.floor(sky.shift * .3), c8(sky.top), c8(sky.low), c8(sky.cloud), c8(sky.far), c8(sky.near), c8(sky.orb), sky.at.map((v) => Math.round(v * 500)), Math.round(sky.stars * 50), ws.map((v) => Math.round(v * 100) / 100), light].join();
+function skyOf(w, h, line, sky, edge = line) {
+const {wash: ws, lit: light} = Light.now(), step = sky.stars > 0 ? .1 : .5, tq = Math.floor(sky.t / step);
+const c8 = (q) => q.map((v) => Math.round(v * 255)), k = [w, h, line, edge, W, zoom, tq, Math.floor(sky.shift), Math.floor(sky.shift * .6), Math.floor(sky.shift * .3), c8(sky.top), c8(sky.low), c8(sky.cloud), c8(sky.far), c8(sky.near), c8(sky.orb), sky.at.map((v) => Math.round(v * 500)), Math.round(sky.stars * 50), ws.map((v) => Math.round(v * 100) / 100), light].join();
 if (k === skyKey) return; const gl = VoxGL.gl; if (!gl) return; skyKey = k; skyVer++;
 sk = sk || document.createElement("canvas").getContext("2d"); if (sk.canvas.width !== w || sk.canvas.height !== h) { sk.canvas.width = w; sk.canvas.height = h; }
 VoxGL.fit(w, h); gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, w, h); gl.disable(gl.BLEND);
-VoxSky.draw(Object.assign({}, sky, {line, t: tq * step}), W / zoom, h, W / zoom, 1);
+VoxSky.draw(Object.assign({}, sky, {line, edge, t: tq * step}), W / artPx(), h, W / artPx(), 1);
 sk.globalAlpha = 1; sk.globalCompositeOperation = "source-over"; sk.imageSmoothingEnabled = false; sk.drawImage(VoxGL.el, 0, 0);
 sk.globalAlpha = ws[3]; sk.fillStyle = `rgb(${ws.slice(0, 3).join()})`; sk.fillRect(0, 0, w, h); sk.globalAlpha = 1; sk.globalCompositeOperation = "multiply"; sk.fillStyle = `rgb(${light.join()})`; sk.fillRect(0, 0, w, h); sk.globalCompositeOperation = "source-over";
 }
 let chk = null, chkOf = "", chkPat = null, bk = null, pic = null;
 function checker(col) { if (col === chkOf) return chkPat; chk = chk || document.createElement("canvas").getContext("2d"); chk.canvas.width = chk.canvas.height = 4; chk.fillStyle = col; chk.fillRect(0, 0, 2, 2); chk.fillRect(2, 2, 2, 2); chkOf = col; return chkPat = g.createPattern(chk.canvas, "repeat"); }
 function show(o) {
-const {w, h} = o, line = o.sky ? Math.round(o.sky.line / zoom) : 0, low = o.sky ? o.sky.low : [.62, .78, .86]; fit(w, h);
-if (line > 0) skyOf(w, h, line, o.sky);
-const key = [line > 0 ? skyVer : 0, line, low.map((v) => Math.round(v * 255)), o.runs, o.marks, zoom].join("|");
+const {w, h} = o, line0 = o.sky ? Math.round(o.sky.line / zoom) : 0, line = o.sky ? Math.max(line0, Math.round((o.sky.edge || 0) / zoom)) : 0, low = o.sky ? o.sky.low : [.62, .78, .86]; fit(w, h);
+if (line0 > 0) skyOf(w, h, line0, o.sky, line);
+const key = [line0 > 0 ? skyVer : 0, line, low.map((v) => Math.round(v * 255)), o.runs, o.marks, zoom].join("|");
 if (!o.fresh && key === lastKey) return false; lastKey = key;
 const tint = (c, a) => `rgb(${low.map((v, i) => Math.round((v * (1 - a) + c[i] * a) * 255)).join()})`; bk = [[.8, .84, .8, .45], [.36, .64, .8, .65]].map((c) => low.map((v, i) => Math.round((v * (1 - c[3]) + c[i] * c[3]) * 255)));
 g.globalAlpha = 1; g.globalCompositeOperation = "source-over"; g.imageSmoothingEnabled = false; g.fillStyle = tint([.8, .84, .8], .45); g.fillRect(0, 0, w, h);
 if (line > 0 && sk) g.drawImage(sk.canvas, 0, 0);
 g.fillStyle = tint([.36, .64, .8], .65); for (const [run, px] of o.runs) { g.fillRect(run, line, px - run, h - line); for (const ex of [run - 8, px]) { g.save(); g.translate(ex, 0); g.fillStyle = checker(g.fillStyle); g.fillRect(0, line, 8, h - line); g.restore(); } }
 g.drawImage(o.pic, 0, 0); pic = o.pic;
-if (recM && o.marks) { g.setTransform(1 / zoom, 0, 0, 1 / zoom, 0, 0); recM.play(); g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; }
+if (recM && o.marks) { const u = artPx(); g.setTransform(1 / u, 0, 0, 1 / u, 0, 0); recM.play(); g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; }
 return true;
 }
 function read(x, y, w, h) {
@@ -8579,32 +8473,29 @@ return {sink, recorder, words, marks, dump: () => (rec ? rec.ops.map((v) => (Arr
 const HdLevel = (() => {
 const col = (x, y) => Voxels.host.column(x, y), topAt = (x, y) => { const c = col(x, y); return c && c.length ? c[c.length - 1] : 0; };
 const solid = (c, z) => { if (!c) return false; for (let i = 0; i < c.length; i += 2) if (z <= c[i]) return i === 0 || z > c[i - 1]; return false; };
-let trail = [];
+let trail = [], place = null, cov = null;
+function track(p, now) {
+const b = !p.free && BodyPlace.of(p), [L, Lf] = p.free ? [p.z, p.z] : of(p, now);
+place = {tx: b ? b.tx : Math.round(p.x), ty: b ? b.ty : Math.round(p.y), L, Lf, free: !!p.free}; cov = p.free ? {top: L, dep: 0, roof: false, rim: rim(place.tx, place.ty, L)} : cover(place); return place;
+}
+function cover({tx, ty, L}) { const top = topAt(tx, ty); return {top, dep: Math.max(0, top - L), roof: top > L, rim: rim(tx, ty, L)}; }
 function of(p, now) { const r = of0(p, now); if (!(p.e && p.e.kind === "agent" && p.e.id === myId)) return r; const a = Leap.state; return [a ? Math.max(r[0], Math.floor(a.z + .5)) : r[0], Leap.cam(r[1], now)]; }
 function of0(p, now) {
 const H0 = Voxels.host, rx = Math.round(p.x), ry = Math.round(p.y), near = typeof myAt !== "undefined" && myAt && Math.abs(myAt.x - rx) + Math.abs(myAt.y - ry) <= 2;
 const at = (x, y) => { const t = topAt(x, y), s = near ? Floors.standOf(p, x, y) : t; return s >= t && H0.water && H0.water(x, y) && H0.waterTop ? Math.max(s, H0.waterTop(x, y)) : s; };
-const cl = Climb.climbOf(p); if (cl) return [Math.floor(cl.h), cl.h];
+const pl = BodyPlace.of(p), cl = pl.climb; if (cl) return [Math.floor(cl.h), cl.h];
 const lp = p.e && p.e.id === myId && p.e.kind === "agent" ? Leap.level() : null; if (lp) return lp;
 const lz = p.leapAt ? Leap.landedOn(p) : null; if (lz !== null) return [lz, lz];
-const L = at(rx, ry), ax = Math.floor(p.x), ay = Math.floor(p.y), bx = Math.ceil(p.x), by = Math.ceil(p.y); if ((ax === bx && ay === by) || falling(p, now)) return [L, L];
+const L = at(rx, ry), ax = Math.floor(p.x), ay = Math.floor(p.y), bx = Math.ceil(p.x), by = Math.ceil(p.y); if ((ax === bx && ay === by) || pl.fall) return [L, L];
 const la = at(ax, ay), lb = at(bx, by), f = ax === bx ? p.y - ay : p.x - ax;
 const fw = mineWalking(p) && DIRV[walking.dir][0] + DIRV[walking.dir][1] > 0;
 if (mineWalking(p) && (fw ? lb > la && Leap.leapable(ax, ay, la, bx, by) : la > lb && Leap.leapable(bx, by, lb, ax, ay))) return [L, Math.min(la, lb)];
 return [L, Math.abs(la - lb) >= FALL.from ? L : la + (lb - la) * f];
 }
 function over(x, y, L, k, n = 20) { let m = 0; for (let d = 1; d <= n; d++) { const c = col(x, y + d), e = L + (d - .5) * k; if (!c || !c.length || matAt(x, y + d)) continue; for (let i = 0; i < c.length; i += 2) if (c[i] > e && (i ? c[i - 1] : -1e9) < e + k) m = Math.max(m, i && c[i - 1] > e ? 99 : c[i] - e); } return m > 0 && topAt(x, y) > L ? 99 : m; }
-const under = (x, y, L) => topAt(x, y) > L;
-function clear(tx, ty, L, n) { let m = 0; for (let d = 1; d <= n; d++) { const t = topAt(tx, ty + d) - L, w = Math.max(0, Math.min(1, t - 1)); if (w > 0 && !matAt(tx, ty + d)) m = Math.max(m, w * (t - .25) / (d - .5)); } return m ? Math.atan(m * RELIEF_STEP / 16) * 180 / Math.PI : 0; }
-let sk = "", sv = 0;
-const RAYS = Array.from({length: 16}, (_, a) => Array.from({length: 6}, (__, d) => [Math.round(Math.cos(a * Math.PI / 8) * (d + 1)), Math.round(Math.sin(a * Math.PI / 8) * (d + 1))]));
-function steep(tx, ty, L, ver) {
-const key = [tx, ty, L, ver].join(); if (key !== sk) { sk = key; sv = 0; for (const r of RAYS) if (r.some(([i, j]) => !matAt(tx + i, ty + j) && topAt(tx + i, ty + j) >= L + 1)) sv++; }
-return sv >= 10;
-}
-function own(tx, ty, L, cov) {
+function own({tx, ty, L}, roof, cov) {
 if (!cov) { trail = []; return trail; }
-const c = col(tx, ty), roof = topAt(tx, ty) > L; let hi = L + 1; if (roof) while (hi < L + 6 && !solid(c, hi + 1)) hi++;
+const c = col(tx, ty); let hi = L + 1; if (roof) while (hi < L + 6 && !solid(c, hi + 1)) hi++;
 const b = roof ? [tx, ty, L, hi] : [tx, ty, L, L + 1, 1], l = trail[trail.length - 1]; if (l && l[0] === tx && l[1] === ty && l[2] === L) return trail;
 trail = trail.filter((t) => t.length < 5 && (t[0] !== tx || t[1] !== ty) && Math.abs(t[0] - tx) + Math.abs(t[1] - ty) <= 3).slice(-3).concat([b]); return trail;
 }
@@ -8615,7 +8506,6 @@ function veils(x, y, L, at) { const f = box(at, x, y, L), a = at(x, y, L), b = a
 const lw = (b[0] - a[0]) / Math.max(1e-6, c[0] - a[0]);
 for (let d = 1; d <= 20; d++) for (let i = -12; i <= 12; i++) { if (Math.abs(i) > 2 && (i * lw > 0 || Math.abs(i) > 2 + Math.abs(lw) * (topAt(x + i, y + d) - L))) continue;
 const t = topAt(x + i, y + d); if (t > L + 1 && !matAt(x + i, y + d)) { const q = box(at, x + i, y + d, t); if (q && q[1] < f[3] - .5 && q[2] > f[0] + .5 && q[0] < f[2] - .5) return true; } } return false; }
-function shut(tx, ty, L, k) { const d = rim(tx, ty, L) - L; if (d <= 0 || under(tx, ty, L)) return false; let w = 1; for (const s of [-1, 1]) for (let j = 1; j <= 12 && topAt(tx, ty + s * j) < L + 1; j++) w++; return w * k < d; }
 function wall(x, y, z, s) {
 if (!s || !s.top || y <= s.ty) return null;
 if (z > s.L) { for (let j = s.ty + 1; j <= y; j++) { const T = topAt(x, j); if (T >= z) return j === y && T > z ? {y: j, T, B: s.L} : null; } return null; }
@@ -8637,7 +8527,15 @@ const r = me && a && runsOf(me.canvas); if (!r) return;
 const x0 = Math.round(a[0] / zs) - me.fx, y0 = Math.round(a[1] / zs) - me.fy; g.beginPath(); g.rect(-1e5, -1e5, 2e5, 2e5); for (let i = 0; i < r.l.length; i += 3) g.rect((x0 + r.l[i]) * zs, (y0 + r.l[i + 1]) * zs, r.l[i + 2] * zs, zs); g.clip("evenodd");
 }
 const body = (me, a, zs) => { const r = me && a && runsOf(me.canvas); if (!r || !r.b) return null; const x0 = Math.round(a[0] / zs) - me.fx, y0 = Math.round(a[1] / zs) - me.fy; return {x: (x0 + r.b[0]) * zs, y: (y0 + r.b[1]) * zs, w: (r.b[2] - r.b[0]) * zs, h: (r.b[3] - r.b[1]) * zs}; };
-return {of, steep, own, rim, over, under, clear, hides, veils, shut, wall, wallAt, cut, body, get shows() { return sv; }};
+const tall = new Map(); let tallAt = 0;
+const standing = (x, y) => { const key = x + "," + y; let t = tall.get(key); if (t === undefined) { t = topAt(x, y); for (const b of HdThings.at(x, y) || []) t = Math.max(t, floorAt(x, y) + (b.z + (b.h || 0)) / RELIEF_STEP); tall.set(key, t); } return t; };
+function behind(x, y, Z0, k) {
+if (performance.now() - tallAt > 500) { tall.clear(); tallAt = performance.now(); }
+const z = Z0 + 1, x0 = Math.floor(x), y0 = Math.floor(y);
+for (let d = 1; d <= 8; d++) if (standing(x0, y0 + d) > z + (y0 + d - y) * k) return true;
+return false;
+}
+return {track, own, over, hides, behind, veils, wall, wallAt, cut, body, get place() { return place; }, get cover() { return cov; }, coverOf: cover};
 })();
 ;
 const HdEase = (() => {
@@ -8686,7 +8584,8 @@ put({canvas: cell(img, a0, b0, w, h), fx: 8 - dx, fy: 16 - dy + Math.round(Math.
 for (const l of loot) { const s = (now - l.t0) / 1000; if (s < 0) continue; let h = 0, dk = 1, since = 1;
 if (s < l.flight) { h = -(l.vy * s + LOOT_G * s * s / 2); dk = s / l.flight; } else { let u = s - l.flight, m = 0; while (m < LOOT_HOPS.length && u > LOOT_HOPS[m]) u -= LOOT_HOPS[m++]; if (m < LOOT_HOPS.length) { h = LOOT_G * LOOT_HOPS[m] / 2 * u - LOOT_G * u * u / 2; since = u; } }
 const dip = s > l.flight && since < .05 ? 1 : 0;
-put({canvas: ghostIcon(l.name), fx: 5, fy: 11 - Math.round(l.dy * dk) + Math.max(0, Math.round(h * 16)) - dip, x: l.x + .5 + Math.round(l.dx * dk) / 16, y: l.y + .7, z: ground(l.x, l.y), pile: true}); n++; }
+const [ox, oy] = lootFrom(l, dk);
+put({canvas: ghostIcon(l.name), fx: 5, fy: 11 - Math.round(l.dy * dk) + Math.max(0, Math.round(h * 16)) - dip, x: l.x + ox + .5 + Math.round(l.dx * dk) / 16, y: l.y + oy + .7, z: ground(l.x, l.y), pile: true}); n++; }
 last.loot = n; n = 0;
 for (const o of orbs) { if (o.age < 0) continue; const w = Math.max(0, Math.min(1, (o.age - o.homing) / .2)), by = o.y + (UP + .15) * w;
 put({canvas: orb(o.big, Math.sin(o.age * 14 + o.seed) > 0), fx: o.big ? 3 : 2, fy: (o.big ? 4 : 3) + Math.round(o.h * 8 + Math.max(0, by - o.y) * 16), x: o.x, y: by, z: ground(o.x, by)}); n++; }
@@ -8694,7 +8593,7 @@ for (const m of magnets) { const pl = playerNamed(m.who); if (m.age < 0 || !pl) 
 put({canvas: ghostIcon(m.name), fx: 5, fy: 6 + Math.round(lift * 16), x, y: gy, z: ground(x, gy), fade: k > .7 ? (1 - k) / .3 : 1}); n++; }
 last.orbs = n; n = 0;
 for (const f of fireAt) { if (!near(f.x, f.y) || !ok(IMG.gen)) continue; const tall = "TF".includes(combAt(f.x, f.y) || ""), z = Math.max(top(f.x, f.y), ground(f.x, f.y));
-const fl = (tt, dx, up, ax, ay) => put({canvas: cell(IMG.gen, ...genCell(Math.floor(tt * 8 + ax * 3 + ay) % 2 ? "fire1" : "fire0"), 16, 16), fx: 8, fy: 19 + up, x: f.x + .5 + dx, y: f.y + 1, z, lamp: up ? 0 : 2, d: false});
+const fl = (tt, dx, up, ax, ay) => put({canvas: cell(IMG.gen, ...genCell(Math.floor(tt * 8 + ax * 3 + ay) % 2 ? "fire1" : "fire0"), 16, 16), fx: 8, fy: 19 + up, x: f.x + .5 + dx, y: f.y + 1, z, lamp: up ? 0 : Light.lamp("fire"), d: false});
 fl(t, 0, 0, f.x, f.y); if (tall) { fl(t + 1, -.3, 14, f.x + 7, f.y); fl(t + 2, .3, 22, f.x, f.y + 5); }
 if (Math.random() < dt * 6) parts.push({x: f.x + .2 + Math.random() * .6, y: f.y - (tall ? 1.6 : .3), vx: (Math.random() - .5) * .4, vy: -1.2, g: -.5, life: 1.2, age: 0, c: Math.random() < .5 ? "#6b6f73" : "#ffb454", s: 1, by: f.y + .9}); n++; }
 last.fire = n;
@@ -8702,11 +8601,11 @@ last.fire = n;
 const HEART = [".oo.oo.", "owrorro", "orrrrro", ".orrro.", "..oro..", "...o..."];
 function words(seen, at) {
 const c = ctx;
-last.floats = []; if (!seen || !floats.length) return; const t = performance.now() / 1000, u = zoom, S = TS();
+last.floats = []; if (!seen || !floats.length) return; const t = performance.now() / 1000, u = artPx(), S = TS();
 c.textAlign = "center"; c.font = "18px SproutPixel";
 for (const f of floats) { const k = t - f.t; if (k < 0 || k >= 1.4) continue;
 const s = seen.list.find((v) => v.q && v.q.tx === f.x && v.q.ty === f.y), a = s ? at(s.x, s.y, s.z) : at(f.x + .5, f.y + .5, ground(f.x, f.y)); if (!a) continue;
-const x = Math.round(a[0] / u) * u - (f.heart ? 9 : 0), y = Math.round((a[1] - 22 * u - (s && s.q.e && s.q.e.kind === "agent" ? 22 : 0) - k * S * .7) / u) * u;
+const x = Math.round(a[0] / u) * u - (f.heart ? onArt(9) : 0), y = Math.round((a[1] - 22 * zoom - (s && s.q.e && s.q.e.kind === "agent" ? 22 : 0) - k * S * .7) / u) * u;
 c.globalAlpha = 1 - k / 1.4; outlined(f.text, x, y, f.color); last.floats.push([f.text, x, y]);
 if (f.heart) { const hx = x + Math.ceil(c.measureText(f.text).width / 2) + 4, hy = y - 13; HEART.forEach((row, j) => [...row].forEach((ch, i) => { if (ch !== ".") { c.fillStyle = ch === "o" ? "#5b3f36" : ch === "w" ? "#ffd9d0" : "#e8554a"; c.fillRect(hx + i * 2, hy + j * 2, 2, 2); } })); } }
 c.globalAlpha = 1; c.textAlign = "start";
@@ -8714,21 +8613,109 @@ c.globalAlpha = 1; c.textAlign = "start";
 return {add, words, last};
 })();
 ;
+const HdEye = (H) => {
+const {cam, api} = H, EASE = .4;
+let camL = null, camV = 0, lastLf = null, pitN = null, stage = 0, tilt = 0, hl = 0, he = 0, hy = 0;
+function pitch(cov, b0, dt) {
+stage = cov ? 1 : 0; const base = b0, want = base + (api.steep - base) * stage; tilt = pitN === null ? stage : Math.max(0, Math.min(1, tilt + (stage ? 1 : -1) * Math.min(dt, .034) / EASE)); pitN = base + (api.steep - base) * tilt * tilt * (3 - 2 * tilt); cam.pitch = pitN; cam.base = base; cam.want = want;
+return eyeRise(want);
+}
+function level(p, L, Lf, dt) {
+{ const fl = BodyPlace.of(p).fall, air = fl && fl.air, far = camL !== null && Math.abs(Lf - camL); if (air) camV = 0;
+if (camL === null || far > 40) { camL = Lf; camV = 0; } else if (air) camL = Math.max(Math.min(camL, L + 9), camL - 40 * dt); else if (far > 3 || camV) { const e = camL - Lf, a = camV + 12 * e, q = Math.exp(-12 * dt); camL = Lf + (e + a * dt) * q; camV = (camV - 12 * a * dt) * q; if (Math.abs(Lf - camL) < .07 && Math.abs(camV) < 1) { camL = Lf; camV = 0; } }
+else { const d = lastLf === null || fl ? 0 : Lf - lastLf; if (Math.abs(d) < .5) camL += d; const e = Lf - camL; camL = Math.abs(e) < .01 ? Lf : camL + e * (1 - Math.exp(-dt / .1)); }
+lastLf = Lf; }
+return camL;
+}
+api.sky = (t) => { const s = Curve.sky(t); return api.on && hl ? Object.assign({}, s, {line: Math.round(hl) * zoom, edge: Math.round(Math.max(hl, he)) * zoom}) : s; };
+let hKey = "", hRaw = 1e9;
+function horizon(tx, ty, L) { const hk = [tx, ty, L, cam.pitch.toFixed(1), Math.round(camL * 8), H.eng.stamp, api.builds, H.making].join(); let y = hRaw; if (hk !== hKey) { hKey = hk; y = -1e9; for (let dx = -18; dx <= 18; dx += 9) { let m = 1e9; for (let dn = 6; dn <= 22; dn += 2) { const c = Voxels.host.column(tx + dx, ty - dn), a = H.eng.at(tx + dx + .5, ty - dn, c && c.length ? c[c.length - 1] : L); if (a) m = Math.min(m, a[1]); } if (m < 1e8) y = Math.max(y, m); } if (y < -1e8) y = 1e9; hRaw = y; } hy = y < 1e8 ? y : -1e9; }
+let lowKey = "", lowL = 1; const eyeC = {k: "", y: 0}, edgeC = {k: "", y: 0};
+function eyeLine(at, w, h, low, C) { const lv = Math.min(at[2] - .5, low), k = [cam.pitch.toFixed(2), cam.fov, api.bend, w, h, Math.round(lv * 16), Math.round(at[2] * 16)].join(); if (k !== C.k) { let m = 1e9; for (let dn = 1; dn <= H.R + 40; dn++) { const a = H.eng.at(at[0], at[1] - dn, lv); if (a && isFinite(a[1])) m = Math.min(m, a[1]); } C.k = k; C.y = m < 1e8 ? m : 0; } return C.y; }
+function lowAhead(tx, ty) { const H0 = Voxels.host, k = [tx >> 2, ty >> 2, H.eng.stamp].join(); if (k === lowKey) return lowL; lowKey = k; let m = 1e9;
+for (let dy = 6; dy <= H.R + 40; dy += 4) for (let dx = -H.R; dx <= H.R; dx += 4) { const x = tx + dx, y = ty - dy, c = H0.column(x, y); m = Math.min(m, !c ? H.SEA_L : H0.water(x, y) ? H0.waterTop(x, y) : c.length ? c[c.length - 1] : H.SEA_L); }
+return api.low = lowL = m; }
+function lines(tx, ty, L, at, w, h, dt) {
+horizon(tx, ty, L); const ease = (v, t) => !v || Math.abs(t - v) < .5 ? t : v + (t - v) * (1 - Math.exp(-dt / .25)), lw = lowAhead(tx, ty), te = Math.max(8, eyeLine(at, w, h, lw, edgeC) + 2);
+{ const t = Math.max(8, eyeLine(at, w, h, 1e9, eyeC) + 2); hl = tilt > 0 && tilt < 1 ? t : ease(hl, t); } he = ease(he, te); api.line = [Math.min(at[2] - .5, lw), te - 2];
+}
+return {pitch, level, lines, get camL() { return camL; }, get tilt() { return tilt; }, get above() { return !!stage; }, get hy() { return hy; }};
+};
+;
+const HdLamps = (K) => {
+let lit = null;
+const SOFT = Array(24).fill(.01);
+function hour(w, h, list) {
+const H = Light.now(), {wash, dark} = H;
+if (wash[3] <= .004 && dark <= .01) return null;
+if (!H.lamps) return {wash, tint: H.lit};
+lit = lit || document.createElement("canvas"); if (lit.width !== w || lit.height !== h) { lit.width = w; lit.height = h; lit._k = ""; }
+const lamps = []; for (const s of list) if (s.lamp) { const a = K.eng.at(s.x, s.y, s.z); if (a) lamps.push(Math.round(a[0] * 4), Math.round(a[1] * 4), s.lamp); }
+const lk = [H.lit, dark.toFixed(3), lamps, K.api.builds].join(), out = {wash, lit}; if (lk === lit._k) return out; lit._k = lk; lit._v = (lit._v || 0) + 1;
+const q = lit.getContext("2d"); q.globalAlpha = 1; q.globalCompositeOperation = "source-over"; q.fillStyle = `rgb(${H.lit.join()})`; q.fillRect(0, 0, w, h); q.globalCompositeOperation = "lighter";
+for (const s of list) if (s.lamp) { const a = K.eng.at(s.x, s.y, s.z), cl = s.top ? HdLevel.cover.roof : K.topAt(Math.floor(s.x), Math.floor(s.y)) > (s.zs ?? s.z); if (s.top) K.api.youLit = !cl || !!K.winMap().size;
+if (!a) continue; if (cl) { q.save(); winPath(q, Math.floor(s.x), Math.floor(s.y)); q.clip(); }
+if (s.lamp > 1 || cl) lamp(q, a[0], a[1] - 8, s.lamp > 1 ? 64 : 42, s.lamp > 1 ? "rgb(255,176,96)" : "rgb(255,222,170)", (s.lamp > 1 ? 1.15 : .45) * H.k, [0, 0]);
+else if (H.open > 0) lamp(q, a[0], a[1] - 8, 72, "rgb(255,232,200)", H.open, [0, 0], SOFT);
+if (cl) q.restore(); }
+q.globalAlpha = 1; return out;
+}
+function winPath(q, tx, ty) {
+q.beginPath(); const quad = (l) => { const a = l.map((v) => K.eng.at(...v)); let ar = 0; for (let i = 0; i < 4; i++) ar += a[i][0] * a[(i + 1) % 4][1] - a[(i + 1) % 4][0] * a[i][1]; if (ar < 0) a.reverse(); q.moveTo(...a[0]); for (let i = 1; i < 4; i++) q.lineTo(...a[i]); q.closePath(); };
+for (const [x, y, lo, hi] of K.eng.win.tiles) if (Math.abs(x - tx) <= 9 && Math.abs(y - ty) <= 9) { quad([[x, y, lo], [x + 1, y, lo], [x + 1, y + 1, lo], [x, y + 1, lo]]);
+for (const e of [[[x, y], [x + 1, y]], [[x, y], [x, y + 1]], [[x + 1, y], [x + 1, y + 1]]]) quad([[...e[0], lo], [...e[1], lo], [...e[1], hi], [...e[0], hi]]); }
+}
+return {hour};
+};
+;
+const HdPick = (K) => {
+const api = K.api;
+function boxed(x, y, lo) {
+let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+for (const b of HdThings.at(x, y) || []) if (!b.shade && (lo === undefined || (b.z < lo + 20 && b.z + b.h > lo - 2))) for (let n = 0; n < 8; n++) { const p = api.screenOf(x + (b.x + (n & 1) * b.w) / 16, y + (b.y + (n >> 1 & 1) * b.d) / 16, (b.z + (n >> 2) * b.h) / RELIEF_STEP); if (p) { x0 = Math.min(x0, p[0]); y0 = Math.min(y0, p[1]); x1 = Math.max(x1, p[0]); y1 = Math.max(y1, p[1]); } }
+return x1 > x0 ? {x: x0, y: y0, w: x1 - x0, h: y1 - y0} : null;
+}
+api.pick = (mx, my, zf) => {
+if (!K.eng || !K.seen) return null;
+const inq = (P, q) => { let s = 0; for (let i = 0; i < 4; i++) { const a = q[i], b = q[(i + 1) % 4], c = (b[0] - a[0]) * (P[1] - a[1]) - (b[1] - a[1]) * (P[0] - a[0]); if (c && s && Math.sign(c) !== s) return false; if (c) s = Math.sign(c); } return true; };
+const wmp = K.winMap(), flr = (x, y) => { const b = wmp.get(x + "," + y), t = K.topAt(x, y); return b ? Math.min(t, b[0]) : t; }, zo = (x, y) => (zf ? zf(x, y) : Models.up(x, y) ? liftAt(x, y) / zoom / RELIEF_STEP : flr(x, y)), part = (q) => Math.max(0, Math.min(.999, (my - Math.min(q[0][1], q[1][1])) / Math.max(1, Math.max(q[2][1], q[3][1]) - Math.min(q[0][1], q[1][1]))));
+if (!zf && wmp.size) for (const [x, y, lo, hi] of K.eng.win.tiles.slice().sort((a, b) => b[1] - a[1])) { const q = [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]].map(([a, b]) => api.screenOf(a, b, lo)); if (q.every((v) => v) && inq([mx, my], q)) return {x, y, fy: part(q)};
+if (!wmp.has(x + "," + (y - 1)) && K.topAt(x, y - 1) > lo) { const f = [[x, y, Math.min(hi, K.topAt(x, y - 1))], [x + 1, y, Math.min(hi, K.topAt(x, y - 1))], [x + 1, y, lo], [x, y, lo]].map((v) => api.screenOf(...v)); if (f.every((v) => v) && inq([mx, my], f)) return {x, y: y - 1, fy: .999, face: true, down: Math.floor(part(f) * (Math.min(hi, K.topAt(x, y - 1)) - lo))}; } }
+for (let y = K.seen.ty + K.south; y >= K.seen.ty - K.R; y--) for (let x = K.seen.tx - K.R; x <= K.seen.tx + K.R; x++) {
+if (!zf) { const c0 = combAt(x, y), pb = c0 && "W%+#g".includes(c0) && HdThings.is(c0, x, y) ? boxed(x, y) : null; if (pb && mx >= pb.x && mx <= pb.x + pb.w && my >= pb.y && my <= pb.y + pb.h) return {x, y, fy: .5}; }
+const z = zo(x, y), zs = zf ? z : zo(x, y + 1);
+if (zs < z) { const q = [[x, y + 1, z], [x + 1, y + 1, z], [x + 1, y + 1, zs], [x, y + 1, zs]].map((v) => api.screenOf(...v)); if (q.every((v) => v) && inq([mx, my], q)) return {x, y, fy: .999, face: true, down: Math.floor(part(q) * (z - zs))}; }
+const q = [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]].map(([a, b]) => api.screenOf(a, b, z));
+if (q.every((v) => v) && inq([mx, my], q)) return {x, y, fy: part(q)};
+}
+return null;
+};
+api.catSeen = (box) => {
+const s = K.seen && K.seen.me; if (!s || !K.eng) return 0; const a = K.eng.at(s.x, s.y, s.z); if (!a) return 0;
+const sg = s.canvas.getContext("2d").getImageData(0, 0, s.canvas.width, s.canvas.height).data, g = HdView.read(0, 0, K.cv.width, K.cv.height).data;
+let n = 0, ok = 0, out = 0; const B = box && box.map((v) => v * K.cv.width / innerWidth);
+for (let j = 0; j < s.canvas.height; j++) for (let i = 0; i < s.canvas.width; i++) { const o = (j * s.canvas.width + i) * 4; if (sg[o + 3] < 128) continue; n++;
+const X = Math.floor((Math.round(a[0]) - s.fx + i + .5) * K.Z()), Y = Math.floor((Math.round(a[1]) - s.fy + j + .5) * K.Z()), p = (Y * K.cv.width + X) * 4;
+if (X >= 0 && Y >= 0 && X < K.cv.width && Y < K.cv.height && Math.abs(g[p] - sg[o]) + Math.abs(g[p + 1] - sg[o + 1]) + Math.abs(g[p + 2] - sg[o + 2]) < 60) { ok++; if (B && (X < B[0] || X > B[2] || Y < B[1] || Y > B[3])) out++; } }
+return box ? [n ? ok / n : 0, out] : n ? ok / n : 0;
+};
+return {boxed};
+};
+;
 const HdLook = (() => {
-const GROW = .25, EASE = .4, HOLD = 300, CAP = 20, R = 24, SEA_L = 1, PART = .25, FAR = 64, EDGE = 32;
+const GROW = .25, HOLD = 300, CAP = 20, R = 24, SEA_L = 1, PART = .25, MOST = .75, FAR = 64, EDGE = 32;
 const STEEP = 58;
-const NARROW = 5;
 const cfg = {levels: [-9, 12], variants: 4, up: RELIEF_STEP, rock: {from: 5, lo: -512, n: 4}};
 const cam = {kind: "persp", pitch: 36, fov: 26};
-const api = {eye: null, get on() { return !!this.eye || (!!me && myId !== null); }, u: 0, ms: 0, build: 0, slice: 0, live: false, drew: false, get busy() { return !!gen || (warmOn && warm < 3); }, get warm() { return warm; }, get part() { return (eng ? gen ? eng.part : 1 : 0) * .8 + (warm + 1) / 20; }, get win() { return eng ? eng.win : {n: 0, a: 0, tiles: []}; }, steep: STEEP, nowin: false, edge: "B", force: null, cam, bend: .03, faces: 0, builds: 0, n: 0};
-let hidAt = -1e9, bareAt = false, camL = null, clr = null, pitN = null, stage = 0, tilt = 0, flip = 0, covAt = -1e9, grow = 0, wantG = 0, genG = 0, shownG = 0, south = 8, gen = null, seen = null, eng = null, key = "", ver = -1, last = performance.now(), lit = null, hl = 0, hy = 0, since = 0, hurry = false, cand = null, candKey = "", noGL = false, wrote = false, keyNear = "", keyFar = "", slice1 = 0, camV = 0, lastLf = null, anc = null, ancG = null, genAt = null, landAt = null, held = false, heldAt = 0, wasAt = null, jump = true, genC = null, shownC = null, spent = 0, warm = -1, warmOn = false;
+const api = {eye: null, get on() { return !!this.eye || (!!me && myId !== null); }, u: 0, ms: 0, build: 0, slice: 0, live: false, drew: false, get busy() { return !!gen || (warmOn && warm < 3); }, get warm() { return warm; }, get part() { return (eng ? gen ? eng.part : 1 : 0) * .8 + (warm + 1) / 20; }, get win() { return eng ? eng.win : {n: 0, a: 0, tiles: []}; }, steep: STEEP, nowin: false, landOnly: false, edge: "B", force: null, cam, bend: .03, faces: 0, builds: 0, n: 0};
+let hidAt = -1e9, bareAt = false, covAt = -1e9, grow = 0, wantG = 0, genG = 0, shownG = 0, south = 8, gen = null, seen = null, eng = null, key = "", ver = -1, last = performance.now(), since = 0, hurry = false, cand = null, candKey = "", noGL = false, wrote = false, keyNear = "", keyFar = "", slice1 = 0, anc = null, ancG = null, genAt = null, landAt = null, held = false, heldAt = 0, wasAt = null, jump = true, genC = null, shownC = null, spent = 0, warm = -1, warmOn = false;
 const sprs = new Map(), lads = new Map(), things = new Map(), piles = new Map(), built = new Map(), stoodOf = new Map();
 let YK = new Float64Array(512); const byY = (l) => { const n = l.length; if (YK.length < n) YK = new Float64Array(n * 2); for (let i = 0; i < n; i++) YK[i] = l[i].y;
 for (let i = 1; i < n; i++) { const k = YK[i]; if (!(k < YK[i - 1])) continue; const o = l[i]; let j = i - 1; while (j >= 0 && k < YK[j]) { YK[j + 1] = YK[j]; l[j + 1] = l[j]; j--; } YK[j + 1] = k; l[j + 1] = o; } };
-const Z = () => zoom * DPR;
+const Z = () => artPx() * DPR;
 const mix = (a, b, k) => Array.isArray(a) ? a.map((v, i) => v + (b[i] - v) * k) : a + (b - a) * k;
 function ent(p, now, z) {
-const T = P, j = jumping(p, now), fl = j && falling(p, now), off = fl ? liftOf(p) / zoom - z * RELIEF_STEP : 0, up = j ? Math.max(0, Math.ceil((j.body + off) * (fl ? Math.cos(cam.pitch * Math.PI / 180) : 1))) : 0, fo = fl ? Math.round(j.body) - up : 0, w = T * 4, h = Math.ceil((T * 5 + up) / 32) * 32, base = h - T * 1.5 + fo;
+const T = P, pl = BodyPlace.of(p), j = pl.jump, fl = j && pl.fall, off = fl ? liftOf(p) / zoom - z * RELIEF_STEP : 0, up = j ? Math.max(0, Math.ceil((j.body + off) * (fl ? Math.cos(cam.pitch * Math.PI / 180) : 1))) : 0, fo = fl ? Math.round(j.body) - up : 0, w = T * 4, h = Math.ceil((T * 5 + up) / 32) * 32, base = h - T * 1.5 + fo;
 let pc = sprs.get(p) || document.createElement("canvas"); sprs.set(p, pc); if (pc.width !== w || pc.height !== h) { pc.width = w; pc.height = h; }
 const g = pc.getContext("2d", {willReadFrequently: true}); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, w, h); g.imageSmoothingEnabled = false;
 const keep = ctx, kz = zoom, sx = (x) => w / 2 - T / 2 + (x - p.x) * T, sy = Object.assign((y) => base + (y - p.y) * T, {up: (y) => base + (y - p.y) * T, apart: true});
@@ -8750,9 +8737,9 @@ const zOn = (q, x, y) => { const a = q.zAt, w = q.zWas; if (a && a.x === x && a.
 const solidAt = (c, z) => { for (let i = 0; i < c.length; i += 2) if (z <= c[i]) return i === 0 || z > c[i - 1]; return false; };
 function under(x, y, z, px, at, st) {
 const g0 = gndAt(x, y), put = topAt(x, y) === z && matAt(x, y) === "d"; if (!put && (topAt(x, y) <= z || (g0 !== "." && g0 !== ","))) return false;
-const lv = VoxPaint.level(x, y, z), d = sheetData(lv >= 5 ? hillSheet(lv) : dugSheet("soil", Math.max(0, Math.min(3, -lv)))), [bx, by] = blobCell(255), pl = hash(x, y, 3) >= .8;
-const sx = pl ? bx * 16 : Math.floor(hash(x, y, 4) ** 2 * 5) * 16, sy = pl ? by * 16 : (5 + (hash(x, y, 5) < .5 ? 0 : 1)) * 16;
+const lv = VoxPaint.level(x, y, z), d = sheetData(lv >= 5 ? hillSheet(lv) : IMG.soil), [sx, sy] = plainCell(null, x, y, .8);
 for (let j = 0; j < 16; j++) for (let i = 0; i < 16; i++) px[at + j * st + i] = d.px[(sy + j) * d.w + sx + i];
+if (lv < 5) deepen(px, at, st, 16, Math.max(-3, lv), "floor");
 if (!put) VoxPaint.rim(x, y, z, px, at, st); return true;
 }
 function shore(x, y, z, px, at, st) {
@@ -8772,28 +8759,9 @@ const sea = x <= tx + R && n >= 3, a = eng.at(x, ty - 14, 0), px = x <= tx - R ?
 if (sea && run === null) run = px; if (!sea && run !== null) { runsOf.push([run, px]); run = null; } }
 return runsOf;
 }
-function hour(w, h, list, el) {
-const ph = clock.phase || 0, tint = lightAt(ph).map((v) => v + (255 - v) * el), wash = washAt(ph), dark = Math.min(1, (1 - (.3 * tint[0] + .59 * tint[1] + .11 * tint[2]) / 255) / .36);
-if (wash[3] * (1 - el) <= .004 && dark <= .01) return null;
-const lift = opt("night") / 100 * .6; if (dark <= .2) return {wash: [wash[0], wash[1], wash[2], wash[3] * (1 - el)], tint: tint.map((v) => Math.round(v + (255 - v) * lift))};
-lit = lit || document.createElement("canvas"); if (lit.width !== w || lit.height !== h) { lit.width = w; lit.height = h; lit._k = ""; }
-const base = tint.map((v) => Math.round(v + (255 - v) * lift)), lamps = []; for (const s of list) if (s.lamp) { const a = eng.at(s.x, s.y, s.z); if (a) lamps.push(Math.round(a[0] * 4), Math.round(a[1] * 4), s.lamp); }
-const lk = [base, dark.toFixed(3), lamps, api.builds].join(), out = {wash: [wash[0], wash[1], wash[2], wash[3] * (1 - el)], lit}; if (lk === lit._k) return out; lit._k = lk; lit._v = (lit._v || 0) + 1;
-const q = lit.getContext("2d"); q.globalAlpha = 1; q.globalCompositeOperation = "source-over"; q.fillStyle = `rgb(${tint.map((v) => Math.round(v + (255 - v) * lift)).join()})`; q.fillRect(0, 0, w, h);
-if (dark > .2) { q.globalCompositeOperation = "lighter"; const k = (dark - .2) / .8;
-for (const s of list) if (s.lamp) { const a = eng.at(s.x, s.y, s.z), cl = topAt(Math.floor(s.x), Math.floor(s.y)) > (s.zs ?? s.z); if (s.top) api.youLit = !cl || !!winMap().size;
-if (!a) continue; if (cl) { q.save(); winPath(q, Math.floor(s.x), Math.floor(s.y)); q.clip(); }
-lamp(q, a[0], a[1] - 8, s.lamp > 1 ? 64 : 42, s.lamp > 1 ? "rgb(255,176,96)" : "rgb(255,222,170)", (s.lamp > 1 ? 1.15 : .45) * k, [0, 0]); if (cl) q.restore(); } }
-q.globalAlpha = 1; return out;
-}
-function winPath(q, tx, ty) {
-q.beginPath(); const quad = (l) => { const a = l.map((v) => eng.at(...v)); let ar = 0; for (let i = 0; i < 4; i++) ar += a[i][0] * a[(i + 1) % 4][1] - a[(i + 1) % 4][0] * a[i][1]; if (ar < 0) a.reverse(); q.moveTo(...a[0]); for (let i = 1; i < 4; i++) q.lineTo(...a[i]); q.closePath(); };
-for (const [x, y, lo, hi] of eng.win.tiles) if (Math.abs(x - tx) <= 9 && Math.abs(y - ty) <= 9) { quad([[x, y, lo], [x + 1, y, lo], [x + 1, y + 1, lo], [x, y + 1, lo]]);
-for (const e of [[[x, y], [x + 1, y]], [[x, y], [x, y + 1]], [[x + 1, y], [x + 1, y + 1]]]) quad([[...e[0], lo], [...e[1], lo], [...e[1], hi], [...e[0], hi]]); }
-}
 function written(p, now, words) {
 if (p.free && !words) return;
-const S = TS(), art = (a) => a && [Math.round(a[0] / zoom) * zoom, Math.round(a[1] / zoom) * zoom], F = art(api.screenOf(seen.at[0], seen.at[1], seen.at[2])), who = (v, ax) => { for (const s of seen.list) if (s.q && s.q[ax] === v) { const a = s === seen.me ? F : art(api.screenOf(s.x, s.y, s.z)); return a && s.fo && ax === "y" ? [a[0], a[1] + s.fo * zoom] : a; } return null; };
+let col = []; const S = TS(), art = (a) => a && [onArt(a[0]), onArt(a[1])], F = art(seen.me ? api.screenOf(seen.me.x, seen.me.y, seen.me.z) : api.screenOf(seen.at[0], seen.at[1], seen.at[2])), who = (v, ax) => { let s = ax === "y" && col.find((c) => c.q.y === v); if (!s) { const m = seen.list.filter((c) => c.q && c.q[ax] === v); if (ax === "x") col = m; s = m[0]; } if (!s) return null; const a = s === seen.me ? F : art(api.screenOf(s.x, s.y, s.z)); return a && s.fo && ax === "y" ? [a[0], a[1] + s.fo * zoom] : a; };
 const sx = (x) => { const a = who(x, "x"); return a ? a[0] - S / 2 : F[0] - S / 2 + (x - p.x) * S; }, fy = (y) => { const a = who(y, "y"); return a ? a[1] - S / 2 : F[1] - S / 2 + (y - p.y) * S; }, sy = Object.assign(fy, {up: fy, out: fy});
 const px = zoom / seen.k, t = now / 1000, snap = (v) => Math.round(v / px) * px, quad = (x, y, z) => [[0, 0], [1, 0], [1, 1], [0, 1]].map(([a, b]) => api.markOf(x + a, y + b, z));
 const corners = (c, col) => { for (const [cl, o] of [["#5b3f36", px], [col, 0]]) { ctx.fillStyle = cl; c.forEach((a, i) => { for (const b of [c[(i + 1) % 4], c[(i + 3) % 4]]) { const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) * .3 / px)); for (let j = 0; j <= n; j++) ctx.fillRect(snap(a[0] + (b[0] - a[0]) * j / n * .3), snap(a[1] + (b[1] - a[1]) * j / n * .3) + o, px, px); } }); } };
@@ -8836,28 +8804,18 @@ if (Build.on) for (const j of Build.S.plans.values()) if (!j.take && !j.dig && j
 const a = Build.on ? Build.aim() : aimedTile(), it = a && a.it; if (a && a.p && it && it.ghost && it.ok !== false && !it.info && !it.walk) add(it.ghost, a.p.x, a.p.y, it.z !== undefined && !it.draw ? it.z : undefined, it.steps);
 return out;
 }
-api.sky = (t) => { const s = Curve.sky(t); return api.on && hl ? Object.assign({}, s, {line: Math.round(hl) * zoom}) : s; };
-let hKey = "", hRaw = 1e9;
-function horizon(tx, ty, L) { const hk = [tx, ty, L, cam.pitch.toFixed(1), Math.round(camL * 8), eng.stamp, api.builds, !!gen].join(); let y = hRaw; if (hk !== hKey) { hKey = hk; y = -1e9; for (let dx = -18; dx <= 18; dx += 9) { let m = 1e9; for (let dn = 6; dn <= 22; dn += 2) { const c = Voxels.host.column(tx + dx, ty - dn), a = eng.at(tx + dx + .5, ty - dn, c && c.length ? c[c.length - 1] : L); if (a) m = Math.min(m, a[1]); } if (m < 1e8) y = Math.max(y, m); } if (y < -1e8) y = 1e9; hRaw = y; } hy = y < 1e8 ? y : -1e9; }
-let eKey = "", eY = 0, lowKey = "", lowL = 1;
-function eyeLine(at, w, h, low) { const lv = Math.min(at[2] - .5, low), k = [cam.pitch.toFixed(2), cam.fov, api.bend, w, h, Math.round(lv * 16), Math.round(at[2] * 16)].join(); if (k !== eKey) { let m = 1e9; for (let dn = 1; dn <= R + 40; dn++) { const a = eng.at(at[0], at[1] - dn, lv); if (a && isFinite(a[1])) m = Math.min(m, a[1]); } eKey = k; eY = m < 1e8 ? m : 0; } api.line = [lv, eY]; return eY; }
-function lowAhead(tx, ty) { const H0 = Voxels.host, k = [tx >> 2, ty >> 2, eng.stamp].join(); if (k === lowKey) return lowL; lowKey = k; let m = 1e9;
-for (let dy = 6; dy <= R + 40; dy += 4) for (let dx = -R; dx <= R; dx += 4) { const x = tx + dx, y = ty - dy, c = H0.column(x, y); m = Math.min(m, !c ? SEA_L : H0.water(x, y) ? H0.waterTop(x, y) : c.length ? c[c.length - 1] : SEA_L); }
-return api.low = lowL = m; }
+const H = {cam, api, R, SEA_L, topAt: (x, y) => topAt(x, y), winMap: () => winMap(), get eng() { return eng; }, get making() { return !!gen; }, get seen() { return seen; }, get south() { return south; }, get cv() { return cv; }, Z: () => Z()}, eye = HdEye(H), lamps = HdLamps(H), boxed = HdPick(H).boxed;
 function after() {
 const now = performance.now(), dt = Math.min(.1, (now - last) / 1000); last = now; api.n++;
 const p = api.eye ? api.eye() : ents.get("agent" + myId); if (!p) return;
 const H0 = Voxels.host, wet = (x, y) => H0.water && H0.water(x, y) && H0.waterTop ? H0.waterTop(x, y) : -1e9;
-const t0 = performance.now(), [L, Lf] = p.free ? [p.z, p.z] : HdLevel.of(p, now), tx = Math.round(p.x), ty = Math.round(p.y);
+const t0 = performance.now(), P = HdLevel.track(p, now), {L, Lf, tx, ty} = P, C = HdLevel.cover, {dep, roof} = C;
 const w = Math.ceil(cv.width / Z()), h = Math.ceil(cv.height / Z());
-const b0 = 36 + 16 * Math.max(0, Math.min(1, h / w - 1)); south = Math.min(R, Math.ceil(h / 32 / Math.sin(b0 * Math.PI / 180)) + 3 + Math.ceil(Math.max(0, topAt(tx, ty) - L) * .9));
-const fy = p.y - Math.floor(p.y), cy = Math.floor(p.y), fx = p.x - Math.floor(p.x), cx0 = Math.floor(p.x), lvAt = (x, y) => { const t = topAt(x, y); return Math.abs(t - L) === 1 ? t : L; }, row = (x) => HdLevel.clear(x, cy, lvAt(x, cy), south) * (1 - fy) + HdLevel.clear(x, cy + 1, lvAt(x, cy + 1), south) * fy, cw = p.free ? 0 : fx ? row(cx0) * (1 - fx) + row(cx0 + 1) * fx : row(cx0), need = p.free ? b0 : HdLevel.under(tx, ty, L) || HdLevel.steep(tx, ty, L, landVer) ? clr ?? b0 : Math.max(b0, Math.min(api.steep, cw)); clr = clr === null || Math.abs(need - clr) < .05 ? need : clr + (need - clr) * (1 - Math.exp(-dt / .06)); const base = clr;
-const sw = p.free ? 0 : +HdLevel.steep(tx, ty, L, landVer);
-if (sw === stage) flip = now; else if (sw || now - flip > HOLD) { stage = sw; flip = now; }
-const want = base + (api.steep - base) * stage; tilt = pitN === null ? stage : Math.max(0, Math.min(1, tilt + (stage ? 1 : -1) * Math.min(dt, .034) / EASE)); pitN = base + (api.steep - base) * tilt * tilt * (3 - 2 * tilt); cam.pitch = pitN; cam.base = base; cam.want = want;
-const kS = eyeRise(want), bare = !p.free && api.force === null && !HdLevel.under(tx, ty, L) && (HdLevel.hides(tx, ty, L, eyeRise(api.steep), p.e && swimsAt(p, p.e) ? SWIM.sink : 0, sw || cw > api.steep ? PART : 1) ? (hidAt = now, true) : bareAt && now - hidAt < HOLD);
-bareAt = bare; const cov0 = p.free ? false : api.force !== null ? api.force > 0 : HdLevel.under(tx, ty, L) || bare, cov = cov0 || (api.force === null && now - covAt < HOLD), dep = p.free ? 0 : Math.max(0, topAt(tx, ty) - L);
-const own = HdLevel.own(tx, ty, L, cov0);
+const b0 = 36 + 16 * Math.max(0, Math.min(1, h / w - 1)); south = Math.min(R, Math.ceil(h / 32 / Math.sin(b0 * Math.PI / 180)) + 3 + Math.ceil(dep * .9));
+const bare = !p.free && api.force === null && !roof && (HdLevel.hides(tx, ty, L, eyeRise(b0), p.e && swimsAt(p, p.e) ? SWIM.sink : 0, eye.above ? PART : MOST) ? (hidAt = now, true) : bareAt && now - hidAt < HOLD);
+bareAt = bare; const cov0 = p.free ? false : api.force !== null ? api.force > 0 : roof || bare, cov = cov0 || (api.force === null && now - covAt < HOLD);
+const kS = eye.pitch(cov, b0, dt);
+const own = HdLevel.own(P, roof, cov0);
 if (cov0) covAt = now;
 grow = cov ? Math.min(CAP, grow + dt / GROW * CAP) : Math.max(0, grow - dt / GROW * CAP); api.u = grow / CAP; const st = cov ? CAP : 0;
 eng = eng || VoxStyle.create(Object.assign({}, Voxels.host, {paintTop: shore, sunk: (x, y, f) => bareAt && HdLevel.veils(x, y, f, eng.at), models: (x, y, cz) => { const a = Models.at(x, y), b = floorAt(x, y) > cz ? null : HdThings.at(x, y); return a && b ? a.concat(b) : a || b; },
@@ -8874,11 +8832,7 @@ if (!wasAt || Math.abs(tx - wasAt[0]) > 3 || Math.abs(ty - wasAt[1]) > 3) jump =
 held = jump && !p.free && (!landAt || Math.abs(landAt[0] - tx) > 8 || Math.abs(landAt[1] - ty) > 8); if (!held) heldAt = 0; else if (!heldAt) heldAt = now; if (held && now - heldAt > 2500) held = false; if (!held) jump = false;
 warmOn = !!p.rush; if (warmOn && warm < 0) { warm = 0; api.ms = performance.now() - t0; return; }
 const fill = warmOn && warm < 3, until = warm < 1 ? 0 : performance.now() + 8; let left = false, nw = 0;
-{ const fl = falling(p, now), air = fl && fl.air, far = camL !== null && Math.abs(Lf - camL); if (air) camV = 0;
-if (camL === null || far > 40) { camL = Lf; camV = 0; } else if (air) camL = Math.max(Math.min(camL, L + 9), camL - 40 * dt); else if (far > 3 || camV) { const e = camL - Lf, a = camV + 12 * e, q = Math.exp(-12 * dt); camL = Lf + (e + a * dt) * q; camV = (camV - 12 * a * dt) * q; if (Math.abs(Lf - camL) < .07 && Math.abs(camV) < 1) { camL = Lf; camV = 0; } }
-else { const d = lastLf === null || fl ? 0 : Lf - lastLf; if (Math.abs(d) < .5) camL += d; const e = Lf - camL; camL = Math.abs(e) < .01 ? Lf : camL + e * (1 - Math.exp(-dt / .1)); }
-lastLf = Lf; }
-const list = [];
+const camL = eye.level(p, L, Lf, dt), list = [];
 const stood = (c, x, y, z, gh, m) => {
 if (c === "l") { const k = [x, y, z, landVer, Floors.ver].join(), ln = Climb.lean(x, y, z); let lc = lads.get(k); if (!lc) { if (lads.size > 60) lads.clear(); const LH = Math.ceil((shOf(ln ? ln.top - z : 2) + 48) / 16) * 16, R0 = LH - 32, a = HdThings.painted(48, LH, () => Climb.drawLadder(x, y, z, (X) => 16 + (X - x) * 16, (Y) => R0 + (Y - y) * 16 + shOf(z), 16, 1)); lc = document.createElement("canvas"); lc.width = 48; lc.height = LH;
 const q = lc.getContext("2d"); q.drawImage(a, 0, 0, 48, R0 - 10, 0, 12, 48, R0 - 10); q.drawImage(a, 0, R0 + 2, 48, LH - R0 - 2, 0, R0 + 2, 48, LH - R0 - 2); lads.set(k, lc); }
@@ -8887,7 +8841,7 @@ const o = m || {}, s0 = objectSprite(c, x, y, now / 1000, o.out || (o.out = []))
 if (o.it && o.img === s0[0] && o.sx === s0[1] && o.sy === s0[2] && o.sw === s0[3] && o.sh === s0[4] && o.dx === s0[5] && o.dy === s0[6]) { o.it.fade = undefined; list.push(o.it); return; }
 const s = s0.slice(), cd = HdThings.card(c, x, y, s);
 const r2 = cd || c === "g" ? 0 : HdThings.foot(c, s), plain = cd || c === "g" ? null : {fy: r2, card: {b: spriteBounds(s[0], s[1], s[2], s[3], s[4]) || [0, 0, s[3], s[4]]}};
-const it = Object.assign(cd ? {} : thing(s), cd, {x: x + .5, y: y + (cd ? cd.y : plain ? (s[6] + r2) / 16 : 1), z, lamp: c === "^" || c === "x" ? 2 : 0, flat: c === "g", tx: x, ty: y, card: cd}, plain);
+const it = Object.assign(cd ? {} : thing(s), cd, {x: x + .5, y: y + (cd ? cd.y : plain ? (s[6] + r2) / 16 : 1), z, lamp: Light.lamp(c), flat: c === "g", tx: x, ty: y, card: cd}, plain);
 Object.assign(o, {img: s[0], sx: s[1], sy: s[2], sw: s[3], sh: s[4], dx: s[5], dy: s[6], it}); list.push(it);
 };
 const memo = (c, x, y, z) => { const k = c + "," + x + "," + y + "," + z; let o = stoodOf.get(k); if (!o) { if (stoodOf.size > 6000) stoodOf.clear(); stoodOf.set(k, o = {}); } return o; };
@@ -8911,8 +8865,8 @@ const qx = Math.round(q.x), qy = Math.round(q.y), z = q === p ? Lf : FLOORS && F
 if (q !== p && seen) { const a = eng.at(q.x + .5, q.y + .5, z); if (!a || a[0] < -EDGE || a[0] > w + EDGE || a[1] < -EDGE || a[1] > h + 2 * EDGE) continue; }
 if (q !== p && z < topAt(qx, qy)) { const c = H0.column(qx, qy), b = winMap().get(qx + "," + qy); let over = false; for (let zz = z + 1; zz <= topAt(qx, qy) && !over; zz++) over = solidAt(c, zz); if (over && !(b && z >= b[0] - 1 && z <= b[1])) continue; }
 if (q !== p && wmB.size) { const b = wmB.get(qx + "," + qy), a = !b && eng.at(q.x + .5, q.y + .5, z); if (!(b ? z >= b[0] - 1 && z <= b[1] : Math.abs(z - L) <= 1) && (b || (a && wr && a[0] + 6 > wr[0] && a[0] - 6 < wr[2] && a[1] > wr[1] && a[1] - 14 < wr[3]))) continue; }
-const s = ent(q, now, z), zb = q !== p && jumpOf(q) && !falling(q, now) ? Floors.standOf(q, qx, qy) : null;
-list.push({canvas: s.canvas, fx: s.fx, fy: s.fy, fo: s.fo, air: s.air, x: q.x + .5, y: q.y + .5, z: zb === null ? z : zb + lineLift(q), zs: q === p ? (Leap.on() ? Leap.level()[0] : L) : zb === null ? z : zb, d: q !== p, top: q === p, on: true, q, lamp: q.e && q.e.kind === "agent" ? (q === p && dep > 0 ? 2 : 1) : 0});
+const s = ent(q, now, z), zb = q !== p && jumpOf(q) && !BodyPlace.of(q).fall ? Floors.standOf(q, qx, qy) : null;
+list.push({canvas: s.canvas, fx: s.fx, fy: s.fy, fo: s.fo, air: s.air, x: q.x + .5, y: q.y + .5, z: zb === null ? z : BodyPlace.of(q).line, zs: q === p ? (Leap.on() ? Leap.level()[0] : L) : zb === null ? z : zb, d: q !== p, top: q === p, on: true, q, lamp: q.e && q.e.kind === "agent" ? Light.lamp("person", q === p && roof) : 0});
 const wk = q.wake && q.wake.length && wakePicture(q, now);
 if (wk) list.push({canvas: wk.canvas, fx: wk.fx, fy: wk.fy, x: q.x + .5, y: q.y + .5, z, lie: true});
 }
@@ -8929,9 +8883,9 @@ const oy = anc[3] === null || anc[4] !== cam.pitch || Math.abs(want - anc[3]) > 
 anc[3] = oy; anc[4] = cam.pitch; return [Math.round(o[0] - fx) - o[0], oy - o[1]]; };
 if (warmOn && warm >= 3 && gen) { api.ms = performance.now() - t0; return; }
 let pic = eng.draw({w, h, cam, at: [p.x + .5, p.y + .5, camL + .5], pin, bend: api.bend, t: now / 1000, light,
-water: typeof waterCv !== "undefined" && waterView ? {canvas: waterCv, x: waterView.x, y: waterView.y, ver: Voxels.wver} : null, dep, own, rim: HdLevel.rim(tx, ty, L), hole: tilt * HdEase.of("shut", !p.free && HdLevel.shut(tx, ty, L, NARROW)), sky: bare, behind: p.free || cov0 ? 0 : HdEase.of("behind", HdLevel.over(tx, ty, L, kS) >= 1), hid: (api.hid = p.free || cov0 || HdLevel.over(tx, ty, L, kS) >= 1 || list.some((s) => s.tx !== undefined && !s.lie && s.ty > ty && s.ty <= ty + 2 && Math.abs(s.tx - tx) <= 1) ? 1 : 0), win: api.nowin ? 0 : 1, edge: api.edge, sprites: list, way: WayShow.land(), ghosts: pieces(list), hour: hour(w, h, list, 0)});
+water: typeof waterCv !== "undefined" && waterView ? {canvas: waterCv, x: waterView.x, y: waterView.y, ver: Voxels.wver} : null, dep, own, rim: C.rim, under: HdEase.of("under", roof), sky: bare, behind: p.free || cov0 ? 0 : HdEase.of("behind", HdLevel.over(tx, ty, L, kS) >= 1), hid: (api.hid = p.free || cov0 || HdLevel.over(tx, ty, L, kS) >= 1 || list.some((s) => s.tx !== undefined && !s.lie && s.ty > ty && s.ty <= ty + 2 && Math.abs(s.tx - tx) <= 1) ? 1 : 0), win: api.nowin ? 0 : 1, edge: api.edge, sprites: api.landOnly ? [] : list, way: WayShow.land(), ghosts: api.landOnly ? [] : pieces(list), hour: lamps.hour(w, h, list)});
 if (!pic) { if (pic === null) noGL = true; else api.lost = true; api.ms = performance.now() - t0; return; }
-seen = {tx, ty, L, rim: HdLevel.rim(tx, ty, L), top: tilt > .5 && !cov0, ks: eyeRise(cam.pitch), k: 1, me: list.find((q) => q.top), list, at: [snap(p.x + .5), snap(p.y + .5), Lf]}; horizon(tx, ty, L + dep); { const t = Math.max(8, eyeLine([snap(p.x + .5), snap(p.y + .5), Math.round(camL * 16) / 16 + .5], w, h, lowAhead(tx, ty)) + 2); hl = !hl || Math.abs(t - hl) < .5 ? t : hl + (t - hl) * (1 - Math.exp(-dt / .25)); }
+seen = {tx, ty, L, rim: C.rim, top: eye.tilt > .5 && !cov0, ks: eyeRise(cam.pitch), k: zoom / artPx(), me: list.find((q) => q.top), list, at: [snap(p.x + .5), snap(p.y + .5), Lf]}; eye.lines(tx, ty, L + dep, [snap(p.x + .5), snap(p.y + .5), Math.round(camL * 16) / 16 + .5], w, h, dt);
 api.faces = eng.faces; api.models = eng.models; reachOf(tx, ty, w, h, now);
 if (fill) { const w0 = warm; warm += w0 === 0 || !left ? 1 : 0; if (w0 === 0) { api.ms = performance.now() - t0; return; } }
 api.held = held; if (held) { api.ms = performance.now() - t0; return; }
@@ -8945,12 +8899,7 @@ for (let ya = -1e9, z0 = topAt(tx, ty); d0 < 40; d0++) { const a = eng.at(tx + .
 for (let dx = -FAR; dx <= FAR; dx += 2) { let sky = 1e9; for (let dy = d0; dy >= -FAR; dy--) { const c = Voxels.host.column(tx + dx, ty + dy); if (!c || !c.length) continue; const a = eng.at(tx + dx + .5, ty + dy + .5, c[c.length - 1]); if (!a || a[1] >= sky) continue; sky = a[1];
 if (a[0] >= 0 && a[0] <= w && a[1] >= 0 && a[1] <= h) { x0 = Math.min(x0, tx + dx); x1 = Math.max(x1, tx + dx); y0 = Math.min(y0, ty + dy); y1 = Math.max(y1, ty + dy); } } }
 api.reach = [x0 - 1, y0, x1 + 1, y1]; }
-function boxed(x, y, lo) {
-let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
-for (const b of HdThings.at(x, y) || []) if (!b.shade && (lo === undefined || (b.z < lo + 20 && b.z + b.h > lo - 2))) for (let n = 0; n < 8; n++) { const p = api.screenOf(x + (b.x + (n & 1) * b.w) / 16, y + (b.y + (n >> 1 & 1) * b.d) / 16, (b.z + (n >> 2) * b.h) / RELIEF_STEP); if (p) { x0 = Math.min(x0, p[0]); y0 = Math.min(y0, p[1]); x1 = Math.max(x1, p[0]); y1 = Math.max(y1, p[1]); } }
-return x1 > x0 ? {x: x0, y: y0, w: x1 - x0, h: y1 - y0} : null;
-}
-Object.defineProperty(api, "level", {get: () => [seen ? seen.L : null, camL, seen ? seen.at[2] : null, 0, seen ? seen.rim : null]});
+Object.defineProperty(api, "level", {get: () => [seen ? seen.L : null, eye.camL, seen ? seen.at[2] : null, 0, seen ? seen.rim : null]});
 api.forget = () => { if (eng) { eng.forget(); key = ""; } };
 api.spaceAt = (x, y) => (eng ? eng.spaceAt(x, y) : null); api.winAt = (x, y) => winMap().get(x + "," + y) || null;
 let wmV = -1, wm = new Map(); const winMap = () => { const w = eng ? eng.win : null; if (!w || !w.n || w.a <= 0) { if (wm.size) wm = new Map(); wmV = -1; return wm; } if (w.tiles !== wmV) { wmV = w.tiles; wm = new Map(); for (const [x, y, lo, hi] of w.tiles) { const k = x + "," + y, o = wm.get(k); wm.set(k, o ? [Math.min(o[0], lo), Math.max(o[1], hi)] : [lo, hi]); } } return wm; };
@@ -8960,42 +8909,10 @@ api.markOf = (x, y, z) => api.screenOf(x, y, z);
 api.drawnAt = (q) => { const s = seen && seen.list.find((o) => o.q === q); return s ? s.z : null; };
 api.art = () => (seen ? {u: zoom / seen.k, view: eng.mver + "|" + zoom / seen.k + "|" + cam.pitch, at: api.markOf, behind: (x, y, Z0) => { const z = Z0, k = eyeRise(cam.pitch), y0 = Math.floor(y); for (let d = 1; d <= 8; d++) if (topAt(Math.floor(x), y0 + d) > z + (y0 + d - y) * k) return true; return false; }, wall: (x, y, z) => { const f = HdLevel.wall(x, y, z, seen); return f ? (X, Y, Z) => api.screenOf(...HdLevel.wallAt(X, Y, Z, seen, f)) : null; },
 body: seen.me ? HdLevel.body(seen.me, api.screenOf(seen.me.x, seen.me.y, seen.me.z), zoom / seen.k) : null} : null);
-const tall = new Map(); let tallAt = 0;
-const standing = (x, y) => { const key = x + "," + y; let t = tall.get(key); if (t === undefined) { t = topAt(x, y); for (const b of HdThings.at(x, y) || []) t = Math.max(t, floorAt(x, y) + (b.z + (b.h || 0)) / RELIEF_STEP); tall.set(key, t); } return t; };
-api.hidden = (x, y, Z0) => {
-if (!seen || !eng) return false;
-if (performance.now() - tallAt > 500) { tall.clear(); tallAt = performance.now(); }
-const z = Z0 + 1, k = eyeRise(cam.pitch), x0 = Math.floor(x), y0 = Math.floor(y);
-for (let d = 1; d <= 8; d++) if (standing(x0, y0 + d) > z + (y0 + d - y) * k) return true;
-return false;
-};
+api.hidden = (x, y, Z0) => !!seen && !!eng && HdLevel.behind(x, y, Z0, eyeRise(cam.pitch));
 api.screenOf = (x, y, z) => { if (!eng || !seen) return null; const a = eng.at(x, y, z); return a && [a[0] * zoom / seen.k, a[1] * zoom / seen.k]; };
-api.pick = (mx, my, zf) => {
-if (!eng || !seen) return null;
-const inq = (P, q) => { let s = 0; for (let i = 0; i < 4; i++) { const a = q[i], b = q[(i + 1) % 4], c = (b[0] - a[0]) * (P[1] - a[1]) - (b[1] - a[1]) * (P[0] - a[0]); if (c && s && Math.sign(c) !== s) return false; if (c) s = Math.sign(c); } return true; };
-const wmp = winMap(), flr = (x, y) => { const b = wmp.get(x + "," + y), t = topAt(x, y); return b ? Math.min(t, b[0]) : t; }, zo = (x, y) => (zf ? zf(x, y) : Models.up(x, y) ? liftAt(x, y) / zoom / RELIEF_STEP : flr(x, y)), part = (q) => Math.max(0, Math.min(.999, (my - Math.min(q[0][1], q[1][1])) / Math.max(1, Math.max(q[2][1], q[3][1]) - Math.min(q[0][1], q[1][1]))));
-if (!zf && wmp.size) for (const [x, y, lo, hi] of eng.win.tiles.slice().sort((a, b) => b[1] - a[1])) { const q = [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]].map(([a, b]) => api.screenOf(a, b, lo)); if (q.every((v) => v) && inq([mx, my], q)) return {x, y, fy: part(q)};
-if (!wmp.has(x + "," + (y - 1)) && topAt(x, y - 1) > lo) { const f = [[x, y, Math.min(hi, topAt(x, y - 1))], [x + 1, y, Math.min(hi, topAt(x, y - 1))], [x + 1, y, lo], [x, y, lo]].map((v) => api.screenOf(...v)); if (f.every((v) => v) && inq([mx, my], f)) return {x, y: y - 1, fy: .999, face: true, down: Math.floor(part(f) * (Math.min(hi, topAt(x, y - 1)) - lo))}; } }
-for (let y = seen.ty + south; y >= seen.ty - R; y--) for (let x = seen.tx - R; x <= seen.tx + R; x++) {
-if (!zf) { const c0 = combAt(x, y), pb = c0 && "W%+#g".includes(c0) && HdThings.is(c0, x, y) ? boxed(x, y) : null; if (pb && mx >= pb.x && mx <= pb.x + pb.w && my >= pb.y && my <= pb.y + pb.h) return {x, y, fy: .5}; }
-const z = zo(x, y), zs = zf ? z : zo(x, y + 1);
-if (zs < z) { const q = [[x, y + 1, z], [x + 1, y + 1, z], [x + 1, y + 1, zs], [x, y + 1, zs]].map((v) => api.screenOf(...v)); if (q.every((v) => v) && inq([mx, my], q)) return {x, y, fy: .999, face: true, down: Math.floor(part(q) * (z - zs))}; }
-const q = [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]].map(([a, b]) => api.screenOf(a, b, z));
-if (q.every((v) => v) && inq([mx, my], q)) return {x, y, fy: part(q)};
-}
-return null;
-};
-api.catSeen = (box) => {
-const s = seen && seen.me; if (!s || !eng) return 0; const a = eng.at(s.x, s.y, s.z); if (!a) return 0;
-const sg = s.canvas.getContext("2d").getImageData(0, 0, s.canvas.width, s.canvas.height).data, g = HdView.read(0, 0, cv.width, cv.height).data;
-let n = 0, ok = 0, out = 0; const B = box && box.map((v) => v * cv.width / innerWidth);
-for (let j = 0; j < s.canvas.height; j++) for (let i = 0; i < s.canvas.width; i++) { const o = (j * s.canvas.width + i) * 4; if (sg[o + 3] < 128) continue; n++;
-const X = Math.floor((Math.round(a[0]) - s.fx + i + .5) * Z()), Y = Math.floor((Math.round(a[1]) - s.fy + j + .5) * Z()), p = (Y * cv.width + X) * 4;
-if (X >= 0 && Y >= 0 && X < cv.width && Y < cv.height && Math.abs(g[p] - sg[o]) + Math.abs(g[p + 1] - sg[o + 1]) + Math.abs(g[p + 2] - sg[o + 2]) < 60) { ok++; if (B && (X < B[0] || X > B[2] || Y < B[1] || Y > B[3])) out++; } }
-return box ? [n ? ok / n : 0, out] : n ? ok / n : 0;
-};
 api.stands = () => (seen ? seen.list.filter((s) => s.tx !== undefined && !s.q).map((s) => [s.tx, s.ty, s.z]) : []);
-api.read = (...a) => HdView.read(...a); api.bodies = () => (seen ? seen.list.filter((s) => s.q && !s.top).map((s) => [s.q.e.kind, s.z]) : []); api.bare = () => (eng && seen ? eng.bare(Math.max(0, Math.ceil(hy) + 2)) : 0); api.raw = () => (eng ? eng.raw() : 0); api.fades = () => (seen ? seen.list.filter((s) => s.fade !== undefined).map((s) => [s.tx, s.ty, s.fade]) : []); api.blank = () => eng && eng.blank(); Object.defineProperty(api, "units", {get: () => eng && eng.units}); Object.defineProperty(api, "why", {get: () => eng && eng.why}); Object.defineProperty(api, "wrote", {get: () => wrote}); Object.defineProperty(api, "made", {get: () => (eng ? eng.made : 0)}); Object.defineProperty(api, "work", {get: () => (eng ? eng.work : null)});
+api.read = (...a) => HdView.read(...a); api.bodies = () => (seen ? seen.list.filter((s) => s.q && !s.top).map((s) => [s.q.e.kind, s.z]) : []); api.bare = () => (eng && seen ? eng.bare(Math.max(0, Math.ceil(eye.hy) + 2)) : 0); api.raw = () => (eng ? eng.raw() : 0); api.fades = () => (seen ? seen.list.filter((s) => s.fade !== undefined).map((s) => [s.tx, s.ty, s.fade]) : []); api.blank = () => eng && eng.blank(); Object.defineProperty(api, "units", {get: () => eng && eng.units}); Object.defineProperty(api, "why", {get: () => eng && eng.why}); Object.defineProperty(api, "wrote", {get: () => wrote}); Object.defineProperty(api, "made", {get: () => (eng ? eng.made : 0)}); Object.defineProperty(api, "work", {get: () => (eng ? eng.work : null)});
 { const f0 = frame; frame = function (now) {
 const t0 = performance.now(), keep = ctx, on = api.on && !noGL && !!(api.eye || ents.get("agent" + myId)); api.live = on && Voxels.engine.ready(); api.drew = wrote = false; slice1 = 0;
 api.lost = on && !api.live && !!HdView.el && HdView.el.style.display === "block";
@@ -9019,8 +8936,8 @@ el("div", "pad", '<div id="stickbase"></div><div id="stickknob"></div>');
 const btns = el("div", "tbtns", "");
 for (const [id, label] of [["tA", "A"], ["tB", "B"]]) el("div", id, `<span class="cap"></span><span class="lbl">${label}</span>`, btns);
 const ctx_ = el("div", "tctx", "");
-el("div", "tUp", "Up", ctx_); el("div", "tDown", "Down", ctx_); el("div", "tBuild", "Build", ctx_);
 el("div", "tJump", "Jump", ctx_); el("div", "tDig", "Dig up", ctx_); el("div", "tPick", "Pick up", ctx_);
+el("div", "tUp", "Up", ctx_); el("div", "tDown", "Down", ctx_); el("div", "tBuild", "Build", ctx_);
 const top = el("div", "ttop", "");
 el("div", "tBag", "Items", top); el("div", "tCraft", "Craft", top); el("div", "tTalk", "Talk", top); el("div", "tMenu", "Menu", top);
 return {btns, ctx_};
@@ -9223,7 +9140,7 @@ if (alts) return alts[0].split("|").map((v) => ({put: v, hint: {N: "north", E: "
 if (what.startsWith("bool")) return [{put: "true", hint: ""}];
 if (key === "recipe") return Object.keys(recipes).map((r) => ({put: r, hint: fmt(recipes[r].inputs)}));
 if ((key === "item" && cmd !== "take") || key === "with")
-return Object.keys(inv).filter((n) => inv[n] > 0 && (cmd !== "eat" || n in foodValue)).map((n) => ({put: n, hint: "×" + inv[n]}));
+return Object.keys(inv).filter((n) => inv[n] > 0 && (cmd !== "eat" || n in RULES.food)).map((n) => ({put: n, hint: "×" + inv[n]}));
 if (key === "target") {
 const pick = what.startsWith("agent") ? (e) => e.kind === "agent" : what.startsWith("cow") ? (e) => e.kind === "cow" : what.startsWith("animal") ? (e) => e.kind !== "agent" : () => true;
 return nearby(pick).slice(0, 12).map(([e, d]) => ({put: String(e.id), hint: `${e.name || e.kind}, ${d} ${d === 1 ? "tile" : "tiles"} away`}));
@@ -9403,7 +9320,7 @@ const HELP = [
 ["Do", [[["{use}"], "Use: open, harvest, eat"], [["{alt}", "X"], "Break: mine, chop, hit"], [["{pick}"], "Pick up"],
 [["Left click"], "{alt} there, or walk"], [["Right click"], "{use} there"]]],
 ["Carry", [[["1-9", "{next}"], "Slot in hand"], [["{hands}"], "Empty your hands"], [["{use}"], "Place what you hold"],
-[["{bag}"], "Inventory"], [["{craft}"], "Craft"]]],
+[["{drop}"], "Drop one. Shift: all"], [["{bag}", "{craft}"], "Inventory, craft"]]],
 ["Build", [[["{build}", "B"], "Build mode: in and out"], [["←", "→"], "Move the cursor, not you"], [["Space"], "Plan a piece. Held: row"], [["X"], "Break, take down, dig"],
 [["~keyq", "E"], "Cursor a layer down, up"]]],
 ["Talk", [[["Enter"], "Talk"], [["ABC"], "Shout: IN CAPITALS"], [["Tab"], "Hold: who is awake"],
@@ -9771,7 +9688,7 @@ const TitleCast = (() => {
 let I = null, spoke = 0, loud = 0, last = null;
 const WAYS = {N: [0, -1], E: [1, 0], S: [0, 1], W: [-1, 0]}, taken = new Map();
 const lv = (x, y) => levelAt(I.ox + x, I.oy + y) || 0, one = (list) => list[I.pick(list.length)];
-const bare = (x, y) => { const t = I.at(x, y); return !!t && WALKABLE_GROUND.has(t[1]) && !SOLID.has(t[0]); };
+const bare = (x, y) => standOn(I.at(x, y), false);
 const afloat = (x, y) => { const t = I.at(x, y); return !!t && wet(t[1]) && GROUND.has(t[0]); };
 const far = (a, b) => Math.abs(a.x - b[0]) + Math.abs(a.y - b[1]);
 const someone = (x, y, but) => I.people.some((o) => o !== but && o.x === x && o.y === y);

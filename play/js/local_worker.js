@@ -33,7 +33,7 @@ self.fetch = async (...a) => {
 
 async function boot() {
   postMessage({t: "say", text: "loading Python…"});
-  const code = fetch("../py.zip?v=e09febd583").then((r) => r.arrayBuffer());     // (asked for at once, with Python: it waited for it)
+  const code = fetch("../py.zip?v=b12bc59208").then((r) => r.arrayBuffer());     // (asked for at once, with Python: it waited for it)
   const {loadPyodide} = await import(PYODIDE + "pyodide.mjs");      // (a module worker: local.js)
   at("loader");
   const py = await loadPyodide(STDLIB ? {indexURL: PYODIDE, stdLibURL: STDLIB} : {indexURL: PYODIDE});
