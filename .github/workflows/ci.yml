@@ -1,6 +1,6 @@
 # Lint, the pages and their links, and commit messages, on every pull request and every push to main.
 # Not blocking yet (continue-on-error, see the step names): ruff format and the ruff rules today's code
-# breaks (the `ignore` list in ruff.toml). GitHub Pages serves main as it is: this is the deploy check.
+# breaks (the `ignore` list in ruff.toml). The deploy, with the game in play/, is pages.yml.
 name: CI
 
 on:

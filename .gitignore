@@ -2,3 +2,7 @@ shots/
 .preview/
 .DS_Store
 __pycache__/
+# the game, built by its own repo (nexel-worlds, game.yml) and placed here at deploy (.github/workflows/pages.yml);
+# tools/build_site.sh builds it here to look at locally. play/brain/ is this site's own.
+/play/*
+!/play/brain/

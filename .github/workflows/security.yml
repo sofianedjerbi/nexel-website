@@ -1,4 +1,4 @@
-# SAST: CodeQL (Python: tools/; JavaScript: the pages and the demo's build in play/), gitleaks over the whole
+# SAST: CodeQL (Python: tools/; JavaScript: the pages and play/brain/; the game is scanned in its own repo), gitleaks over the whole
 # history, bandit on tools/ (medium and up; not blocking, the count goes in the run's summary). No dependencies to audit.
 name: Security
 

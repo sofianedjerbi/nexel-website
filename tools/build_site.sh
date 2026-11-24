@@ -9,7 +9,8 @@
 #   2. copies in the two things the game's build needs that git does not hold:
 #        src/nexel_worlds/web/audio/   the rendered sound effects and music (tools/build_audio.py output)
 #        .cache/pyodide/                Python's library for the browser (else the build fetches it)
-#   3. runs the game's own tools/build_pages.py (the same build tools/publish_demo.sh publishes) into play/
+#   3. runs the game's own tools/build_pages.py into play/ (to look at locally: the deployed one is built by the game's
+#      CI, its game.yml, and placed by .github/workflows/pages.yml)
 #   4. drops the build's README (the demo repo's), keeps the rest as built
 #
 # Every path the demo uses is relative, so play/ works under https://<user>.github.io/nexel-website/play/.

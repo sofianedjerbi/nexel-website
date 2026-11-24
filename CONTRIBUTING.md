@@ -29,7 +29,8 @@ https://sofianedjerbi.github.io/nexel-website/
 ```
 index.html            landing page (written by tools/make_site.py from tools/landing.html)
 devlog/               posts (written from devlog/posts/*.md)
-play/                 the demo: the game's own static build, committed as built
+play/                 the game: built from source by the game repo (its game.yml), placed here at deploy; not committed
+                      (play/brain/, the brain view, is this site's own and is)
 img/                  screenshots of the game (whole pixels, never scaled)
 css/site.css          the look: the game's colours and edges
 fonts/                the game's pixel font
@@ -42,14 +43,15 @@ Pages (after editing `tools/landing.html` or a post in `devlog/posts/`):
 
     python3 tools/make_site.py
 
-The demo, from a clean clone of the game repo (only committed code gets in; the built sound files and the cached
-Pyodide library are copied from the game's working folder, since git does not hold them):
+The deployed site takes the game from the game repo's latest good build (`.github/workflows/pages.yml`: on every push
+here, and every half hour when the game has a newer one): nothing to do by hand. To look at it locally, from a clean
+clone of the game repo (only committed code gets in; the built sound files and the cached Pyodide library are copied
+from the game's working folder):
 
     GAME=~/nexel-worlds tools/build_site.sh     # GAME: your nexel-worlds checkout; REF=HEAD by default
     GAME=/path/to/nexel-worlds REF=<commit> tools/build_site.sh
 
-It runs the game's `tools/build_pages.py` into `play/` and writes the commit it was built from in `play/BUILD`. The
-music page of the old demo is skipped unless the music is rendered in that clone (it is not committed).
+It runs the game's `tools/build_pages.py` into `play/` (not committed) and writes the commit it was built from in `play/BUILD`.
 
 ### Screenshots
 
