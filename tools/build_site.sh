@@ -1,13 +1,13 @@
 #!/bin/sh
 # Build the playable demo into play/ from a CLEAN checkout of the game repo (only what is committed at REF).
 #
-#   tools/build_site.sh                       game repo: ~/megastructure, REF: HEAD
-#   GAME=/path/to/megastructure REF=v0.3 tools/build_site.sh
+#   tools/build_site.sh                       game repo: ~/nexel/nexel-worlds, REF: HEAD
+#   GAME=/path/to/nexel-worlds REF=v0.3 tools/build_site.sh
 #
 # What it does:
 #   1. clones the game repo (local clone, so nobody's uncommitted work gets in) and checks out REF
 #   2. copies in the two things the game's build needs that git does not hold:
-#        src/megastructure/web/audio/   the rendered sound effects and music (tools/build_audio.py output)
+#        src/nexel_worlds/web/audio/   the rendered sound effects and music (tools/build_audio.py output)
 #        .cache/pyodide/                Python's library for the browser (else the build fetches it)
 #   3. runs the game's own tools/build_pages.py (the same build tools/publish_demo.sh publishes) into play/
 #   4. drops the build's README (the demo repo's), keeps the rest as built
@@ -15,7 +15,7 @@
 # Every path the demo uses is relative, so play/ works under https://<user>.github.io/nexel-website/play/.
 set -e
 SITE=$(cd "$(dirname "$0")/.." && pwd)
-GAME=${GAME:-$HOME/megastructure}
+GAME=${GAME:-$HOME/nexel/nexel-worlds}
 REF=${REF:-HEAD}
 PYTHON=${PYTHON:-$GAME/.venv/bin/python}
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/nexel-site.XXXXXX")
@@ -26,9 +26,9 @@ echo "game: $GAME at $REF ($SHA)"
 git clone -q --no-hardlinks "$GAME" "$WORK/game"
 git -C "$WORK/game" checkout -q --detach "$SHA"
 
-if [ -d "$GAME/src/megastructure/web/audio" ]; then
-  mkdir -p "$WORK/game/src/megastructure/web/audio"
-  cp -R "$GAME/src/megastructure/web/audio/." "$WORK/game/src/megastructure/web/audio/"
+if [ -d "$GAME/src/nexel_worlds/web/audio" ]; then
+  mkdir -p "$WORK/game/src/nexel_worlds/web/audio"
+  cp -R "$GAME/src/nexel_worlds/web/audio/." "$WORK/game/src/nexel_worlds/web/audio/"
 else
   echo "note: no built audio in $GAME (run its tools/build_audio.py first); the build will try to render it" >&2
 fi

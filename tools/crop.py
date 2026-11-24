@@ -26,7 +26,7 @@ CROPS = {   # out name: (raw shot, box)
     "build-3": ("build_2.png", (306, 160, 774, 400)),
 }
 # older looks, from the game repo's own showcase pictures (screenshots of the game, tools/pages/)
-OLD = Path.home() / "megastructure" / "tools" / "pages"
+OLD = Path.home() / "nexel" / "nexel-worlds" / "tools" / "pages"
 OLDCROPS = {
     "old-hills": ("game_hills.png", (70, 110, 1030, 650)),
     "old-cave": ("underground.jpg", (160, 90, 1120, 630)),

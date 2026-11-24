@@ -1,5 +1,5 @@
 /* Nexel Worlds site. The game's own letters (sprout-pixel: 5x7, pixel-exact at 9, 18, 27, 36 px) and the
-   game's UI colours (src/megastructure/web/css/style.css). Every edge is a whole pixel; pictures are shown
+   game's UI colours (src/nexel_worlds/web/css/style.css). Every edge is a whole pixel; pictures are shown
    at their own size (never scaled down; on a narrow screen they are cropped round their middle). */
 @font-face { font-family: SproutPixel; src: url(../fonts/sprout-pixel.ttf) format("truetype"); font-display: swap; }
 

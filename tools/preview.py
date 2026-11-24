@@ -2,7 +2,7 @@
 a sub-path, as on GitHub Pages, and that no request fails.
 
     cd <dir holding a link nexel-website -> this repo> && python3 -m http.server 7882
-    ~/megastructure/.venv/bin/python tools/preview.py [--phone-shot]     (--phone-shot: also writes img/phone.png)
+    ~/nexel/nexel-worlds/.venv/bin/python tools/preview.py [--phone-shot]     (--phone-shot: also writes img/phone.png)
 """
 
 import sys

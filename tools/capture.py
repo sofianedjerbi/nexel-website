@@ -2,9 +2,9 @@
 
 Runs against a QA server of the game on a COPY of a save (never the live one, never port 7777):
 
-    cp -R ~/megastructure/saves/caves /tmp/site-qa/caves
-    cd ~/megastructure && PYTHONPATH=src .venv/bin/python -m megastructure.server --port 7881 --world /tmp/site-qa/caves --seed 12 --dev
-    ~/megastructure/.venv/bin/python tools/capture.py [shot ...]      (default: all shots)
+    cp -R ~/nexel/nexel-worlds/saves/caves /tmp/site-qa/caves
+    cd ~/nexel/nexel-worlds && PYTHONPATH=src .venv/bin/python -m nexel_worlds.server --port 7881 --world /tmp/site-qa/caves --seed 12 --dev
+    ~/nexel/nexel-worlds/.venv/bin/python tools/capture.py [shot ...]      (default: all shots)
 
 It drives one headless Chrome with the game's own test helper (tests/e2e/game.py) and writes PNGs to shots/raw/.
 """
@@ -14,7 +14,7 @@ import sys
 import time
 from pathlib import Path
 
-GAME = Path(os.environ.get("GAME", Path.home() / "megastructure"))
+GAME = Path(os.environ.get("GAME", Path.home() / "nexel" / "nexel-worlds"))
 sys.path.insert(0, str(GAME / "tests" / "e2e"))
 from playwright.sync_api import sync_playwright  # noqa: E402
 from game import Game  # noqa: E402
