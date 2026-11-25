@@ -49,7 +49,7 @@ jobs:
       - name: tools/make_site.py runs, and the committed pages are what it writes
         run: |
           uv run --no-project python tools/make_site.py
-          git diff --exit-code -- index.html news devlog \
+          git diff --exit-code -- index.html news devlog sitemap.xml \
             || { echo "::error::the pages are not the ones make_site.py writes: run it and commit"; exit 1; }
       - name: Every local link and picture is there
         run: uv run --no-project python tools/check_links.py
