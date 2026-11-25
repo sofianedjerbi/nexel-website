@@ -11,6 +11,12 @@ By day it's a stump with its eyes shut. At night it shuffles after you and slams
 
 ![A grumblestump slamming at night, two hearts gone](img/new-grumblestump.png)
 
+## Gustling
+
+Rare, by day. It snatches up to five of what you hold and runs. Hit it while it spins and it drops them.
+
+![A gustling running off with your wood](img/new-gustling.png)
+
 ## Snapbloom
 
 Rare, by day. It creeps up, rears back and bites. At night it's just a flower.
@@ -47,7 +53,6 @@ strip: new-mouth-before.png new-mouth-after.png | A cave mouth, before and after
 
 - **Ores:** coal, copper, iron, gold and titanium in the stone, deeper ones rarer. Gold and titanium need an iron pickaxe or better, or they crumble.
 - **Tool tiers:** wood, stone, iron and titanium axes and pickaxes. Better ones dig faster.
-- **Gustling:** rare, by day. It snatches up to five of what you hold and runs. Hit it while it spins.
 - Every creature has its own sounds: a warning, a blow, a cry.
 - **View distance** is a slider, 9 to 65 tiles (Picture settings).
 - New music: *Slow Tide* in the morning, *Bright Dream* by day.
