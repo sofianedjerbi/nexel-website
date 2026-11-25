@@ -221,8 +221,29 @@ def jump(g):
     print("shot jump", flush=True)
 
 
+def bridge(g):
+    """Earth in hand on a terrace's edge, six levels over the meadow: blocks put out at your own level, a bridge in the air."""
+    empty(g)
+    tp(g, 2, 13)
+    g.clear_area(10)
+    hour(g, .4)
+    x, y = g.pos()
+    g.rpc("dev_col", tiles=[[x + i, y + j] for i in range(-3, 1) for j in (-1, 0, 1)], col=[6])
+    tp(g, x, y, 6)
+    g.give(dirt=6)
+    g.hold_item("dirt")
+    g.face(1, 0)
+    g.rest()
+    for k in (1, 2, 3):
+        g.press("e", 600)
+        g.wait(f"solidAt({x + k}, {y}, 6)", 3000)
+        g.hold(["d"], 60)
+        g.rest()
+    snap(g, "bridge")
+
+
 SHOTS = {"where": where, "explore": explore, "home": home, "village": village, "night": night, "water": water,
-         "cave": cave, "build": build, "jump": jump}
+         "cave": cave, "build": build, "jump": jump, "bridge": bridge}
 
 if __name__ == "__main__":
     t0 = time.time()

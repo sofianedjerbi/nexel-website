@@ -13,10 +13,10 @@ strip: old-cave.jpg cave.png | The same idea, before and after: a cave in the fl
 
 ## One renderer
 
-For a few days both looks lived side by side, with a setting. Keeping two painters in step cost us bugs every day, so the old one went: 15 files and 3,364 lines of code deleted, and 147 browser tests that only checked the old look were retired with it.
+For a few days both looks lived side by side, with a setting. Keeping two painters in step cost us bugs every day, so the old one went. Everyone now sees the same world.
 
 ## On a phone
 
-The demo used to load in 208 requests. Now it is 12: one script, one pack of pictures, a trimmed Python library, and a service worker so the second visit comes from the phone itself.
+The game used to load in 208 requests. Now it is 12: one script, one pack of pictures, a trimmed Python library, and a service worker so the second visit comes from the phone itself.
 
 ![The cave by night, lit by a torch](img/cave-night.png)

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What&#x27;s new: creatures, a new sky, and bridges in the air · Nexel Worlds devlog</title>
+<meta name="description" content="Three new wild creatures and a fire friend, sun and moon and stars, caves you see whole, and blocks you can put out over a drop.">
+<meta property="og:title" content="What&#x27;s new: creatures, a new sky, and bridges in the air · Nexel Worlds devlog">
+<meta property="og:description" content="Three new wild creatures and a fire friend, sun and moon and stars, caves you see whole, and blocks you can put out over a drop.">
+<meta property="og:image" content="../img/hero.png">
+<link rel="preload" href="../fonts/sprout-pixel.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="../css/site.css">
+<link rel="icon" href="../img/favicon.png">
+<script>
+(() => { const n = performance.getEntriesByType("navigation")[0], u = location.href.split("#")[0];
+  if (!n || n.transferSize !== 0 || sessionStorage.getItem("fresh " + u)) return;
+  Promise.all([fetch(u, {cache: "force-cache"}), fetch(u, {cache: "no-cache"})]).then((r) => Promise.all(r.map((x) => x.text())))
+    .then(([kept, now]) => { if (kept !== now) { sessionStorage.setItem("fresh " + u, 1); location.reload(); } }).catch(() => {}); })();
+</script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+<a class="brand" href="../index.html">Nexel Worlds</a>
+<nav class="nav"><a href="../index.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/></svg>Home</a><a href="../devlog/index.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="1" y="0" width="1" height="1"/><rect x="2" y="0" width="1" height="1"/><rect x="3" y="0" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="5" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="5" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/></svg>Devlog</a><a href="../play/"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/></svg>Play</a></nav>
+</div></header>
+<main class="wrap"><section>
+<article class="panel post-body">
+<p class="date">2026-11-25</p>
+<h1>What&#x27;s new: creatures, a new sky, and bridges in the air</h1>
+<p></p>
+<p>Here is what changed in the game over the last two days. It is all live now: <a href="../play/">play it</a>.</p>
+<h2>New creatures</h2>
+<ul><li><b>Gustling.</b> Rare, and only by day. It drifts up to whoever is holding something, spins up, then grabs up to five of it and runs. Hit it while it spins and it drops everything.</li><li><b>Grumblestump.</b> By day it is a stump with its eyes shut. At night it shuffles after you, raises its arms and slams the ground. Everyone within two tiles gets hit, so step back when you see the arms go up.</li><li><b>Snapbloom.</b> Rare, by day. It creeps up, rears back, and bites if you are still beside it. At night it is just a flower.</li><li><b>The hob, on your side.</b> Make one at a workbench (8 stone and a campfire) and set it down. It follows you for good. When a wild creature comes close it hunches, then its firebox bursts: every wild thing near it is burnt and runs. It never hurts a person or an animal.</li></ul>
+<p>Every creature also has its own sounds now: a warning before it acts, a blow, a cry. If you hear one, look up.</p>
+<h2>The sky and the view</h2>
+<ul><li>A new sky: a sun with pixel rays, a moon that goes through its phases day by day, stars and a faint milky band at night.</li><li><b>View distance</b> is now a slider, from 9 to 65 tiles, in the Picture settings.</li><li>New music: *Slow Tide* plays in the morning, and *Bright Dream* joins the daytime pieces. A piece no longer repeats for twenty minutes.</li></ul>
+<h2>Under the ground</h2>
+<ul><li>The land is earth on top and stone underneath, the same everywhere, so you know what a dig will give.</li><li>In a cave you see the whole cave, every branch of it, not just a circle round you.</li><li>A cave keeps the real colours of its blocks, and its mouth casts a soft shadow inside.</li><li>No more dark border along cliff tops and the rims of holes.</li></ul>
+<h2>Jumping, falling, swimming</h2>
+<ul><li>Running up a flight of steps, each automatic jump clears the next step instead of hitting its face.</li><li>Walking off a high ledge is one smooth fall, into water and inside a low tunnel too.</li><li>When a fall hurts, you see it the moment you land, not a second later.</li><li>Let go of the key while swimming and you glide into place at swimming pace, not at a run.</li></ul>
+<h2>Bridges in the air</h2>
+<p>With earth or stone in hand, aim past a cliff's edge or over a hole and press <kbd>E</kbd>: the block goes in at your own level, not down at the bottom. Step onto it, place the next one, and you have a bridge straight out through the air.</p>
+<h2>Always the latest version</h2>
+<p>If your browser kept an old copy of the game from before an update, the page now notices and loads the new version by itself.</p>
+<div class="shot"><img src="../img/cave-out.png" alt="A hill with a cave mouth in it, by day" loading="lazy"></div>
+<p class="cap">A hill with a cave mouth in it, by day</p>
+</article>
+<div class="post-nav"><a class="btn small ghost" href="inside-rooks-head.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/></svg>Inside Rook&#x27;s head</a></div>
+<p></p>
+</section></main>
+<footer class="foot"><div class="wrap">
+<p>Nexel Worlds is made by <a href="https://github.com/sofianedjerbi">sofianedjerbi</a>. Code: <a href="https://github.com/sofianedjerbi/nexel-worlds">nexel-worlds</a> (the game) and <a href="https://github.com/sofianedjerbi/nexel-agent">nexel-agent</a> (the AI players).</p>
+<p>Art: Sprout Lands by <a href="https://cupnooble.itch.io/">Cup Nooble</a>. The pictures on this site are screenshots of the game.</p>
+</div></footer>
+</body>
+</html>
