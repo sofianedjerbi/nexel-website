@@ -1,0 +1,58 @@
+# Pictures and clips of the game for the news, taken on a GitHub runner, never on the shared Mac: the game from its
+# repo's main (or a ref), a fresh QA world, tools/capture.py's scenes in the runner's own Chrome. The pictures (shots/raw)
+# and clips (img/*.webm) come back as the artifact "shots": download it, crop (tools/crop.py), pick, commit.
+name: Capture
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenes:
+        description: "capture.py scenes, space-separated"
+        default: "creatures sky bridge bridge_clip fall_clip"
+      ref:
+        description: "nexel-worlds ref to capture"
+        default: main
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    name: Capture ${{ inputs.scenes }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: sofianedjerbi/nexel-worlds
+          ref: ${{ inputs.ref }}
+          path: game
+      - uses: astral-sh/setup-uv@v10.4.0
+        with:
+          python-version: "3.14"
+      - name: The game's environment
+        working-directory: game
+        run: uv sync --locked
+      - name: A QA server on a fresh world (port 7881)
+        working-directory: game
+        run: |
+          nohup .venv/bin/python -m nexel_worlds.server --port 7881 --world qa --saves "$RUNNER_TEMP/saves" --seed 12 --dev > "$RUNNER_TEMP/server.log" 2>&1 &
+          for i in $(seq 1 60); do curl -fs -o /dev/null http://127.0.0.1:7881/ && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/server.log"; exit 1
+      - name: The scenes
+        env:
+          GAME: ${{ github.workspace }}/game
+          SCENES: ${{ inputs.scenes }}
+          SHOT_W: "960"
+          SHOT_H: "540"
+          ZOOM: "3"
+        run: game/.venv/bin/python tools/capture.py $SCENES
+      - if: always()
+        run: mkdir -p shots/raw && cp img/*.webm shots/raw/ 2>/dev/null; cp "$RUNNER_TEMP/server.log" shots/ || true
+      - if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: shots
+          path: shots
+          retention-days: 14
