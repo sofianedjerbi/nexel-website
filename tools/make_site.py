@@ -70,7 +70,9 @@ def page(title: str, body: str, base: str, desc: str, active: str = "") -> str:
 <meta property="og:image" content="{base}img/hero.png">
 <link rel="preload" href="{base}fonts/sprout-pixel.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="stylesheet" href="{base}css/site.css">
-<link rel="icon" href="{base}img/favicon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="{base}img/emblem.png">
+<link rel="icon" type="image/png" sizes="32x32" href="{base}img/emblem_32.png">
+<link rel="apple-touch-icon" href="{base}img/emblem_180.png">
 {FRESH}
 </head>
 <body>
