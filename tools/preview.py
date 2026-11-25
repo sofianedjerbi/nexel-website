@@ -13,7 +13,7 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parent.parent
 BASE = "http://127.0.0.1:7882/nexel-website/"
 OUT = ROOT / ".preview"
-PAGES = {"home": "index.html", "devlog": "devlog/index.html", "post-ai": "devlog/ai-players.html", "post-water": "devlog/flowing-water.html"}
+PAGES = {"home": "index.html", "news": "news/index.html", "post": "news/whats-new-nov-25.html"}
 SIZES = {"desk": dict(viewport={"width": 1440, "height": 900}), "phone": dict(viewport={"width": 390, "height": 844}, device_scale_factor=3, is_mobile=True, has_touch=True)}
 
 

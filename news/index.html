@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>News · Nexel Worlds</title>
+<meta name="description" content="What is new in Nexel Worlds: new creatures, places and things to do, shown.">
+<meta property="og:title" content="News · Nexel Worlds">
+<meta property="og:description" content="What is new in Nexel Worlds: new creatures, places and things to do, shown.">
+<meta property="og:image" content="../img/hero.png">
+<link rel="preload" href="../fonts/sprout-pixel.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="../css/site.css">
+<link rel="icon" href="../img/favicon.png">
+<script>
+(() => { const n = performance.getEntriesByType("navigation")[0], u = location.href.split("#")[0];
+  if (!n || n.transferSize !== 0 || sessionStorage.getItem("fresh " + u)) return;
+  Promise.all([fetch(u, {cache: "force-cache"}), fetch(u, {cache: "no-cache"})]).then((r) => Promise.all(r.map((x) => x.text())))
+    .then(([kept, now]) => { if (kept !== now) { sessionStorage.setItem("fresh " + u, 1); location.reload(); } }).catch(() => {}); })();
+</script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+<a class="brand" href="../index.html">Nexel Worlds</a>
+<nav class="nav"><a href="../index.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/></svg>Home</a><a href="../news/index.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="1" y="0" width="1" height="1"/><rect x="2" y="0" width="1" height="1"/><rect x="3" y="0" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="5" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="5" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/></svg>News</a><a href="../play/"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/></svg>Play</a></nav>
+</div></header>
+<main class="wrap"><section>
+<div class="panel">
+<h1>News</h1>
+<p>What is new in Nexel Worlds, shown. Every change here is already in the game: <a href="../play/">play it</a>.</p>
+</div>
+<ul class="posts">
+<li><a class="post" href="whats-new-nov-25.html">
+<div class="thumb"><img src="../img/cave-out.png" alt="" loading="lazy"></div>
+<div><h2>What&#x27;s new: creatures, a new sky, and bridges in the air</h2><p class="date">2026-11-25</p><p>Three new wild creatures and a fire friend, sun and moon and stars, caves you see whole, and blocks you can put out over a drop.</p></div>
+</a></li>
+</ul>
+</section></main>
+<footer class="foot"><div class="wrap">
+<p>Nexel Worlds is made by <a href="https://github.com/sofianedjerbi">sofianedjerbi</a>. Code: <a href="https://github.com/sofianedjerbi/nexel-worlds">nexel-worlds</a> (the game) and <a href="https://github.com/sofianedjerbi/nexel-agent">nexel-agent</a> (the AI players).</p>
+<p>Art: Sprout Lands by <a href="https://cupnooble.itch.io/">Cup Nooble</a>. The pictures on this site are screenshots of the game.</p>
+</div></footer>
+</body>
+</html>

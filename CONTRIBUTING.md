@@ -11,7 +11,7 @@ Every commit on main follows [Conventional Commits](https://www.conventionalcomm
 
 - **type**: `feat` (a new page, post or demo feature), `fix`, `perf`, `refactor`, `docs`, `build`
   (a demo rebuilt from the game), `ci` (.github), `chore` (tools, anything else), `style`, `test`, `revert`.
-- **scope**: `site` (landing page, css, img, fonts), `devlog`, `demo` (play/), `brain` (play/brain/), `tools`.
+- **scope**: `site` (landing page, css, img, fonts), `news`, `demo` (play/), `brain` (play/brain/), `tools`.
 
 Optional hooks (ruff, and the message check at commit time): `uvx pre-commit install`.
 
@@ -28,7 +28,7 @@ https://sofianedjerbi.github.io/nexel-website/
 
 ```
 index.html            landing page (written by tools/make_site.py from tools/landing.html)
-devlog/               posts (written from devlog/posts/*.md)
+news/                 the news: what is new in the game (written from news/posts/*.md; devlog/ sends there)
 play/                 the game: built from source by the game repo (its game.yml), placed here at deploy; not committed
                       (play/brain/, the brain view, is this site's own and is)
 img/                  screenshots of the game (whole pixels, never scaled)
@@ -39,7 +39,7 @@ tools/                the scripts below
 
 ### Rebuild
 
-Pages (after editing `tools/landing.html` or a post in `devlog/posts/`):
+Pages (after editing `tools/landing.html` or a post in `news/posts/`):
 
     python3 tools/make_site.py
 
