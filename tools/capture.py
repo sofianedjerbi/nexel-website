@@ -242,8 +242,98 @@ def bridge(g):
     snap(g, "bridge")
 
 
+# Clips: the world's own picture (the canvas, no bar or hearts over it) recorded in the page, and with `sound` what the
+# game plays (its effects and its music), into one .webm: no other program needed. Written straight to img/.
+REC = """(sound) => { const s = document.getElementById('c').captureStream(30);
+  if (sound && audio) { const d = audio.createMediaStreamDestination(); soundOut.connect(d); musicOut.connect(d); d.stream.getAudioTracks().forEach((t) => s.addTrack(t)); }
+  const kind = sound ? 'video/webm;codecs=vp9,opus' : 'video/webm;codecs=vp9';
+  window.__rec = new MediaRecorder(s, {mimeType: kind, videoBitsPerSecond: 5e6}); window.__chunks = [];
+  __rec.ondataavailable = (e) => e.data.size && __chunks.push(e.data); __rec.start(250); return 1; }"""
+STOP = """() => new Promise((ok) => { __rec.onstop = () => { const r = new FileReader();
+  r.onload = () => ok(r.result.split(',')[1]); r.readAsDataURL(new Blob(__chunks, {type: 'video/webm'})); }; __rec.stop(); })"""
+IMG = Path(__file__).resolve().parent.parent / "img"
+
+
+def clip(g, name, play, sound=False):
+    """Record `play(g)` into img/<name>.webm."""
+    import base64
+    g.page.evaluate(REC, sound)
+    play(g)
+    data = base64.b64decode(g.page.evaluate(STOP))
+    (IMG / f"{name}.webm").write_bytes(data)
+    print("clip", name, f"{len(data) / 1e6:.1f} MB", flush=True)
+
+
+def stage(g, at, phase, r=10):
+    """A clear patch of meadow at `at`, at that hour, nothing in hand, nothing about."""
+    empty(g)
+    tp(g, *at)
+    g.clear_area(r)
+    g.rpc("dev_creatures", clear=r + 4)
+    hour(g, phase)
+    g.rpc("dev_needs", hp=20, hunger=20)
+
+
+def creatures(g):
+    """The new wild ones and the hob: a clip each."""
+    stage(g, (300, 40), .4)
+    g.give(wood=12); g.hold_item("wood"); g.face(1, 0); g.rest()
+    g.rpc("dev_creatures", kind="gustling", dx=4, dy=0)
+    clip(g, "gustling", lambda g: g.sleep(9000))
+    stage(g, (300, 40), .4)
+    g.face(1, 0); g.rest()
+    g.rpc("dev_creatures", kind="snapbloom", dx=3, dy=0)
+    clip(g, "snapbloom", lambda g: g.sleep(8000))
+    stage(g, (300, 40), .86)
+    g.face(1, 0); g.rest()
+    g.rpc("dev_creatures", kind="grumblestump", dx=4, dy=0)
+    clip(g, "grumblestump", lambda g: g.sleep(9000))
+    stage(g, (300, 40), .86)
+    g.give(hob=1); g.face(1, 0); g.rest()
+    g.act("place", dir="E", item="hob"); g.sleep(1500)
+    g.rpc("dev_creatures", kind="grumblestump", dx=5, dy=1)
+    clip(g, "hob", lambda g: g.sleep(9000))
+
+
+def bridge_clip(g):
+    """Blocks put out over a drop, at your own level, and walked on."""
+    stage(g, (2, 13), .4)
+    x, y = g.pos()
+    g.rpc("dev_col", tiles=[[x + i, y + j] for i in range(-3, 1) for j in (-1, 0, 1)], col=[6])
+    tp(g, x, y, 6)
+    g.give(dirt=6); g.hold_item("dirt"); g.face(1, 0); g.rest()
+
+    def play(g):
+        g.sleep(600)
+        for k in (1, 2, 3):
+            g.press("e", 700)
+            g.wait(f"solidAt({x + k}, {y}, 6)", 3000)
+            g.hold(["d"], 60); g.rest(); g.sleep(300)
+        g.sleep(800)
+    clip(g, "bridge", play)
+
+
+def fall_clip(g):
+    """Walking off a ledge six high: one smooth fall, the hurt shown as you land."""
+    stage(g, (2, 13), .4)
+    x, y = g.pos()
+    g.rpc("dev_col", tiles=[[x + i, y + j] for i in range(-3, 1) for j in (-1, 0, 1)], col=[6])
+    tp(g, x - 2, y, 6); g.face(1, 0); g.rest()
+    clip(g, "fall", lambda g: (g.sleep(500), g.hold(["d"], 900), g.sleep(1500)))
+
+
+def sky(g):
+    """The new sky: by night the moon and the stars, at noon the sun's rays."""
+    stage(g, (300, 40), .9)
+    g.sleep(2500)
+    snap(g, "sky_night")
+    hour(g, .25)
+    snap(g, "sky_day")
+
+
 SHOTS = {"where": where, "explore": explore, "home": home, "village": village, "night": night, "water": water,
-         "cave": cave, "build": build, "jump": jump, "bridge": bridge}
+         "cave": cave, "build": build, "jump": jump, "bridge": bridge, "creatures": creatures, "bridge_clip": bridge_clip,
+         "fall_clip": fall_clip, "sky": sky}
 
 if __name__ == "__main__":
     t0 = time.time()
