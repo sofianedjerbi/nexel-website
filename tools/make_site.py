@@ -1,4 +1,4 @@
-"""Write the site's pages: index.html, devlog/index.html and one page per post (devlog/posts/*.md).
+"""Write the site's pages: index.html, news/index.html and one page per post (news/posts/*.md); devlog/ sends to news/.
 
     python3 tools/make_site.py
 
@@ -10,8 +10,9 @@ Plain Python, no packages. A post is a small Markdown file with a head:
     summary: one line for the list
     ---
     text: paragraphs, "## heading", "- list", **bold**, [link](url), `key`,
-    ![caption](img/name.png) for a picture (at its own size), and a line "strip: a.png b.png c.png | caption"
-    for frames side by side.
+    ![caption](img/name.png) for a picture (at its own size), ![caption](img/clip.webm) for a short silent clip
+    (it loops by itself), "video: clip.webm | caption" for a video with sound (it plays when asked), and a line
+    "strip: a.png b.png c.png | caption" for frames side by side.
 """
 
 import html
@@ -19,7 +20,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-POSTS = ROOT / "devlog" / "posts"
+POSTS = ROOT / "news" / "posts"
 CODE = "https://github.com/sofianedjerbi/nexel-worlds"
 AGENT = "https://github.com/sofianedjerbi/nexel-agent"
 
@@ -55,7 +56,7 @@ FRESH = """<script>
 def page(title: str, body: str, base: str, desc: str, active: str = "") -> str:
     """The frame round every page. base: the way back to the site's root ("" or "../")."""
     nav = (f'<a href="{base}index.html">{icon("home")}Home</a>'
-           f'<a href="{base}devlog/index.html">{icon("log")}Devlog</a>'
+           f'<a href="{base}news/index.html">{icon("log")}News</a>'
            f'<a href="{base}play/">{icon("play")}Play</a>')
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -99,7 +100,11 @@ def fix(url: str, base: str) -> str:
     return url if re.match(r"https?:|#|mailto:", url) else base + url
 
 
-def picture(src: str, alt: str, base: str) -> str:
+def picture(src: str, alt: str, base: str, sound: bool = False) -> str:
+    """A picture, or a clip (.webm, .mp4): a silent one loops by itself, one with sound plays when asked."""
+    if src.endswith((".webm", ".mp4")):
+        how = "controls preload=\"metadata\"" if sound else "autoplay loop muted playsinline"
+        return f'<div class="shot"><video src="{fix(src, base)}" {how} aria-label="{html.escape(alt)}"></video></div>'
     return f'<div class="shot"><img src="{fix(src, base)}" alt="{html.escape(alt)}" loading="lazy"></div>'
 
 
@@ -128,6 +133,11 @@ def markdown(text: str, base: str) -> str:
             flush()
             out.append(picture(m.group(2), m.group(1), base))
             out.append(f'<p class="cap">{inline(m.group(1), base)}</p>')
+        elif s.startswith("video:"):
+            flush()
+            f, _, cap = s[6:].partition("|")
+            out.append(picture("img/" + f.strip(), cap.strip(), base, sound=True))
+            out.append(f'<p class="cap">{inline(cap.strip(), base)}</p>')
         elif s.startswith("strip:"):
             flush()
             files, _, cap = s[6:].partition("|")
@@ -148,9 +158,9 @@ def read_post(f: Path) -> dict:
     return {**meta, "slug": re.sub(r"^\d+-", "", f.stem), "body": body}
 
 
-def devlog():
+def news():
     posts = sorted((read_post(f) for f in POSTS.glob("*.md")), key=lambda p: (p["date"], p.get("order", "0"), p.get("slug", p.get("file", ""))))
-    out = ROOT / "devlog"
+    out = ROOT / "news"
     for i, p in enumerate(posts):
         prev = posts[i - 1] if i else None
         nxt = posts[i + 1] if i + 1 < len(posts) else None
@@ -168,28 +178,31 @@ def devlog():
 {links}
 <p></p>
 </section></main>"""
-        (out / f"{p['slug']}.html").write_text(page(f"{p['title']} · Nexel Worlds devlog", body, "../", p["summary"]))
+        (out / f"{p['slug']}.html").write_text(page(f"{p['title']} · Nexel Worlds news", body, "../", p["summary"]))
     items = "\n".join(f"""<li><a class="post" href="{p['slug']}.html">
 <div class="thumb"><img src="../img/{p['image']}" alt="" loading="lazy"></div>
 <div><h2>{html.escape(p['title'])}</h2><p class="date">{p['date']}</p><p>{html.escape(p['summary'])}</p></div>
 </a></li>""" for p in reversed(posts))
     body = f"""<main class="wrap"><section>
 <div class="panel">
-<h1>Devlog</h1>
-<p>How Nexel Worlds got made, a few days at a time. Short and honest: what worked, what did not, what we measured.
-The full day-by-day notes live in the code repo's <a href="{CODE}/blob/main/JOURNAL.md">JOURNAL.md</a>.</p>
+<h1>News</h1>
+<p>What is new in Nexel Worlds, shown. Every change here is already in the game: <a href="../play/">play it</a>.</p>
 </div>
 <ul class="posts">
 {items}
 </ul>
 </section></main>"""
-    (out / "index.html").write_text(page("Devlog · Nexel Worlds", body, "../", "How Nexel Worlds got made: short, honest posts."))
+    (out / "index.html").write_text(page("News · Nexel Worlds", body, "../", "What is new in Nexel Worlds: new creatures, places and things to do, shown."))
+    old = ROOT / "devlog"                    # (the old name: its links go on working)
+    old.mkdir(exist_ok=True)
+    (old / "index.html").write_text('<!DOCTYPE html>\n<meta charset="utf-8">\n<title>News · Nexel Worlds</title>\n'
+                                    '<meta http-equiv="refresh" content="0; url=../news/">\n<a href="../news/">News</a>\n')
     return posts
 
 
 def landing(posts):
     body = (ROOT / "tools" / "landing.html").read_text()
-    latest = "\n".join(f'<li><a href="devlog/{p["slug"]}.html">{html.escape(p["title"])}</a> <span class="date">{p["date"]}</span></li>' for p in list(reversed(posts))[:4])
+    latest = "\n".join(f'<li><a href="news/{p["slug"]}.html">{html.escape(p["title"])}</a> <span class="date">{p["date"]}</span></li>' for p in list(reversed(posts))[:4])
     body = body.replace("{{latest}}", latest)
     for name in ICONS:
         body = body.replace("{{icon:" + name + "}}", icon(name))
@@ -198,5 +211,5 @@ def landing(posts):
 
 
 if __name__ == "__main__":
-    landing(devlog())
+    landing(news())
     print("pages written")
