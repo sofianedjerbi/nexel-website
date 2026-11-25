@@ -32,7 +32,7 @@ def local_target(page: Path, link: str) -> Path | None:
     target = (ROOT / path.lstrip("/")) if path.startswith("/") else (page.parent / path)
     if path.endswith("/") or target.is_dir():
         target = target / "index.html"
-    return target
+    return target.resolve()           # (../play/ from devlog/: the game's, as play/ is)
 
 
 def main() -> int:
