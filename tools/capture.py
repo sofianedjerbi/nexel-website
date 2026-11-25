@@ -274,6 +274,15 @@ def stage(g, at, phase, r=10):
     g.rpc("dev_needs", hp=20, hunger=20)
 
 
+def watch(name, ms):
+    """A clip's play: `ms` of it, a still of it halfway (shots/raw/<name>.png)."""
+    def play(g):
+        g.sleep(ms // 2)
+        snap(g, name)
+        g.sleep(ms - ms // 2)
+    return play
+
+
 def creatures(g):
     """The new wild ones and the hob: a clip each."""
     stage(g, (300, 40), .4)
@@ -282,17 +291,17 @@ def creatures(g):
     g.face(1, 0)
     g.rest()
     g.rpc("dev_creatures", kind="gustling", dx=4, dy=0)
-    clip(g, "gustling", lambda g: g.sleep(9000))
+    clip(g, "gustling", watch("gustling", 9000))
     stage(g, (300, 40), .4)
     g.face(1, 0)
     g.rest()
     g.rpc("dev_creatures", kind="snapbloom", dx=3, dy=0)
-    clip(g, "snapbloom", lambda g: g.sleep(8000))
+    clip(g, "snapbloom", watch("snapbloom", 8000))
     stage(g, (300, 40), .86)
     g.face(1, 0)
     g.rest()
     g.rpc("dev_creatures", kind="grumblestump", dx=4, dy=0)
-    clip(g, "grumblestump", lambda g: g.sleep(9000))
+    clip(g, "grumblestump", watch("grumblestump", 9000))
     stage(g, (300, 40), .86)
     g.give(hob=1)
     g.face(1, 0)
@@ -300,7 +309,7 @@ def creatures(g):
     g.act("place", dir="E", item="hob")
     g.sleep(1500)
     g.rpc("dev_creatures", kind="grumblestump", dx=5, dy=1)
-    clip(g, "hob", lambda g: g.sleep(9000))
+    clip(g, "hob", watch("hob", 9000))
 
 
 def bridge_clip(g):
