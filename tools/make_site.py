@@ -41,6 +41,17 @@ def icon(name: str) -> str:
     return f'<svg class="i" viewBox="0 0 7 7" aria-hidden="true">{rects}</svg>'
 
 
+# A page the browser kept (GitHub Pages lets it keep one ten minutes, and nothing here can say otherwise) is asked of
+# the site again; if the site's has changed (a deploy since), the page is loaded again with it. Only a kept page: one
+# that came over the network is the site's own. Once a page, never in a loop.
+FRESH = """<script>
+(() => { const n = performance.getEntriesByType("navigation")[0], u = location.href.split("#")[0];
+  if (!n || n.transferSize !== 0 || sessionStorage.getItem("fresh " + u)) return;
+  Promise.all([fetch(u, {cache: "force-cache"}), fetch(u, {cache: "no-cache"})]).then((r) => Promise.all(r.map((x) => x.text())))
+    .then(([kept, now]) => { if (kept !== now) { sessionStorage.setItem("fresh " + u, 1); location.reload(); } }).catch(() => {}); })();
+</script>"""
+
+
 def page(title: str, body: str, base: str, desc: str, active: str = "") -> str:
     """The frame round every page. base: the way back to the site's root ("" or "../")."""
     nav = (f'<a href="{base}index.html">{icon("home")}Home</a>'
@@ -59,6 +70,7 @@ def page(title: str, body: str, base: str, desc: str, active: str = "") -> str:
 <link rel="preload" href="{base}fonts/sprout-pixel.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="stylesheet" href="{base}css/site.css">
 <link rel="icon" href="{base}img/favicon.png">
+{FRESH}
 </head>
 <body>
 <header class="top"><div class="wrap">

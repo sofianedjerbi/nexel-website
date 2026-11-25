@@ -44,7 +44,7 @@ Pages (after editing `tools/landing.html` or a post in `devlog/posts/`):
     python3 tools/make_site.py
 
 The deployed site takes the game from the game repo's latest good build (`.github/workflows/pages.yml`: on every push
-here, and every half hour when the game has a newer one): nothing to do by hand. To look at it locally, from a clean
+here, and as soon as the game has a newer one: its own build says so, or the site looks every five minutes): nothing to do by hand. To look at it locally, from a clean
 clone of the game repo (only committed code gets in; the built sound files and the cached Pyodide library are copied
 from the game's working folder):
 

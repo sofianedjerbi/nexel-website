@@ -1,13 +1,14 @@
 # The site, deployed: these pages, and under play/ the game as its own repo builds it from source (sofianedjerbi/
 # nexel-worlds, its game.yml: the artifact "game" of its latest good run on main). play/brain/ is this repo's.
-# On every push here; every half hour it looks for a newer game and deploys only when there is one.
+# On every push here; when the game's own build says so (its game.yml, given a token: WEBSITE_DEPLOY); and every five
+# minutes it looks for a newer game and deploys only when there is one (in case the game could not say).
 name: Pages
 
 on:
   push:
     branches: [main]
   schedule:
-    - cron: "11,41 * * * *"             # (off the hour and half hour: GitHub drops scheduled runs there when it is busy)
+    - cron: "3-58/5 * * * *"            # (every 5 minutes, off the hour: GitHub drops scheduled runs there when it is busy)
   workflow_dispatch:
 
 permissions:
