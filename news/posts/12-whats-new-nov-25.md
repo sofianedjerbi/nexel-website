@@ -1,45 +1,55 @@
 title: What's new: creatures, a new sky, and bridges in the air
 date: 2026-11-25
-image: cave-out.png
+image: new-grumblestump.png
 summary: Three new wild creatures and a fire friend, sun and moon and stars, caves you see whole, and blocks you can put out over a drop.
 ---
-Here is what changed in the game over the last two days. It is all live now: [play it](play/).
+All of it is in the game now: [play it](play/).
 
-## New creatures
+## Grumblestump
 
-- **Gustling.** Rare, and only by day. It drifts up to whoever is holding something, spins up, then grabs up to five of it and runs. Hit it while it spins and it drops everything.
-- **Grumblestump.** By day it is a stump with its eyes shut. At night it shuffles after you, raises its arms and slams the ground. Everyone within two tiles gets hit, so step back when you see the arms go up.
-- **Snapbloom.** Rare, by day. It creeps up, rears back, and bites if you are still beside it. At night it is just a flower.
-- **The hob, on your side.** Make one at a workbench (8 stone and a campfire) and set it down. It follows you for good. When a wild creature comes close it hunches, then its firebox bursts: every wild thing near it is burnt and runs. It never hurts a person or an animal.
+By day it's a stump with its eyes shut. At night it shuffles after you and slams the ground: step back when its arms go up.
 
-Every creature also has its own sounds now: a warning before it acts, a blow, a cry. If you hear one, look up.
+![A grumblestump slamming at night, two hearts gone](img/new-grumblestump.png)
 
-## The sky and the view
+## Snapbloom
 
-- A new sky: a sun with pixel rays, a moon that goes through its phases day by day, stars and a faint milky band at night.
-- **View distance** is now a slider, from 9 to 65 tiles, in the Picture settings.
-- New music: *Slow Tide* plays in the morning, and *Bright Dream* joins the daytime pieces. A piece no longer repeats for twenty minutes.
+Rare, by day. It creeps up, rears back and bites. At night it's just a flower.
 
-## Under the ground
+![A snapbloom biting: -1](img/new-snapbloom.png)
 
-- The land is earth on top and stone underneath, the same everywhere, so you know what a dig will give.
-- In a cave you see the whole cave, every branch of it, not just a circle round you.
-- A cave keeps the real colours of its blocks, and its mouth casts a soft shadow inside.
-- No more dark border along cliff tops and the rims of holes.
+## The hob, on your side
 
-## Jumping, falling, swimming
+Make one at a workbench (8 stone and a campfire) and set it down. It follows you, and burns any wild creature that comes too close.
 
-- Running up a flight of steps, each automatic jump clears the next step instead of hitting its face.
-- Walking off a high ledge is one smooth fall, into water and inside a low tunnel too.
-- When a fall hurts, you see it the moment you land, not a second later.
-- Let go of the key while swimming and you glide into place at swimming pace, not at a run.
+![Your hob by your side at night, a grumblestump coming in](img/new-hob.png)
+
+## A new sky
+
+A sun with pixel rays, a moon that changes phase day by day, stars and a milky band at night.
+
+![The night sky: the moon, the stars, the milky band](img/new-sky-night.png)
 
 ## Bridges in the air
 
-With earth or stone in hand, aim past a cliff's edge or over a hole and press `E`: the block goes in at your own level, not down at the bottom. Step onto it, place the next one, and you have a bridge straight out through the air.
+With earth or stone in hand, aim past a cliff's edge and press `E`: the block goes in at your own level. Step on it, place the next one.
 
-## Always the latest version
+![A bridge of earth built out from a stone pillar](img/new-bridge.png)
 
-If your browser kept an old copy of the game from before an update, the page now notices and loads the new version by itself.
+## Cleaner cliffs and caves
 
-![A hill with a cave mouth in it, by day](img/cave-out.png)
+No more dark border round holes and cliff tops. Cave mouths cast a soft shadow, and a cave keeps its real colours.
+
+strip: new-rim-before.png new-rim-after.png | A hole, before and after
+
+strip: new-mouth-before.png new-mouth-after.png | A cave mouth, before and after
+
+## Also new
+
+- **Ores:** coal, copper, iron, gold and titanium in the stone, deeper ones rarer. Gold and titanium need an iron pickaxe or better, or they crumble.
+- **Tool tiers:** wood, stone, iron and titanium axes and pickaxes. Better ones dig faster.
+- **Gustling:** rare, by day. It snatches up to five of what you hold and runs. Hit it while it spins.
+- Every creature has its own sounds: a warning, a blow, a cry.
+- **View distance** is a slider, 9 to 65 tiles (Picture settings).
+- New music: *Slow Tide* in the morning, *Bright Dream* by day.
+- Walking off a ledge is one smooth fall. A fall's damage shows as you land.
+- A swimmer glides into place at swimming pace.
