@@ -274,12 +274,12 @@ def stage(g, at, phase, r=10):
     g.rpc("dev_needs", hp=20, hunger=20)
 
 
-def watch(name, ms):
-    """A clip's play: `ms` of it, a still of it halfway (shots/raw/<name>.png)."""
+def watch(name, ms, at=.5):
+    """A clip's play: `ms` of it, a still of it at `at` of the way (shots/raw/<name>.png)."""
     def play(g):
-        g.sleep(ms // 2)
+        g.sleep(int(ms * at))
         snap(g, name)
-        g.sleep(ms - ms // 2)
+        g.sleep(ms - int(ms * at))
     return play
 
 
@@ -291,7 +291,7 @@ def creatures(g):
     g.face(1, 0)
     g.rest()
     g.rpc("dev_creatures", kind="gustling", dx=4, dy=0)
-    clip(g, "gustling", watch("gustling", 9000))
+    clip(g, "gustling", watch("gustling", 9000, at=.22))   # (by halfway it has the wood and is gone)
     stage(g, (300, 40), .4)
     g.face(1, 0)
     g.rest()
