@@ -28,11 +28,10 @@
 <p class="date">2026-11-08</p>
 <h1>Day one: a world for robots, then a game</h1>
 <p></p>
-<p>Nexel Worlds started on 8 November as something else: a persistent world where the players are AI agents running on a local model. The first version was a server, a world of chunks saved in SQLite, and eight scripted bots walking, digging and building. It worked: 1604 decisions in four minutes, a tick in 0.2 ms.</p>
+<p>Nexel Worlds started on 8 November as something else: a persistent world where the players are AI agents running on a local model. The first version was a server, a world of chunks saved in SQLite, and eight scripted bots walking, digging and building. It worked, and it was fast.</p>
 <p>Then it had to be looked at, and the first look was a debug viewer. The verdict was short: ugly, and nobody could tell how to play. Then: still ugly, and the latency is insane.</p>
 <h2>What we fixed that day</h2>
 <ul><li><b>Latency.</b> A one-tick step took two ticks (400 ms), and the page waited for the server before moving you. Now your character moves the moment you press a key and the server confirms within a tick.</li><li><b>The look.</b> Hand-drawn tiles at uneven scales made a checkerboard. We switched to the Sprout Lands art pack, drawn at whole-number zooms only, so pixels stay square.</li><li><b>Letters.</b> No font we tried felt right, so the game got its own: a 5 by 7 pixel font, drawn letter by letter. It is the one you are reading.</li><li><b>Feel.</b> Collisions you could trust, things that spawned everywhere, animation for every action.</li></ul>
-<p>By midnight there had been 24 iterations, each written down in the journal: what we thought, what we changed, what we measured.</p>
 <div class="shot"><img src="../img/island.png" alt="The first screen&#x27;s island, as it looks today" loading="lazy"></div>
 <p class="cap">The first screen's island, as it looks today</p>
 </article>

@@ -9,7 +9,7 @@ Behind a mountain or in a cave, a top-down camera loses you. So when land hides 
 
 ## Black tiles on a phone
 
-A screenshot from a phone showed black tiles along cliff tops. We could not reproduce it on the Mac, with the same world, spot and screen size. The cause was the phone's graphics chip drawing chained canvas copies wrong. The fix was to stop asking the GPU: the land is now painted pixel by pixel in JavaScript and uploaded once.
+A screenshot from a phone showed black tiles along cliff tops. We could not reproduce it on the Mac, with the same world, spot and screen size. The cause was the phone's graphics chip drawing chained canvas copies wrong. The fix at the time was to stop asking the GPU: the land was painted pixel by pixel in JavaScript and uploaded once. (Today's HD look draws real blocks, and that phone is fine with it.)
 
 ## A name
 

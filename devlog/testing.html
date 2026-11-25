@@ -28,7 +28,7 @@
 <p class="date">2026-11-22</p>
 <h1>Tests that tell the truth</h1>
 <p></p>
-<p>Every change to Nexel Worlds is checked twice: unit tests on the simulation (665 of them now, a few seconds), and tests in real Chrome that join the game and play it with the keyboard.</p>
+<p>Every change to Nexel Worlds is checked twice: unit tests on the simulation (665 of them at the time, a few seconds), and tests in real Chrome that join the game and play it with the keyboard.</p>
 <h2>Slow and flaky</h2>
 <p>By the 17th the browser suite had 245 tests, took four minutes on six workers, and in a whole day of runs not one was fully green. A different handful failed each time.</p>
 <p>We measured before changing anything. About 440 seconds of the run were fixed sleeps in the test helper: 0.4 s after every bit of land, 0.7 s for a cleared area, 0.8 s after a gift. They were too long when the machine was idle and too short when it was busy. Now the helper waits for the thing itself (the land is drawn, the item is in your bag), never for a fixed time. The suite got a fifth faster and much steadier.</p>

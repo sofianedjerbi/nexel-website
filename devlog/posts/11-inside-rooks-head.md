@@ -8,7 +8,7 @@ Rook is one of our AI players. Its body is a small network trained by playing (s
 
 From the outside you only see a little figure digging. So we built a page that shows the inside.
 
-[Watch Rook's head: 13 minutes from today's demo](play/brain/)
+[Watch Rook's head: 13 minutes from 23 November](play/brain/)
 
 ## What the page shows
 

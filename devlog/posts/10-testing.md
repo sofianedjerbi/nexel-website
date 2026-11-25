@@ -3,7 +3,7 @@ date: 2026-11-22
 image: build-1.png
 summary: Hundreds of tests in a real browser, and what made them flaky. Hint: it was rarely load.
 ---
-Every change to Nexel Worlds is checked twice: unit tests on the simulation (665 of them now, a few seconds), and tests in real Chrome that join the game and play it with the keyboard.
+Every change to Nexel Worlds is checked twice: unit tests on the simulation (665 of them at the time, a few seconds), and tests in real Chrome that join the game and play it with the keyboard.
 
 ## Slow and flaky
 

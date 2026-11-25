@@ -3,7 +3,7 @@ date: 2026-11-08
 image: island.png
 summary: It started as a server for AI players. By the evening it had to be a game people want to play.
 ---
-Nexel Worlds started on 8 November as something else: a persistent world where the players are AI agents running on a local model. The first version was a server, a world of chunks saved in SQLite, and eight scripted bots walking, digging and building. It worked: 1604 decisions in four minutes, a tick in 0.2 ms.
+Nexel Worlds started on 8 November as something else: a persistent world where the players are AI agents running on a local model. The first version was a server, a world of chunks saved in SQLite, and eight scripted bots walking, digging and building. It worked, and it was fast.
 
 Then it had to be looked at, and the first look was a debug viewer. The verdict was short: ugly, and nobody could tell how to play. Then: still ugly, and the latency is insane.
 
@@ -13,7 +13,5 @@ Then it had to be looked at, and the first look was a debug viewer. The verdict 
 - **The look.** Hand-drawn tiles at uneven scales made a checkerboard. We switched to the Sprout Lands art pack, drawn at whole-number zooms only, so pixels stay square.
 - **Letters.** No font we tried felt right, so the game got its own: a 5 by 7 pixel font, drawn letter by letter. It is the one you are reading.
 - **Feel.** Collisions you could trust, things that spawned everywhere, animation for every action.
-
-By midnight there had been 24 iterations, each written down in the journal: what we thought, what we changed, what we measured.
 
 ![The first screen's island, as it looks today](img/island.png)
