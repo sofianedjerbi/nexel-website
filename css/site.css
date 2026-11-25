@@ -62,7 +62,7 @@ code, kbd { font: inherit; }
 /* a picture from the game, at its own size; wider than the screen: its middle */
 .shot { margin: 0 0 9px; overflow: hidden; background: var(--ink);
   box-shadow: 0 0 0 var(--px) var(--ink); }
-.shot img { display: block; width: auto; max-width: none; position: relative; left: 50%; transform: translateX(-50%); }
+.shot img, .shot video { display: block; width: auto; max-width: none; position: relative; left: 50%; transform: translateX(-50%); }
 .cap { color: var(--ink2); margin: 9px 0 27px; }
 
 /* the first screen */
@@ -84,7 +84,7 @@ kbd { display: inline-block; min-width: 33px; text-align: center; padding: 0 8px
 .strip { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 9px; }
 .strip .shot { flex: none; margin: 0; max-width: 100%; }
 
-/* devlog */
+/* news */
 .posts { margin: 0; }
 .posts li { padding: 0; margin: 0 0 27px; }
 .posts li::before { display: none; }
