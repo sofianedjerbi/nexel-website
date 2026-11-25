@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parent.parent
 POSTS = ROOT / "news" / "posts"
 CODE = "https://github.com/sofianedjerbi/nexel-worlds"
 AGENT = "https://github.com/sofianedjerbi/nexel-agent"
+SITE = "https://sofianedjerbi.github.io/nexel-website/"   # (link previews and search engines need whole addresses)
 
 # pixel icons, 7 x 7, drawn 3 px a pixel ('#' = ink)
 ICONS = {
@@ -67,7 +68,11 @@ def page(title: str, body: str, base: str, desc: str, active: str = "") -> str:
 <meta name="description" content="{html.escape(desc)}">
 <meta property="og:title" content="{html.escape(title)}">
 <meta property="og:description" content="{html.escape(desc)}">
-<meta property="og:image" content="{base}img/hero.png">
+<meta property="og:image" content="{SITE}img/hero.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nexel Worlds">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{SITE}img/hero.png">
 <link rel="preload" href="{base}fonts/sprout-pixel.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="stylesheet" href="{base}css/site.css">
 <link rel="icon" type="image/png" sizes="16x16" href="{base}img/emblem.png">
@@ -212,6 +217,16 @@ def landing(posts):
                                           "Nexel Worlds: a cozy top-down voxel survival game. Dig, build, farm and explore. Play the demo in your browser."))
 
 
+def crawl(posts):
+    """sitemap.xml, for search engines (Search Console): every page a player reads. (No robots.txt: one is read only at
+    the root of the domain, not under /nexel-website/.)"""
+    urls = [SITE, SITE + "news/", SITE + "play/"] + [f"{SITE}news/{p['slug']}.html" for p in posts]
+    (ROOT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+                                      + "".join(f"<url><loc>{u}</loc></url>\n" for u in urls) + "</urlset>\n")
+
+
 if __name__ == "__main__":
-    landing(news())
+    posts = news()
+    landing(posts)
+    crawl(posts)
     print("pages written")
