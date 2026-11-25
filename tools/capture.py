@@ -274,6 +274,15 @@ def stage(g, at, phase, r=10):
     g.rpc("dev_needs", hp=20, hunger=20)
 
 
+def watch(name, ms):
+    """A clip's play: `ms` of it, a still of it halfway (shots/raw/<name>.png)."""
+    def play(g):
+        g.sleep(ms // 2)
+        snap(g, name)
+        g.sleep(ms - ms // 2)
+    return play
+
+
 def creatures(g):
     """The new wild ones and the hob: a clip each."""
     stage(g, (300, 40), .4)
@@ -282,17 +291,17 @@ def creatures(g):
     g.face(1, 0)
     g.rest()
     g.rpc("dev_creatures", kind="gustling", dx=4, dy=0)
-    clip(g, "gustling", lambda g: g.sleep(9000))
+    clip(g, "gustling", watch("gustling", 9000))
     stage(g, (300, 40), .4)
     g.face(1, 0)
     g.rest()
     g.rpc("dev_creatures", kind="snapbloom", dx=3, dy=0)
-    clip(g, "snapbloom", lambda g: g.sleep(8000))
+    clip(g, "snapbloom", watch("snapbloom", 8000))
     stage(g, (300, 40), .86)
     g.face(1, 0)
     g.rest()
     g.rpc("dev_creatures", kind="grumblestump", dx=4, dy=0)
-    clip(g, "grumblestump", lambda g: g.sleep(9000))
+    clip(g, "grumblestump", watch("grumblestump", 9000))
     stage(g, (300, 40), .86)
     g.give(hob=1)
     g.face(1, 0)
@@ -300,7 +309,7 @@ def creatures(g):
     g.act("place", dir="E", item="hob")
     g.sleep(1500)
     g.rpc("dev_creatures", kind="grumblestump", dx=5, dy=1)
-    clip(g, "hob", lambda g: g.sleep(9000))
+    clip(g, "hob", watch("hob", 9000))
 
 
 def bridge_clip(g):
@@ -337,6 +346,27 @@ def fall_clip(g):
     clip(g, "fall", lambda g: (g.sleep(500), g.hold(["d"], 900), g.sleep(1500)))
 
 
+def nyxwing(g):
+    """The second boss: summoned, its entrance (32 beats, 12.3 s, landing on its song's drop), a fight, its death
+    (dev_hit after it has landed: untouchable while it comes down)."""
+    stage(g, (300, 40), .4, r=14)
+    g.face(0, -1)
+    g.rest()
+
+    def play(g):
+        r = g.rpc("dev_creatures", kind="nyxwing", dx=0, dy=-5)
+        g.sleep(6000)
+        snap(g, "nyxwing_entrance")
+        g.sleep(10000)
+        snap(g, "nyxwing")
+        g.sleep(14000)
+        if r.get("spawned"):
+            g.rpc("dev_hit", id=r["spawned"], n=120)
+        g.sleep(6000)
+        snap(g, "nyxwing_death")
+    clip(g, "nyxwing", play, sound=True)
+
+
 def sky(g):
     """The new sky: by night the moon and the stars, at noon the sun's rays."""
     stage(g, (300, 40), .9)
@@ -348,7 +378,7 @@ def sky(g):
 
 SHOTS = {"where": where, "explore": explore, "home": home, "village": village, "night": night, "water": water,
          "cave": cave, "build": build, "jump": jump, "bridge": bridge, "creatures": creatures, "bridge_clip": bridge_clip,
-         "fall_clip": fall_clip, "sky": sky}
+         "fall_clip": fall_clip, "sky": sky, "nyxwing": nyxwing}
 
 if __name__ == "__main__":
     t0 = time.time()
