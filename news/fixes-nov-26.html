@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fixes: hills stay solid, the horizon holds still · Nexel Worlds news</title>
+<meta name="description" content="Climbing a stone hill no longer cuts it open, the far land stops sliding as you walk, and jumping into water looks right.">
+<meta property="og:title" content="Fixes: hills stay solid, the horizon holds still · Nexel Worlds news">
+<meta property="og:description" content="Climbing a stone hill no longer cuts it open, the far land stops sliding as you walk, and jumping into water looks right.">
+<meta property="og:image" content="https://sofianedjerbi.github.io/nexel-website/img/hero.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nexel Worlds">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://sofianedjerbi.github.io/nexel-website/img/hero.png">
+<link rel="preload" href="../fonts/sprout-pixel.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="../css/site.css">
+<link rel="icon" type="image/png" sizes="16x16" href="../img/emblem.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../img/emblem_32.png">
+<link rel="apple-touch-icon" href="../img/emblem_180.png">
+<script>
+(() => { const n = performance.getEntriesByType("navigation")[0], u = location.href.split("#")[0];
+  if (!n || n.transferSize !== 0 || sessionStorage.getItem("fresh " + u)) return;
+  Promise.all([fetch(u, {cache: "force-cache"}), fetch(u, {cache: "no-cache"})]).then((r) => Promise.all(r.map((x) => x.text())))
+    .then(([kept, now]) => { if (kept !== now) { sessionStorage.setItem("fresh " + u, 1); location.reload(); } }).catch(() => {}); })();
+</script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+<a class="brand" href="../index.html">Nexel Worlds</a>
+<nav class="nav"><a href="../index.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/></svg>Home</a><a href="../news/index.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="1" y="0" width="1" height="1"/><rect x="2" y="0" width="1" height="1"/><rect x="3" y="0" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="5" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="5" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/></svg>News</a><a href="../play/"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/></svg>Play</a></nav>
+</div></header>
+<main class="wrap"><section>
+<article class="panel post-body">
+<p class="date">2026-11-26</p>
+<h1>Fixes: hills stay solid, the horizon holds still</h1>
+<p></p>
+<p>Small things, all of them in the game now: <a href="../play/">play it</a>.</p>
+<h2>Hills stay solid</h2>
+<p>Walking up a stone hillside, the land under you could open up like a cave and show its grey insides. Now it stays shut.</p>
+<div class="shot"><img src="../img/new-xray-hill.gif" alt="Left before, right now: climbing a stone hill" loading="lazy"></div>
+<p class="cap">Left before, right now: climbing a stone hill</p>
+<h2>The far land holds still</h2>
+<p>The world bends away toward the horizon. The bends used to slide along the far ridges as you walked; now they stay put on the land.</p>
+<div class="shot"><img src="../img/new-creases.gif" alt="Left before, right now: walking north, watch the far ridge" loading="lazy"></div>
+<p class="cap">Left before, right now: walking north, watch the far ridge</p>
+<h2>Into the water</h2>
+<p>Jump off a ledge into a pond and you go into the water, without popping up the screen for a moment first.</p>
+<div class="shot"><img src="../img/new-splash.gif" alt="Left before, right now, slowed down 4x" loading="lazy"></div>
+<p class="cap">Left before, right now, slowed down 4x</p>
+<h2>Also fixed</h2>
+<ul><li>Climbing: you stop on the stair you let go on, and stepping onto a ladder from a cliff top no longer throws you past its foot.</li><li>Speech bubbles stay sharp at 125% and 175% display scale.</li><li>A far plateau's rim has no more dark specks.</li><li>Fires, puffs and dropped items are lighter on slower computers.</li><li>Nyxwing's entrance and its music meet you where the fight is, even if you come late.</li></ul>
+</article>
+<div class="post-nav"><a class="btn small ghost" href="whats-new-nov-25.html"><svg class="i" viewBox="0 0 7 7" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/></svg>What&#x27;s new: creatures, a new sky, and bridges in the air</a></div>
+<p></p>
+</section></main>
+<footer class="foot"><div class="wrap">
+<p>Nexel Worlds is made by <a href="https://github.com/sofianedjerbi">sofianedjerbi</a>. Code: <a href="https://github.com/sofianedjerbi/nexel-worlds">nexel-worlds</a> (the game) and <a href="https://github.com/sofianedjerbi/nexel-agent">nexel-agent</a> (the AI players).</p>
+<p>Art: Sprout Lands by <a href="https://cupnooble.itch.io/">Cup Nooble</a>. The pictures on this site are screenshots of the game.</p>
+</div></footer>
+</body>
+</html>
