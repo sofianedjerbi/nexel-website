@@ -1,7 +1,7 @@
 \section*{The executor and the skills, in the simulator}
 \textbf{Building.} A drawn design's unlaid cells are turned into a bill of raw material (Theorem 1), gathered in trips
-of 24, then laid by the builder with a full inventory. Six designs on three seeds each, from an empty inventory: 15 of
-18 stand whole (Wilson 95\% interval $61$--$94\%$), in 241 to 791 decisions (Figure S). Before the executor the builder,
+of 24, then laid by the builder with a full inventory. Six designs on three seeds each, from an empty inventory: 17 of
+18 stand whole (Wilson 95\% interval $74$--$99\%$), in 241 to 3\,980 decisions (Figure S). Before the executor the builder,
 fetching a craft's worth at a time, laid a fifth of the smallest house in 5\,000 decisions.
 
 \begin{figure}[h]\centering
@@ -15,8 +15,10 @@ What this test exposed, each a fault the live trials could only show as nothing 
 re-sited the house whenever the agent was more than 64 tiles away (each gathering trip moved it); fetching per craft,
 the agent walked between trees and site, each out of view of the other; a hill under a roof's overhang made a cell
 unplaceable for ever; a flight of stairs takes one item per step; the builder recorded a plank and the wall on it as
-one cell (Theorem 2); standing inside its own site, it had nowhere to put a workbench. Still failing: seed 21 twice
-and the T on seed 7.
+one cell (Theorem 2); standing inside its own site, it had nowhere to put a workbench; a tile to clear lay ``behind
+the land'' from where it stood and was dug at 199 times (now tried from another side); a hill one layer under the
+eaves left no storey of room, which the game requires under a block (the site check now asks for it). Still
+failing: the T on seed 7, a walk to a tile it cannot reach, ordered over and over.
 
 \textbf{Other goals.} Eight goals from an empty inventory, 20 seeds, paired: the learned body choosing every action
 as it played live, against the goal's code skill (Table G). The skill succeeds as often or more on all eight and
