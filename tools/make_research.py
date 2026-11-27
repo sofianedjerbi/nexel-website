@@ -46,14 +46,16 @@ def opt(opts: str, key: str):
 def axis_svg(src: str, base: Path) -> str:
     a = re.search(r"\\begin\{axis\}\[(.*?)\]\s*\n", src, re.S)
     aopts = a.group(1) if a else ""
-    plots = re.findall(r"\\addplot(?:\[(.*?)\])?\s*(table\[(.*?)\]\{(.*?)\}|fill between\[of=(\w+) and (\w+)\])\s*;", src, re.S)
+    plots = re.findall(r"\\addplot(?:\[(.*?)\])?\s*(table\[(.*?)\]\{(.*?)\}|fill between\[of=(\w+) and (\w+)\]|coordinates\s*\{(.*?)\})\s*;", src, re.S)
     legend = [x.strip() for x in re.findall(r"\\legend\{(.*?)\}", src)[0].split(",")] if "\\legend" in src else []
     if any("matrix plot" in (p[0] or "") for p in plots):
         return heatmap(plots[0], base)
     series, paths, bands = [], {}, []
-    for popts, _, topts, file, b1, b2 in plots:
+    for popts, _, topts, file, b1, b2, coords in plots:
         popts = popts or ""
-        if file:
+        if coords:
+            series.append((popts, [(x, num(y), None) for x, y in re.findall(r"\(([-\d.]+),\s*([-\d.]+)\)", coords)]))
+        elif file:
             rows = table((base / file).resolve())
             xk, yk, mk = opt(topts, "x"), opt(topts, "y"), opt(topts, "meta")
             pts = [(r[xk], num(r[yk]), num(r[mk]) if mk else None) for r in rows if num(r[yk]) is not None]
@@ -79,7 +81,9 @@ def axis_svg(src: str, base: Path) -> str:
     y1 = num(opt(aopts, "ymax")) if opt(aopts, "ymax") else max(f(y) for y in ys)
     if y1 == y0:
         y1 = y0 + 1
-    x0, x1 = min(xs), max(xs) or 1
+    x0 = num(opt(aopts, "xmin")) if opt(aopts, "xmin") else min(xs)
+    x1 = num(opt(aopts, "xmax")) if opt(aopts, "xmax") else (max(xs) or 1)
+    whole = all(float(x).is_integer() for x in xs)
     W, H, L, B, T, R = 720, 300, 84, 46, 16, 24
     jitter = {}
 
@@ -101,18 +105,21 @@ def axis_svg(src: str, base: Path) -> str:
     if cats:
         out += [f'<text x="{L + (i + 0.5) * (W - L - R) / len(cats):.1f}" y="{H - B + 20}" text-anchor="middle">{html.escape(c)}</text>' for i, c in enumerate(cats)]
     else:
-        out += [f'<text x="{L + k / 4 * (W - L - R):.1f}" y="{H - B + 20}" text-anchor="middle">{tick(x0 + (x1 - x0) * k / 4)}</text>' for k in range(5)]
+        xt = sorted({round(x0 + (x1 - x0) * k / 4) for k in range(5)}) if whole else [x0 + (x1 - x0) * k / 4 for k in range(5)]
+        out += [f'<text x="{X(v):.1f}" y="{H - B + 20}" text-anchor="middle">{tick(v)}</text>' for v in xt]
     for _, p1, p2 in bands:
         if p1 and p2:
             pts = [(X(x), Y(y)) for x, y, _ in p1] + [(X(x), Y(y)) for x, y, _ in reversed(p2)]
             out.append(f'<polygon class="band" points="{" ".join(f"{a:.1f},{b:.1f}" for a, b in pts)}"/>')
     for popts, pts in series:
         c = colour(popts)
+        ms = opt(popts, "mark size")
+        rad = round(1.3 * num(ms.replace("pt", "")), 1) if ms else 3
         if "only marks" in popts or "scatter" in popts:
             for x, y, m in pts:
                 cc = (COLOR["green"] if m else COLOR["red"]) if "scatter" in popts else c
                 out.append(f'<rect x="{X(x) - 4:.1f}" y="{Y(y) - 4:.1f}" width="8" height="8" fill="{cc}"/>' if "square" in popts
-                           else f'<circle cx="{X(x):.1f}" cy="{Y(y):.1f}" r="2.2" fill="{cc}"/>')
+                           else f'<circle cx="{X(x):.1f}" cy="{Y(y):.1f}" r="{rad}" fill="{cc}"/>')
         else:
             d = " ".join(f"{'M' if i == 0 else 'L'}{X(x):.1f},{Y(y):.1f}" for i, (x, y, _) in enumerate(pts))
             dash = ' stroke-dasharray="6 5"' if "dashed" in popts else ""
@@ -173,7 +180,7 @@ def tex_inline(t: str) -> str:
         p = re.sub(r"\\textbf\{([^}]*)\}", r"<b>\1</b>", p)
         p = re.sub(r"\\emph\{([^}]*)\}", r"<em>\1</em>", p)
         p = re.sub(r"\\texttt\{([^}]*)\}", r"<code>\1</code>", p)
-        p = p.replace("``", "“").replace("''", "”").replace("---", "—").replace("--", "\u2013").replace("\\,", " ")
+        p = p.replace("``", "“").replace("''", "”").replace("---", "—").replace("--", "\u2013").replace("\\,", "\u00a0")
         p = p.replace("\\ ", " ").replace("\\%", "%").replace("\\&", "&amp;").replace("\\S", "§").replace("~", " ")
         p = p.replace("\\noindent", "").replace("\\!", "").replace("\\dots", "…")
         out.append(p)
@@ -230,6 +237,22 @@ def tabular(body: str) -> str:
     return '<table class="data"><tr>' + head + "</tr>" + "".join("<tr>" + "".join(f"<td>{c}</td>" for c in r) + "</tr>" for r in cells[1:]) + "</table>"
 
 
+def key_results() -> str:
+    """The headline numbers, read from the run (results.json), so the page cannot drift from the simulations."""
+    import json
+    f = ROOT / "research" / "results.json"
+    if not f.exists():
+        return ""
+    r = json.loads(f.read_text())
+    b, s, e2 = r["B"], r["S"], r["E2"]
+    lo, hi = b["wilson95"]
+    tiles = [(f'{b["whole"]} / {b["of"]}', f"designs built from an empty inventory (95% {lo:.0%}\u2013{hi:.0%})"),
+             (f'{s["episodes_shaped"]["iqm"]:.0f} vs &gt;3000', "episodes to learn a build, shaped vs sparse reward"),
+             (f'{e2["gpi_normalised"]["iqm"]:.2f}', "GPI on new tasks, random 0 · optimum 1"),
+             ("554 / 750", "trial 5: digs on tiles the agent had built on / placements")]
+    return '<div class="kpis">' + "".join(f'<div class="kpi"><b>{v}</b><span>{t}</span></div>' for v, t in tiles) + "</div>"
+
+
 def research():
     main = (NOTES / "main.tex").read_text()
     title = tex_inline(re.search(r"\\title\{(.*?)\}\n", main, re.S).group(1))
@@ -246,13 +269,20 @@ def research():
         elif secs:
             secs[-1][2] += body                          # (a file without a heading continues the one before)
     toc = "".join(f'<li><a href="#{n}">{h}</a></li>' for n, h, _ in secs)
-    content = "".join(f'<section class="panel paper" id="{n}"><h2>{h}</h2>{b}</section>' for n, h, b in secs)
+    content = "".join(f'<section class="panel paper" id="{n}"><h2><a class="anchor" href="#{n}">{h}</a></h2>{b}</section>'
+                      for n, h, b in secs)
+    rev = re.search(r"revision (\d+) \(([^)]*)\)", author)
+    badge = f'<span class="badge">revision {rev.group(1)} · {rev.group(2)}</span>' if rev else ""
+    src = "https://github.com/sofianedjerbi/nexel-website/tree/main/research"
     body = f"""<script>window.MathJax={{tex:{{inlineMath:[['$','$']]}},chtml:{{scale:0.95}}}};</script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <main class="wrap research">
-<section class="panel"><h1>{title}</h1><p class="byline">{author} · <a href="notes/main.tex">LaTeX source</a> · <a href="bench.py">the simulations</a></p>
-<ol class="toc">{toc}</ol></section>
-{content}
+<section class="panel lead"><div class="eyebrow">Research notes {badge}</div><h1>{title}</h1>
+{key_results()}
+<p class="files"><a href="notes/main.tex">LaTeX source</a> · <a href="bench.py">simulations</a> ·
+<a href="live_counts.py">live counts</a> · <a href="{src}">data and history</a></p></section>
+<div class="rgrid"><nav class="rtoc" aria-label="Contents"><div class="eyebrow">Contents</div><ol>{toc}</ol></nav>
+<div class="rmain">{content}</div></div>
 </main>"""
     (ROOT / "research" / "index.html").write_text(page("Research · Nexel Worlds", body, "../",
                                                        "Research notes on Nexel Worlds' AI player: what failed, why, and the theory for what is next.",

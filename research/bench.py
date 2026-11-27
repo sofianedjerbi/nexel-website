@@ -1,14 +1,19 @@
-"""The benchmark behind the notes (main.tex): each claim a theorem, each checked on Garnet random MDPs over many
-seeds, reported as an interquartile mean with a bootstrap 95% interval (Agarwal et al. 2021; Patterson et al. 2024).
-numpy only, ~1 min of one core. Writes results.json and data/*.csv (what the figures in the notes plot).
+"""The simulations behind the research notes (notes/main.tex), revision 3. numpy only, under a minute on one core.
+Writes results.json and data/*.csv (what the notes' figures plot).
 
-    ~/minish-rl/.venv/bin/python bench.py [--seeds 20]
+    python bench.py [--seeds 20]
+
+E1  successor features: Q^pi_w = psi^pi . w, an identity, checked once (Garnet MDPs)
+E2  GPI on Garnet MDPs: how good the combined policy is, from a random policy (0) to the optimum (1), against the
+    best single skill; and how often the theorem's bound says more than the trivial one
+S   potential-based shaping on a small build task: the optimal policy unchanged (checked exactly), and how many
+    episodes Q-learning needs with the sparse reward and with the shaped one, over seeds
+B   the executor's simulator board (data/sim_board.csv): the share of designs standing, with a Wilson interval
 """
 
 import argparse
 import csv
 import json
-from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -76,145 +81,165 @@ def optimal(P, r, g=GAMMA, tol=1e-10):
 
 
 # ---- E1: successor features ------------------------------------------------------------------------------------
-def e1(seeds, steps=300000, every=25000):
-    exact, curves = [], []
+def e1(seeds):
+    """The identity, once per Garnet: the value of a fixed policy under any weighting, from features learned once."""
+    worst = 0.0
     for sd in range(seeds):
         rng = np.random.default_rng(sd)
         P, phi = garnet(rng)
-        S, A, K = phi.shape
-        pi = rng.integers(0, A, S)
+        pi = rng.integers(0, phi.shape[1], phi.shape[0])
         psi = evaluate(P, phi, pi)
-        exact.append(max(np.abs(psi @ w - evaluate(P, phi @ w, pi)).max() for w in rng.normal(size=(50, K))))
-        est, seen, s, curve = np.zeros_like(psi), np.zeros((S, A)), 0, []
-        cum, acts, us = P.cumsum(2), rng.integers(A, size=steps), rng.random(steps)
-        for t in range(1, steps + 1):
-            a = acts[t - 1]
-            s2 = min(int(np.searchsorted(cum[s, a], us[t - 1])), S - 1)
-            seen[s, a] += 1
-            est[s, a] += (phi[s, a] + GAMMA * est[s2, pi[s2]] - est[s, a]) / seen[s, a] ** 0.7
-            s = s2
-            if t % every == 0:
-                curve.append(np.abs(est - psi).max() / np.abs(psi).max())
-        curves.append(curve)
-    curves = np.array(curves)
-    write("e1_td", ["samples", "iqm", "lo", "hi"],
-          [[(i + 1) * every, iqm(c), *ci(c)] for i, c in enumerate(curves.T)])
-    return {"exact_max_error": summary(exact), "td_final_relative_error": summary(curves[:, -1])}
+        worst = max(worst, max(np.abs(psi @ w - evaluate(P, phi @ w, pi)).max() for w in rng.normal(size=(50, phi.shape[2]))))
+    return {"max_abs_error": float(worst)}
 
 
 # ---- E2: generalised policy improvement ------------------------------------------------------------------------
+def evaluate_random(P, r, g=GAMMA):
+    S = r.shape[0]
+    V = np.linalg.solve(np.eye(S) - g * P.mean(1), r.mean(1))
+    return V
+
+
 def e2(seeds, tasks=40):
-    margins, slack, gaps, pts = [], [], [], []
+    """Per new task w: the mean over states of V, normalised so a uniform random policy is 0 and the optimum 1, for
+    the GPI policy and for the best single base skill; and whether the bound 2 delta/(1-gamma) beats the trivial
+    (r_max - r_min)/(1-gamma)."""
+    rows, vacuous = [], 0
     for sd in range(seeds):
         rng = np.random.default_rng(100 + sd)
         P, phi = garnet(rng)
         K = phi.shape[2]
         base = list(np.eye(K))
-        psis = [evaluate(P, phi, optimal(P, phi @ w).argmax(1)) for w in base]
+        pols = [optimal(P, phi @ w).argmax(1) for w in base]
+        psis = [evaluate(P, phi, p) for p in pols]
         for w in rng.normal(size=(tasks, K)):
-            Qs = np.stack([p @ w for p in psis])
-            Qg = evaluate(P, phi @ w, Qs.max(0).argmax(1))
-            Qstar = optimal(P, phi @ w)
+            r = phi @ w
+            gpi = np.stack([p @ w for p in psis]).max(0).argmax(1)
+            def v(pi, P=P, r=r):
+                return evaluate(P, r, pi)[np.arange(len(pi)), pi].mean()
+            vstar, vrand = optimal(P, r).max(1).mean(), evaluate_random(P, r).mean()
+            span = vstar - vrand
+            if span < 1e-9:
+                continue
+            g = (v(gpi) - vrand) / span
+            best = max((v(p) - vrand) / span for p in pols)
+            rows.append([best, g])
             d = min(np.abs(phi @ (w - wi)).max() for wi in base)
-            gap = (Qstar - Qg).max()
-            margins.append((Qg - Qs.max(0)).min())
-            slack.append(2 * d / (1 - GAMMA) - gap)
-            gaps.append(gap / np.abs(Qstar).max())
-            pts.append([d, gap, 2 * d / (1 - GAMMA), max(gap, 0.0) / (2 * d / (1 - GAMMA))])
-    pts.sort()
-    write("e2_gap", ["delta", "gap", "bound", "ratio"], pts)
-    return {"min_margin_over_best_skill": float(min(margins)), "min_bound_slack": float(min(slack)),
-            "relative_gap_to_optimum": summary(gaps), "tasks": len(gaps)}
+            vacuous += 2 * d >= r.max() - r.min()
+    rows = np.array(rows)
+    write("e2_norm", ["best_skill", "gpi"], rows.tolist())
+    return {"gpi_normalised": summary(rows[:, 1]), "gpi_minus_best_skill": summary(rows[:, 1] - rows[:, 0]),
+            "share_gpi_above_best_skill": float(np.mean(rows[:, 1] > rows[:, 0] + 1e-9)),
+            "share_bound_vacuous": float(vacuous / len(rows)), "tasks": len(rows)}
 
 
-# ---- E3: conflict, split, merge --------------------------------------------------------------------------------
-PAIRS = {"identical": 1.0, "twice": 2.0, "opposite": -1.0}
+# ---- S: potential-based shaping on a build task ------------------------------------------------------------------
+L_, N_, H_, G_ = 8, 4, 100, 0.97      # positions, site cells at the far end, steps an episode, discount
+SITE_ = list(range(L_ - N_, L_))
 
 
-def e3(seeds, n=200, d=8, steps=3000):
-    exact, steps_to_split, traces = {k: [] for k in PAIRS}, {k: [] for k in PAIRS}, {}
+def build_mdp():
+    """A line of L positions: blocks taken at 0, a site of N cells at the far end. State (pos, carrying, filled mask).
+    Actions: left, right, take (at 0), place (on an empty site cell, carrying), dig (a filled site cell: the block
+    back in hand if the hand is free). Reward 1 when the last cell is filled; the episode ends."""
+    S = L_ * 2 * 2 ** N_
+    nxt, rew, done = np.zeros((S, 5), int), np.zeros((S, 5)), np.zeros((S, 5), bool)
+    def idx(p, c, m):
+        return (p * 2 + c) * 2 ** N_ + m
+    for p in range(L_):
+        for c in (0, 1):
+            for m in range(2 ** N_):
+                s = idx(p, c, m)
+                k = p - SITE_[0]
+                for a in range(5):
+                    p2, c2, m2 = p, c, m
+                    if a == 0:
+                        p2 = max(0, p - 1)
+                    elif a == 1:
+                        p2 = min(L_ - 1, p + 1)
+                    elif a == 2 and p == 0:
+                        c2 = 1
+                    elif a == 3 and k >= 0 and c and not m >> k & 1:
+                        c2, m2 = 0, m | 1 << k
+                    elif a == 4 and k >= 0 and m >> k & 1:
+                        c2, m2 = 1, m & ~(1 << k)                # (the hand ends full: a block held is dropped)
+                    nxt[s, a] = idx(p2, c2, m2)
+                    if m2 == 2 ** N_ - 1 and m != m2:
+                        rew[s, a], done[s, a] = 1.0, True
+    phi = np.array([bin(s % 2 ** N_).count("1") / N_ for s in range(S)])
+    return nxt, rew, done, phi, idx(0, 0, 0)
+
+
+def shaped(rew, done, nxt, phi):
+    """F = gamma Phi(s') - Phi(s), Phi(terminal) = 0 (Ng, Harada, Russell 1999)."""
+    return rew + np.where(done, 0.0, G_ * phi[nxt]) - phi[:, None]
+
+
+def solve(nxt, r, done):
+    Q = np.zeros(r.shape)
+    for _ in range(3000):
+        Q = r + G_ * np.where(done, 0.0, Q.max(1)[nxt])
+    return Q
+
+
+def learn(nxt, r, done, start, rng, eps=0.1, alpha=0.5, most=3000):
+    """Q-learning, epsilon-greedy from Q = 0; episodes until the greedy policy builds the site within H steps."""
+    Q = np.zeros(r.shape)
+    for ep in range(1, most + 1):
+        s = start
+        for _ in range(H_):
+            a = rng.integers(5) if rng.random() < eps else int(rng.choice(np.flatnonzero(Q[s] == Q[s].max())))
+            t = r[s, a] + (0.0 if done[s, a] else G_ * Q[nxt[s, a]].max())
+            Q[s, a] += alpha * (t - Q[s, a])
+            if done[s, a]:
+                break
+            s = nxt[s, a]
+        if ep % 10 == 0:
+            s = start
+            for _ in range(H_):
+                a = int(Q[s].argmax())
+                if done[s, a]:
+                    return ep
+                s = nxt[s, a]
+    return most
+
+
+def shaping(seeds):
+    nxt, rew, done, phi, start = build_mdp()
+    rs = shaped(rew, done, nxt, phi)
+    q0, q1 = solve(nxt, rew, done), solve(nxt, rs, done)
+    same = bool(np.allclose(q1, q0 - phi[:, None], atol=1e-6))                  # (Q' = Q - Phi: the same argmax)
+    dig = [(s, 4) for s in range(len(phi)) if nxt[s, 4] != s and phi[nxt[s, 4]] < phi[s]]
+    sparse, shp = [], []
     for sd in range(seeds):
-        rng = np.random.default_rng(200 + sd)
-        X, u = rng.normal(size=(n, d)), rng.normal(size=d)
-        y1 = X @ u
-        Pm = X @ np.linalg.pinv(X)
-        for k, c in PAIRS.items():
-            y2 = c * y1
-            th = np.linalg.lstsq(np.vstack([X, X]), np.concatenate([y1, y2]), rcond=None)[0]
-            shared = ((X @ th - y1) ** 2).sum() + ((X @ th - y2) ** 2).sum()
-            exact[k].append(abs(shared - 0.5 * ((Pm @ (y1 - y2)) ** 2).sum()))
-            th, ema, at, tr = np.zeros(d), 0.0, None, []
-            for t in range(1, steps + 1):
-                i = rng.integers(n, size=16)
-                g1, g2 = X[i].T @ (X[i] @ th - y1[i]), X[i].T @ (X[i] @ th - y2[i])
-                nrm = np.linalg.norm(g1) * np.linalg.norm(g2)
-                ema = 0.98 * ema + 0.02 * (g1 @ g2 / nrm if nrm > 1e-9 else 0.0)
-                th -= 0.01 * (g1 + g2) / 16
-                if at is None and t > 200 and ema < -0.9:
-                    at = t
-                if sd == 0 and t % 25 == 0:
-                    tr.append(ema)
-            steps_to_split[k].append(at if at is not None else np.inf)
-            if sd == 0:
-                traces[k] = tr
-    write("e3_cos", ["step", *PAIRS], [[(i + 1) * 25, *(traces[k][i] for k in PAIRS)] for i in range(len(traces["twice"]))])
-    return {k: {"max_error_vs_theory": float(max(exact[k])),
-                "split_share": float(np.mean(np.isfinite(steps_to_split[k]))),
-                "steps_to_split_iqm": iqm([s for s in steps_to_split[k] if np.isfinite(s)]) if np.isfinite(steps_to_split[k]).any() else None}
-            for k in PAIRS}
+        sparse.append(learn(nxt, rew, done, start, np.random.default_rng(400 + sd)))
+        shp.append(learn(nxt, rs, done, start, np.random.default_rng(400 + sd)))
+    write("s_episodes", ["seed", "sparse", "shaped"], [[i, a, b] for i, (a, b) in enumerate(zip(sparse, shp, strict=True))])
+    return {"optimal_policy_unchanged": same, "every_dig_of_a_standing_cell_pays_below_zero": bool(all(rs[s, a] < 0 for s, a in dig)),
+            "episodes_sparse": summary(sparse), "episodes_shaped": summary(shp),
+            "paired_ratio_sparse_over_shaped": summary(np.array(sparse) / np.array(shp))}
 
 
-# ---- E4: reward kinds from gradients ---------------------------------------------------------------------------
-def e4(seeds, n=300, d=10, kinds=3, events=9, noise=0.3):
-    agree, found, within, across = [], [], [], []
-    for sd in range(seeds):
-        rng = np.random.default_rng(300 + sd)
-        X, dirs = rng.normal(size=(n, d)), rng.normal(size=(kinds, d))
-        label = np.arange(events) % kinds
-        G = np.stack([-X.T @ (X @ (dirs[k] * rng.uniform(0.5, 3)) + rng.normal(scale=noise, size=n)) for k in label])
-        nr = np.linalg.norm(G, axis=1)
-        C = G @ G.T / np.outer(nr, nr)
-        group, f = -np.ones(events, int), 0
-        for e in range(events):
-            if group[e] < 0:
-                group[(C[e] > 0.9) & (group < 0)] = f
-                f += 1
-        pairs = lambda g: {(i, j) for i in range(events) for j in range(i + 1, events) if g[i] == g[j]}
-        agree.append(len(pairs(group) & pairs(label)) / max(1, len(pairs(group) | pairs(label))))
-        found.append(f)
-        within += [C[i, j] for i, j in pairs(label)]
-        across += [C[i, j] for i in range(events) for j in range(i + 1, events) if label[i] != label[j]]
-        if sd == 0:
-            write("e4_cos", ["i", "j", "cos"], [[i, j, float(C[i, j])] for i in range(events) for j in range(events)])
-    return {"pair_agreement": summary(agree), "kinds_found_share_right": float(np.mean(np.array(found) == kinds)),
-            "min_cos_within": float(min(within)), "max_cos_across": float(max(across))}
+# ---- B: the simulator board -------------------------------------------------------------------------------------
+def wilson(k, n, z=1.96):
+    p = k / n
+    c = (p + z * z / (2 * n)) / (1 + z * z / n)
+    h = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / (1 + z * z / n)
+    return [float(c - h), float(c + h)]
 
 
-# ---- E5: what the reward pays decides what is done --------------------------------------------------------------
-def reaches(pay_side, pay_goal, dist, side=6, H=16, g=0.97):
-    @lru_cache(None)
-    def V(c, t):
-        opts = [(0.0, False)]
-        if t + dist <= H:
-            opts.append((g ** (t + dist) * pay_goal, True))
-        if c < side and t + 2 <= H:
-            v, r = V(c + 1, t + 2)
-            opts.append((g ** (t + 1) * pay_side + v, r))
-        return max(opts, key=lambda o: (round(o[0], 12), not o[1]))      # (a tie: the goal not counted as sought)
-    return V(0, 0)[1]
-
-
-def e5():
-    rows = [[p, dd, int(reaches(p, 1.0, dd))] for p in (0.05, 0.1, 0.2, 0.3, 0.5) for dd in (4, 6, 8, 10, 12)]
-    write("e5_sweep", ["pay", "dist", "reached"], rows)
-    return {"achievement_only_reaches": reaches(0.3, 0.0, 8), "verified_goal_reaches": reaches(0.0, 1.0, 8),
-            "mixed_share_reaching": float(np.mean([r[2] for r in rows]))}
+def board():
+    with open(DATA / "sim_board.csv") as f:
+        rows = list(csv.DictReader(f, delimiter=" "))
+    k, n = sum(int(r["whole"]) for r in rows), len(rows)
+    return {"whole": k, "of": n, "share": k / n, "wilson95": wilson(k, n),
+            "not_whole": [f"{r['design']} seed {r['seed']}" for r in rows if r["whole"] == "0"]}
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--seeds", type=int, default=20)
     n = ap.parse_args().seeds
-    res = {"seeds": n, "E1": e1(n), "E2": e2(n), "E3": e3(n), "E4": e4(n), "E5": e5()}
+    res = {"seeds": n, "E1": e1(n), "E2": e2(n), "S": shaping(n), "B": board()}
     (HERE / "results.json").write_text(json.dumps(res, indent=1))
     print(json.dumps(res, indent=1))

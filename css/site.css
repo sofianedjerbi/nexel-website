@@ -124,11 +124,30 @@ kbd { display: inline-block; min-width: 33px; text-align: center; padding: 0 8px
 }
 
 /* research notes (tools/make_research.py) */
+.research { padding-top: 36px; }
 .research .panel { margin-bottom: 27px; }
-.research .byline { color: var(--ink2); }
-.research .toc li::before { display: none; }
-.research .toc { padding-left: 27px; margin: 0; }
-.research .toc li { padding-left: 0; list-style: decimal; }
+.research .eyebrow { color: var(--ink2); text-transform: uppercase; font-size: 15px; }
+.research .badge { background: var(--green); color: #fff8e8; padding: 0 9px; margin-left: 9px; text-transform: none; }
+.research .lead h1 { margin: 9px 0 18px; }
+.research .files { color: var(--ink2); margin: 18px 0 0; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.kpi { background: var(--cream); padding: 12px 15px; box-shadow: inset 0 0 0 var(--px) var(--edge), inset 0 calc(-1 * var(--px)) 0 calc(var(--px)) var(--shade); }
+.kpi b { display: block; font-size: 27px; line-height: 36px; color: var(--green-dk); font-weight: normal; }
+.kpi span { display: block; color: var(--ink2); font-size: 15px; line-height: 21px; }
+.rgrid { display: grid; grid-template-columns: 1fr; gap: 0 27px; }
+.rtoc { display: none; }
+.rtoc ol { padding-left: 24px; margin: 9px 0 0; }
+.rtoc li { padding-left: 0; list-style: decimal; font-size: 15px; line-height: 21px; margin-bottom: 9px; }
+.rtoc li::before { display: none; }
+.rtoc a { border-bottom: 0; color: var(--ink2); }
+.rtoc a:hover { color: var(--green-dk); }
+@media (min-width: 1180px) {
+  .research.wrap { max-width: 1260px; }
+  .rgrid { grid-template-columns: 228px minmax(0, 1fr); }
+  .rtoc { display: block; position: sticky; top: 18px; align-self: start; }
+}
+.paper h2 a.anchor { color: var(--ink); border: 0; }
+.paper h2 a.anchor:hover::after { content: " #"; color: var(--ink2); }
 .paper p { margin: 0 0 18px; }
 .paper .thm { background: var(--cream); padding: 15px 18px; margin: 0 0 18px; box-shadow: inset var(--px) 0 0 var(--accent), inset 0 0 0 var(--px) var(--edge); }
 .paper .kind { color: var(--green-dk); text-transform: uppercase; margin-bottom: 6px; }
@@ -161,3 +180,4 @@ kbd { display: inline-block; min-width: 33px; text-align: center; padding: 0 8px
 .paper ol.notes li::before { display: none; }
 .paper code { background: var(--paper2); padding: 0 6px; }
 .paper mjx-container { color: var(--ink); }
+.paper b { color: var(--green-dk); font-weight: normal; }

@@ -1,14 +1,13 @@
-\section*{Open questions for review}
+\section*{Next, and open questions}
 \begin{enumerate}
-\item \textbf{The body's architecture.} About 30 kinds of goals, one CPU core for training, a language model setting
-goals every 20\,s. Successor features with per-kind policies combined by GPI (E1, E2), or one goal-conditioned policy?
-E2's bound is loose and its gap reaches 98\% for tasks far from every skill: how should the base skills be chosen?
-\item \textbf{Splitting beyond the linear case.} E3's criterion (a moving average of the gradient cosine staying near
-$-1$) is exact at a shared optimum of a linear model. For a deep network, per layer, is there a known criterion with
-guarantees, and how should merging be decided?
-\item \textbf{Order of construction.} The tower stands when every piece is in hand, not when built from scratch. Is
-there a standard formulation (planning over laying orders under reachability constraints) we should use rather than a
-greedy builder?
-\item \textbf{Evaluation.} Live trials cost an hour of a shared machine each. How many are needed to compare two bodies,
-and how should the gap between the simulator's completion rate and the live one be measured?
+\item \textbf{The body as skills.} Retrain it as a few short skills (go to, gather an item, fight, flee), each rewarded by
+shaping on progress the game verifies, combined by GPI or one network conditioned on the weighting [USFA, Borsa et al.\ 2019], the base
+skills chosen by SFOLS [Alegre et al.\ 2022]. Measure: goals done per hour, in the simulator, against the current body.
+\item \textbf{Order of construction.} Plan by disassembly: take cells off the finished design, each one reachable and
+leaving the rest standing, and lay them in the reverse order. The tower is the test.
+\item \textbf{Splitting a shared network.} Not by the sign of a gradient cosine (revision 2's E3: at a minimum of a sum
+of two losses the gradients are always opposite, so it detects convergence, not conflict). Measure conflict during
+training, as PCGrad does [Yu et al.\ 2020], and split where a split's measured loss gain is worth its parameters.
+\item \textbf{Evaluation.} More seeds per design, the same seeds for the bodies compared (paired), an interval on every
+rate; the simulator's completion rate against the live one, once live trials of the executor exist.
 \end{enumerate}

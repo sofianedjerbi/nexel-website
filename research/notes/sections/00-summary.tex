@@ -1,10 +1,12 @@
 \section*{Summary}
 We build an AI player for Nexel Worlds, a voxel survival game, that should build what a language model describes (``a
 two-storey house with a gabled roof of shingles''). In three one-hour live trials it built nothing that was designed.
-The failures trace to three causes: the learned body was trained on a reward that pays for novelty, and it undid the
-work (897 crafts an hour, a house's site dug 463 times); no component owned a build from start to end; and every test of
-the builder started with the materials already in hand, so gathering hundreds of pieces was never tested. A
-code executor that gathers a design's whole bill of materials and then lays it, checked in the game's simulator from an
-empty inventory, completes 12 of 18 designs (0 before). For the learned body's retraining we state five claims, prove
-them, and check them on Garnet MDPs over 20 seeds: rewards by kind with weights set by the language model, skills
-combined by generalised policy improvement, and a network that splits where gradients conflict.
+The game's own event logs give three causes: between the language model's goals, a learned body trained to do each
+thing once (a Crafter-style reward) dug up what had been built (554 digs on tiles it had itself built on, of 750
+placements) and crafted away the materials the plan was gathering; no component owned a build from start to end; and
+every test of the builder started with the materials in hand, so gathering was never tested. A code executor that
+gathers a design's whole bill of materials and then lays it stands 12 of 18 designs in the game's simulator from an
+empty inventory ($67\%$, Wilson 95\% interval $44$--$84\%$; 0 before). For the learned body we argue a narrower role,
+short skills the executor calls, rewarded by potential-based shaping on verified progress: it leaves the optimal policy
+unchanged (checked exactly), makes digging a standing cell cost reward, and in a small build task Q-learning finds the
+build in $\approx\!100$ episodes where the sparse reward is not learned in 3\,000.
