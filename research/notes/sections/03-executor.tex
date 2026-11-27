@@ -1,38 +1,38 @@
-\section*{A build owned by code, checked from an empty inventory}
-\textbf{Executor.} A drawn design's unlaid cells are expanded through the game's recipes down to what the land gives
-(a crafting station counted once); the raw material is gathered first, in trips of 24 (a trip, not a walk per piece),
-then the builder lays the design with a full inventory, the case its tests already covered. While a design is
-unfinished the executor chooses every action; the learned body acts only when the agent is hurt. The mind's build words
-are kept whatever its goal, until it names another build or none.
-
-\textbf{Acceptance test.} The game's simulator, an empty inventory, a design drawn: the executor alone must make it stand.
-Six designs (a gabled house, two storeys, a round house, a three-storey tower, a T and a cross of wings with mixed
-roofs) on three seeds each: 12 of 18 stand whole ($67\%$, Wilson 95\% interval $44$--$84\%$), in 335 to 7\,828 decisions (Figure S). The builder fetching a craft's
-worth at a time laid a fifth of the gabled house in 5\,000 decisions.
+\section*{The executor and the skills, in the simulator}
+\textbf{Building.} A drawn design's unlaid cells are turned into a bill of raw material (Theorem 1), gathered in trips
+of 24, then laid by the builder with a full inventory. Six designs on three seeds each, from an empty inventory: 15 of
+18 stand whole (Wilson 95\% interval $61$--$94\%$), in 241 to 791 decisions (Figure S). Before the executor the builder,
+fetching a craft's worth at a time, laid a fifth of the smallest house in 5\,000 decisions.
 
 \begin{figure}[h]\centering
 \begin{tikzpicture}\begin{axis}[width=\textwidth,height=5cm,ylabel={decisions},xlabel={design (seeds 7, 21, 9)},ymode=log,symbolic x coords={house,two-storey,round,tower,T-wings,cross}]
 \addplot[scatter,only marks,mark=square*,point meta=explicit] table[x=design,y=decisions,meta=whole]{../data/sim_board.csv};
 \end{axis}\end{tikzpicture}
-\caption{S. From an empty inventory in the simulator: each design on seeds 7, 21, 9; green whole, red not (decisions
-spent before it stalled).}
+\caption{S. From an empty inventory: green, the design stands whole; red, it stalled (decisions spent).}
 \end{figure}
 
-\textbf{What the test exposed}, each a defect the live trials could only have shown as ``nothing built'':
-\begin{itemize}
-\item \emph{A side effect in a legality check.} Computing the action mask asked the builder for its next step, and the
-builder re-sited the house when the agent was more than 64 tiles away: each gathering trip moved the house. Legality
-predicates must be pure.
-\item \emph{Oscillation.} Fetching per craft, the agent walked between the trees and the site, each out of view of the
-other, for 1\,500 steps. Gathering the whole bill first removes it.
-\item \emph{Geometry the site check missed.} A roof's overhang over a hill puts a cell inside the land: placed for
-ever, refused for ever. The site check now bounds the land's height under every overhanging cell.
-\item \emph{Counting.} A flight of stairs was one piece in the plan but takes one stairs item per step: upper storeys
-were unreachable.
-\end{itemize}
+What this test exposed, each a fault the live trials could only show as nothing built: computing the action mask
+re-sited the house whenever the agent was more than 64 tiles away (each gathering trip moved it); fetching per craft,
+the agent walked between trees and site, each out of view of the other; a hill under a roof's overhang made a cell
+unplaceable for ever; a flight of stairs takes one item per step; the builder recorded a plank and the wall on it as
+one cell (Theorem 2); standing inside its own site, it had nowhere to put a workbench. Still failing: seed 21 twice
+and the T on seed 7.
 
-\textbf{Still failing.} The tower on all three seeds: its top storey is not reached from an empty inventory though
-it is from a full one; the order cells are laid in matters and nothing plans it. Three more runs stall: the house on seed 21,
-the two-storey house and the T on seed 7; seed 21 fails or nearly fails twice, which points at the map
-rather than the design. Earth and stone-block roofs need material dug from the land, which neither verb does. Eighteen
-runs on three seeds can only rank designs coarsely; the live trial of the executor is pending.
+\textbf{Other goals.} Eight goals from an empty inventory, 20 seeds, paired: the learned body choosing every action
+as it played live, against the goal's code skill (Table G). The skill succeeds as often or more on all eight and
+needs 2 to 22 times fewer decisions; it looks further when nothing in view gives the item (gathering stone: 17 to
+20 of 20).
+
+\begin{table}[h]\centering
+\begin{tabular}{lll}\toprule
+goal & learned body: done (median decisions) & skill: done (median decisions)\\\midrule
+gather wood & 18/20 (59) & 20/20 (8)\\
+gather stone & 12/20 (136) & 20/20 (19)\\
+gather fibre & 13/20 (32) & 20/20 (9)\\
+gather berries & 16/20 (36) & 20/20 (6)\\
+craft workbench & 19/20 (15) & 20/20 (4)\\
+craft axe & 4/20 (334) & 17/20 (19)\\
+craft bed & 7/20 (338) & 17/20 (17)\\
+craft door & 19/20 (18) & 20/20 (3)\\\bottomrule
+\end{tabular}\caption{G. Goals done within 600 decisions (\texttt{data/scenarios.csv}, \texttt{nexel-agent tools/scenarios.py}).}
+\end{table}

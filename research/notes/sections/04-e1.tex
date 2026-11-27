@@ -1,9 +1,0 @@
-\section*{E1. One network, every weighting}
-\begin{theorem}[successor features] Let $\psi^\pi(s,a)=\mathbb E^\pi[\sum_t\gamma^t\phi(s_t,a_t)\mid s_0=s,a_0=a]$. Then
-$Q^\pi_w=\psi^{\pi\top}w$ for every $w$.\end{theorem}
-\begin{proof} $Q^\pi_w(s,a)=\mathbb E^\pi[\sum_t\gamma^t\phi(s_t,a_t)^\top w]=\psi^\pi(s,a)^\top w$ by linearity of
-expectation.\end{proof}
-\noindent Check. An identity; computed exactly on 20 Garnets it holds to $2\times10^{-14}$.
-
-\emph{So:} features learned once give the \emph{value} of a fixed policy under any weighting the language model sets.
-They do not give a good policy for it: that is E2's job, or a network conditioned on $w$ [USFA, Borsa et al.\ 2019].

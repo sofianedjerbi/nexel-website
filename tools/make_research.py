@@ -182,7 +182,7 @@ def tex_inline(t: str) -> str:
         p = re.sub(r"\\texttt\{([^}]*)\}", r"<code>\1</code>", p)
         p = p.replace("``", "“").replace("''", "”").replace("---", "—").replace("--", "\u2013").replace("\\,", "\u00a0")
         p = p.replace("\\ ", " ").replace("\\%", "%").replace("\\&", "&amp;").replace("\\S", "§").replace("~", " ")
-        p = p.replace("\\noindent", "").replace("\\!", "").replace("\\dots", "…")
+        p = p.replace("\\noindent", "").replace("\\!", "").replace("\\dots", "…").replace("\\_", "_")
         out.append(p)
     return "".join(out)
 
@@ -238,18 +238,22 @@ def tabular(body: str) -> str:
 
 
 def key_results() -> str:
-    """The headline numbers, read from the run (results.json), so the page cannot drift from the simulations."""
-    import json
-    f = ROOT / "research" / "results.json"
-    if not f.exists():
+    """The headline numbers, read from the data the notes ship (research/data), so the page cannot drift from them."""
+    import math
+    data = ROOT / "research" / "data"
+    if not (data / "sim_board.csv").exists():
         return ""
-    r = json.loads(f.read_text())
-    b, s, e2 = r["B"], r["S"], r["E2"]
-    lo, hi = b["wilson95"]
-    tiles = [(f'{b["whole"]} / {b["of"]}', f"designs built from an empty inventory (95% {lo:.0%}\u2013{hi:.0%})"),
-             (f'{s["episodes_shaped"]["iqm"]:.0f} vs &gt;3000', "episodes to learn a build, shaped vs sparse reward"),
-             (f'{e2["gpi_normalised"]["iqm"]:.2f}', "GPI on new tasks, random 0 · optimum 1"),
-             ("554 / 750", "trial 5: digs on tiles the agent had built on / placements")]
+    board = table(data / "sim_board.csv")
+    k, n = sum(int(r["whole"]) for r in board), len(board)
+    p, z = k / n, 1.96
+    c, h = (p + z * z / (2 * n)) / (1 + z * z / n), z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / (1 + z * z / n)
+    sc = {(r["scenario"], r["controller"]): r for r in table(data / "scenarios.csv")} if (data / "scenarios.csv").exists() else {}
+    axe = (sc.get(("craft_axe", "learned")), sc.get(("craft_axe", "skills")))
+    tiles = [(f"{k} / {n}", f"designs built from an empty inventory (95% {c - h:.0%}\u2013{c + h:.0%})"),
+             ("6/6 · 8/8", "trial 7: the room the agent built, judged works · makes sense"),
+             ("181 \u2192 104", "wood in a house's bill, per-cell vs least (Theorem 1)")]
+    if all(axe):
+        tiles.append((f'{axe[0]["success"]} \u2192 {axe[1]["success"]} / 20', "axe crafted: learned body vs code skill"))
     return '<div class="kpis">' + "".join(f'<div class="kpi"><b>{v}</b><span>{t}</span></div>' for v, t in tiles) + "</div>"
 
 
@@ -279,8 +283,10 @@ def research():
 <main class="wrap research">
 <section class="panel lead"><div class="eyebrow">Research notes {badge}</div><h1>{title}</h1>
 {key_results()}
-<p class="files"><a href="notes/main.tex">LaTeX source</a> · <a href="bench.py">simulations</a> ·
-<a href="live_counts.py">live counts</a> · <a href="{src}">data and history</a></p></section>
+<p class="files"><a href="notes/main.tex">LaTeX source</a> · <a href="live_counts.py">live counts</a> ·
+<a href="https://github.com/sofianedjerbi/nexel-agent/blob/main/tools/theorems.py">theorem checks</a> ·
+<a href="https://github.com/sofianedjerbi/nexel-agent/blob/main/tools/scenarios.py">scenarios</a> ·
+<a href="{src}">data and history</a></p></section>
 <div class="rgrid"><nav class="rtoc" aria-label="Contents"><div class="eyebrow">Contents</div><ol>{toc}</ol></nav>
 <div class="rmain">{content}</div></div>
 </main>"""

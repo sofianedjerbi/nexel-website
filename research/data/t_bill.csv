@@ -1,0 +1,16 @@
+design seed wood stone fiber whole cells_left raw_left
+house 7 104 4 3 1 0 0
+house 9 104 4 3 1 0 2
+house 21 104 4 3 1 0 2
+two_storeys 7 115 4 3 1 0 0
+two_storeys 9 115 4 3 1 0 2
+two_storeys 21 115 4 3 1 0 2
+round_home 7 99 4 3 1 0 0
+round_home 9 99 4 3 0 80 49
+round_home 21 99 4 3 1 0 4
+tower 7 157 4 3 1 0 0
+tower 9 157 4 3 1 0 0
+tower 21 157 4 3 1 0 2
+cross 7 174 4 3 1 0 0
+cross 9 174 4 3 1 0 0
+cross 21 174 4 3 1 0 0

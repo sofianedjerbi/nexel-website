@@ -1,0 +1,5 @@
+design storey missing storey_reached
+two_storeys 1 none 1
+tower 1 none 1
+tower 2 none 2
+tower 2 wall_z3 1

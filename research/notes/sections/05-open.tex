@@ -1,13 +1,14 @@
 \section*{Next, and open questions}
 \begin{enumerate}
-\item \textbf{The body as skills.} Retrain it as a few short skills (go to, gather an item, fight, flee), each rewarded by
-shaping on progress the game verifies, combined by GPI or one network conditioned on the weighting [USFA, Borsa et al.\ 2019], the base
-skills chosen by SFOLS [Alegre et al.\ 2022]. Measure: goals done per hour, in the simulator, against the current body.
-\item \textbf{Order of construction.} Plan by disassembly: take cells off the finished design, each one reachable and
-leaving the rest standing, and lay them in the reverse order. The tower is the test.
-\item \textbf{Splitting a shared network.} Not by the sign of a gradient cosine (revision 2's E3: at a minimum of a sum
-of two losses the gradients are always opposite, so it detects convergence, not conflict). Measure conflict during
-training, as PCGrad does [Yu et al.\ 2020], and split where a split's measured loss gain is worth its parameters.
-\item \textbf{Evaluation.} More seeds per design, the same seeds for the bodies compared (paired), an interval on every
-rate; the simulator's completion rate against the live one, once live trials of the executor exist.
+\item \textbf{The learned body.} Its role is now reflexes and what no skill can step. Retraining it as a few short
+skills conditioned on a reward weighting [USFA, Borsa et al.\ 2019], the skills chosen so that combining them by
+generalised policy improvement [Barreto et al.\ 2017] is optimal for every weighting [SFOLS, Alegre et al.\ 2022],
+each rewarded by shaping on progress the game verifies [Ng et al.\ 1999]; measured on the goal table above.
+\item \textbf{The language model under load.} In trial 7 its requests failed 75 times; the executor carried on, the
+second house did not start. Requests that outlive the server's queue should be dropped server-side, not only by the
+client.
+\item \textbf{The last three stalls.} Seed 21 twice (a roof cell, a tower wall) and the T on seed 7: each a run of
+decisions with no piece laid, to be traced as the six faults above were.
+\item \textbf{Evaluation.} Live trials cost an hour of a shared machine: the simulator boards are the measure, the
+live trial their check; more seeds, paired between versions, an interval on every rate.
 \end{enumerate}

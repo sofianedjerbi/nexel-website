@@ -1,0 +1,35 @@
+\section*{Theorem 1. The least raw material a design takes}
+A recipe table: each craftable item $k$ has one recipe, taking $m_{k,c}$ of each input $c$, yielding $y_k\ge1$, and
+possibly a station $\sigma_k$ (a workbench), used but not consumed; land items $L$ (wood, stone, fibre) are gathered,
+never crafted; the graph $k\to c$ (inputs and station) is acyclic. Given a demand $D$ (what the design's unlaid cells
+take) and an inventory $I$, process the items in a topological order that puts every item after all items that consume
+it, with $\mathit{need}_k=D_k+\sum_p m_{p,k}x_p+[\,k=\sigma_p$ for some $p$ with $x_p>0$, first time$\,]$ and
+$$x_k=\Big\lceil\frac{(\mathit{need}_k-I_k)^+}{y_k}\Big\rceil\ (k\notin L),\qquad B_k=(\mathit{need}_k-I_k)^+\ (k\in L).$$
+\begin{theorem} (i) From $I+B$, crafting each $k$ $x_k$ times, inputs first, leaves $D$ in hand. (ii) Every raw bill
+$B'$ such that $I+B'$ suffices has $B'\ge B$ in every item. (iii) Expanding each cell on its own instead costs up to
+$y_k$ times as much of $k$'s inputs: $\sum_{\text{cells}}\lceil 1/y_k\rceil$ against $\lceil n/y_k\rceil$.\end{theorem}
+\begin{proof} (i) Taken inputs first, item $k$'s supply is $I_k+y_kx_k\ge\mathit{need}_k$, which covers its consumers'
+crafts and $D_k$; a station is made once and stands for every craft at it. (ii) Take any sufficient plan. By
+induction along the order (consumers first), it crafts each $k\notin L$ at least $x_k$ times: when $k$ is reached,
+each consumer $p$ is crafted at least $x_p$ times (hypothesis), taking at least $\sum_pm_{p,k}x_p$ of $k$, $D_k$ must
+remain, and $k$ comes only from $I_k$ and its one recipe, $y_k$ a craft; a station needed by some craft must exist
+at least once. So the plan holds at least $\mathit{need}_k$ of every item; for $k\in L$ that comes from $I_k+B'_k$,
+hence $B'_k\ge B_k$. (iii) $\sum_{i=1}^n\lceil1/y\rceil=n\ge\lceil n/y\rceil$, the ratio tending to $y$.\end{proof}
+\noindent Check. The executor had expanded cell by cell: a gabled house's 107 shingles (2 per wood) counted 107 wood,
+54 do; its whole bill falls from 181 wood and 6 stone to 104 and 4. Built from exactly $B$, with no gathering, 14 of 15
+design-seeds stand whole (Table T1); 7 end with nothing left. The leftovers are wood the builder got clearing trees
+off the site (seed 9: 6 gained, 108 used, 4 above $B$: the builder is not optimal, the bound is). The one failure,
+the round home on seed 9, was a builder stall since fixed (\S executor), not a short bill.
+
+\emph{So:} the executor gathers exactly what the design needs: no trip wasted on a wrong count, nothing short.
+
+\begin{table}[h]\centering
+\begin{tabular}{llll}\toprule
+design & bill $B$ (wood, stone, fibre) & stands whole from $B$ & raw left\\\midrule
+gabled house & 104, 4, 3 & 3/3 & 0, 2, 2\\
+two storeys & 115, 4, 3 & 3/3 & 0, 2, 2\\
+round home & 99, 4, 3 & 2/3 & 0, --, 4\\
+tower & 157, 4, 3 & 3/3 & 0, 0, 2\\
+cross & 174, 4, 3 & 3/3 & 0, 0, 0\\\bottomrule
+\end{tabular}\caption{T1. Seeds 7, 9, 21 (\texttt{data/t\_bill.csv}, \texttt{nexel-agent tools/theorems.py bill}).}
+\end{table}

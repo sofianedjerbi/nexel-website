@@ -1,9 +1,10 @@
 \section*{Revisions}
-\textbf{3} (after review). Live counts recounted from the game's event logs, which ship with the notes: 554 digs on tiles
-the agent had built on (revision 2's 463 came from an unpublished count); the 912 crafts of trial 6 are mostly the old
-builder's materials, 161 were things nothing asked for. Retracted: E3 (the gradient cosine at a shared minimum is $-1$
-for any two different tasks: it detects convergence; the ``opposite'' pair split at the first step allowed, untrained);
-E4 (circular: kinds defined by collinear targets, found by collinear gradients, and at odds with E3); E5 (its ``goal
-never reached'' came from a tie-break; the proposition shows only indifference). E2 rescored by the policy's value,
-its bound reported as weak. Added: shaping (S), an interval on the simulator board, the stall count corrected (three
-runs and the tower, not two).
+\textbf{4.} Only our own results are proved; known ones are cited where used. Two theorems with proofs and checks in
+the game's simulator: the least bill (Theorem 1; it found the executor's bill overcounting by up to the recipes'
+yield) and the stairs ordering (Theorem 2; it explains the tower). Removed: the successor-feature, GPI and shaping
+sections of revision 3, which restated others' theorems. Added: live trial 7, the goal table, the board after the
+fixes (15 of 18).
+
+\textbf{3} (after review). Live counts recounted from the games' event logs, which ship with the notes. Retracted: a
+gradient-cosine split rule (it detects convergence, not conflict), a circular reward-kind experiment, a result that came
+from a tie-break.

@@ -1,0 +1,33 @@
+\section*{Theorem 2. When a flight of stairs reaches its storey}
+The game's rule (\texttt{nexel-worlds sim/climbing.py}, \texttt{flight}): a flight whose top step is at tile $t$, on
+ground at height $h$, runs up to the first surface $s$ found scanning the four tiles beside $t$ in a fixed order and
+each tile's surfaces from the lowest, such that $h+2\le s\le h+7$ and the two cells above $s$ are open. A design's
+storey $j$ stands on a floor whose top is at $h+3j$; a wall of storey $j$ fills the cells above it; a door does not.
+The flight to storey $k$ ($k\le2$, so $h+3k\le h+7$) has its top beside the door column $c$ of storey $k$, and the
+other tiles beside $t$ have no surface in $[h+2,h+7]$ (the site is level around the build).
+\begin{theorem} Laid at a given moment, the flight reaches storey $k$ if and only if, at that moment, the wall of every
+storey $j<k$ stands in column $c$ and the cell of column $c$ at storey $k$ holds a door or nothing.\end{theorem}
+\begin{proof} The surfaces of column $c$ in $[h+2,h+7]$ are the floor tops $h+3j$, $1\le j\le k$; beside $t$ no other
+tile has one. Scanned from the lowest, the flight stops at the first $h+3j$ whose cells above are open: open for
+$j<k$ exactly when the wall of storey $j$ is not there, open at $j=k$ exactly when the cell holds a door or nothing.
+So it stops at $h+3k$ iff every lower one is closed and that one is open.\end{proof}
+\noindent Check. In the simulator, each multi-storey design stamped whole but its stairs, with one wall of the door
+column below the flight's storey taken out or none, a flight laid from the planned stand (Table T2): with the column
+standing, every flight reaches its storey; without the first storey's wall, the tower's top flight stops at storey 1.
+
+\emph{So:} a builder must lay a flight only after its door column below stands, and must not count a cell as laid when
+another piece shares its place. Ours did both wrong: its record of what it laid up a storey was keyed by place alone,
+so the first floor's plank read as the wall standing on it; the wall never went up, the flight stopped at storey 1,
+and the tower's top storey was out of reach from an empty inventory (it stood from a full one only because the order
+happened to lay the wall first). With the record keyed by block or thing and each flight after its column, the tower
+stands from an empty inventory on 2 of 3 seeds.
+
+\begin{table}[h]\centering
+\begin{tabular}{llll}\toprule
+design & flight to storey & wall taken out & storey reached\\\midrule
+two storeys & 1 & none & 1\\
+tower & 1 & none & 1\\
+tower & 2 & none & 2\\
+tower & 2 & storey 1's & 1\\\bottomrule
+\end{tabular}\caption{T2. The game's own flight rule, read in the simulator (\texttt{data/t\_flight.csv}, \texttt{nexel-agent tools/theorems.py flight}).}
+\end{table}

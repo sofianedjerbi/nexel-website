@@ -1,11 +1,12 @@
-\section*{Live trials: what failed}
+\section*{Live trials}
 \begin{table}[h]\centering
 \begin{tabular}{llll}\toprule
 trial & asked & designed & what stood\\\midrule
 4 & a gabled roof of shingles & a flat $5\times4$ (judged 19/19) & nothing designed\\
 5 & two storeys, a flat stone roof & the same, judged whole & 0 of its 209 cells\\
-6 & a two-storey round house, gabled shingles & nothing drawn & a $3\times3$ hut of the old builder\\\bottomrule
-\end{tabular}\caption{Three live trials (trials 1--3 tested earlier components). Counts below are from the game's event
+6 & a two-storey round house, gabled shingles & nothing drawn & a $3\times3$ hut of the old builder\\
+7 & a house, a gable roof of shingles & two houses, gabled shingles, plank eaves and ridge & a room judged 6/6, 8/8, 4/8\\\bottomrule
+\end{tabular}\caption{Live trials 4--7 (1--3 tested earlier components). Counts below are from the game's event
 log of each trial (\texttt{research/data/trials}, recounted by \texttt{research/live\_counts.py}) or, where marked,
 from the agent's own logs.}
 \end{table}
@@ -24,6 +25,14 @@ descriptions it wrote were dropped, because build words were kept only with the 
 building materials crafted by the old builder for its hut; the other 161 were things nothing asked for (17 campfires,
 16 spears, 15 chairs, 7 bandanas, \dots), and they used the wood and fibre the language model was gathering for a bed:
 the inventory read 0 of each for the hour.
+
+\textbf{Trial 7: the executor builds.} The architect drew two houses on one site; the executor gathered the bill and
+laid the first: a closed $3\times3$ room with bed, chest, campfire, table, chair and a door, under a roof. The game's
+judge scores it 6/6 for working and 8/8 for sense (the best real player's room in that world: 4/6 and 5/8), 4/8 for
+looks (mixed wall materials, no windows, no path). Unasked crafts fell to 17 (161 in trial 6). Two faults stopped the
+second house: the language model's requests failed 75 times from minute 19 (not logged; failures are now written
+with their cause), and with the mind silent the learned body acted freely, placing 22 workbenches and digging 134 times
+on tiles it had built on: trial 7 ran before the body was restricted (\S The system).
 
 \textbf{Causes.} (i) \emph{The learned body's reward} pays $+1$ the first time each of $\sim$150 events happens in an
 episode, as in Crafter [Hafner 2022]; it acts whenever no goal steers it, and nothing in that reward values a design standing, so building
