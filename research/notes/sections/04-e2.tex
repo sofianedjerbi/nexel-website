@@ -1,0 +1,24 @@
+\section*{E2. Combining learned skills is never worse than any of them}
+\begin{theorem}[GPI, Barreto et al.\ 2017] For policies $\pi_1..\pi_n$, let $\pi(s)\in\arg\max_a\max_iQ^{\pi_i}_w(s,a)$.
+Then $Q^\pi_w\ge\max_iQ^{\pi_i}_w$. If each $\pi_i$ is optimal for $r_i$ and $\delta=\min_i\|r_w-r_i\|_\infty$, then
+$Q^*_w-Q^\pi_w\le 2\delta/(1-\gamma)$.\end{theorem}
+\begin{proof} Let $Q_{\max}=\max_iQ^{\pi_i}_w$. As $\pi$ is greedy on $Q_{\max}$, for each $i$:
+$T^{\pi}Q_{\max}(s,a)=r_w(s,a)+\gamma\,\mathbb E_{s'}[\max_bQ_{\max}(s',b)]\ge r_w(s,a)+\gamma\,\mathbb E_{s'}[Q^{\pi_i}_w(s',\pi_i(s'))]=Q^{\pi_i}_w(s,a)$,
+so $T^\pi Q_{\max}\ge Q_{\max}$; $T^\pi$ is monotone and a $\gamma$-contraction, hence
+$Q^\pi_w=\lim_k(T^\pi)^kQ_{\max}\ge Q_{\max}$. For the bound, with $j$ the minimiser and values of a reward moving by at
+most $\delta/(1-\gamma)$ when the reward moves by $\delta$:
+$Q^*_w\le Q^*_{r_j}+\tfrac{\delta}{1-\gamma}=Q^{\pi_j}_{r_j}+\tfrac{\delta}{1-\gamma}\le Q^{\pi_j}_w+\tfrac{2\delta}{1-\gamma}\le Q^\pi_w+\tfrac{2\delta}{1-\gamma}$.\end{proof}
+\noindent Check. 4 base skills (one per kind), 800 new tasks over 20 Garnets: GPI never below the best skill (worst margin
+$-10^{-14}$, rounding); the bound never broken (least slack $2.3$). The gap to the optimum, with no learning for the new
+task: IQM $4.3\%$ of its scale (CI $[3.8, 4.7]$), but up to $98\%$ for tasks far from every skill (Figure E2): the
+bound is loose, the guarantee only as good as the skills' spread.
+
+\emph{So:} skills learned once can be combined on demand; tasks far from all of them still need learning.
+
+\begin{figure}[h]\centering
+\begin{tikzpicture}\begin{axis}[width=0.8\textwidth,height=5cm,xlabel={$\delta$, distance to the nearest learned task},ylabel={gap / bound},ymin=0,ymax=1]
+\addplot[only marks,mark=*,mark size=1pt,blue] table[x=delta,y=ratio]{../data/e2_gap.csv};
+\end{axis}\end{tikzpicture}
+\caption{E2. Each dot a new task: the GPI policy's gap to the optimum as a fraction of the theorem's bound
+$2\delta/(1-\gamma)$; never above 1, mostly far below: the bound is safe and loose.}
+\end{figure}

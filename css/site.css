@@ -42,6 +42,7 @@ code, kbd { font: inherit; }
 .brand { font-size: 27px; letter-spacing: 0; display: flex; align-items: center; gap: 12px; }
 .nav { display: flex; gap: 24px; }
 .nav a { display: flex; align-items: center; gap: 9px; }
+.nav .i { width: 14px; height: 14px; vertical-align: 0; }   /* (2 px an icon pixel: a capital of the 18 px font) */
 
 /* icons: pixel drawings in SVG, 3 px a pixel (svg/icons in the page) */
 .i { width: 21px; height: 21px; flex: none; shape-rendering: crispEdges; fill: currentColor; vertical-align: -4px; }
@@ -121,3 +122,42 @@ kbd { display: inline-block; min-width: 33px; text-align: center; padding: 0 8px
   .strip .shot img { top: 0; transform: translateX(-50%); }
   .posts .thumb { width: 100%; height: 144px; }
 }
+
+/* research notes (tools/make_research.py) */
+.research .panel { margin-bottom: 27px; }
+.research .byline { color: var(--ink2); }
+.research .toc li::before { display: none; }
+.research .toc { padding-left: 27px; margin: 0; }
+.research .toc li { padding-left: 0; list-style: decimal; }
+.paper p { margin: 0 0 18px; }
+.paper .thm { background: var(--cream); padding: 15px 18px; margin: 0 0 18px; box-shadow: inset var(--px) 0 0 var(--accent), inset 0 0 0 var(--px) var(--edge); }
+.paper .kind { color: var(--green-dk); text-transform: uppercase; margin-bottom: 6px; }
+.paper .note { color: var(--ink2); text-transform: none; }
+.paper details.proof { margin: -6px 0 18px; }
+.paper details.proof summary { cursor: pointer; color: var(--ink2); }
+.paper details.proof > div { padding: 9px 0 0 18px; box-shadow: inset var(--px) 0 0 var(--shade); }
+.paper .qed { float: right; color: var(--ink2); }
+.paper p.check, .paper p.lesson { padding: 12px 18px; }
+.paper p.check { background: #e3f0d8; box-shadow: inset var(--px) 0 0 var(--green); }
+.paper p.lesson { background: #fbe9b8; box-shadow: inset var(--px) 0 0 #d9a23a; }
+.paper p.check b, .paper p.lesson b { text-transform: uppercase; margin-right: 9px; }
+.paper figure { margin: 0 0 27px; }
+.paper figcaption { color: var(--ink2); margin-top: 9px; }
+.paper .chart { width: 100%; background: var(--cream); box-shadow: 0 0 0 var(--px) var(--edge); }
+.paper .chart.heat { max-width: 324px; display: block; }
+.paper .chart text { font: 12px SproutPixel, monospace; fill: var(--ink2); }
+.paper .chart .lab { fill: var(--ink); }
+.paper .chart .ax { stroke: var(--ink); stroke-width: 2; }
+.paper .chart .grid { stroke: var(--shade); stroke-width: 1; }
+.paper .chart .band { fill: rgba(63, 111, 166, .18); }
+.paper .legend { display: flex; gap: 18px; flex-wrap: wrap; color: var(--ink2); margin-top: 9px; }
+.paper .legend i { display: inline-block; width: 12px; height: 12px; margin-right: 6px; vertical-align: -1px; }
+.paper table.data { border-collapse: collapse; width: 100%; }
+.paper table.data th, .paper table.data td { text-align: left; padding: 6px 9px; box-shadow: inset 0 -2px 0 var(--shade); vertical-align: top; }
+.paper table.data th { color: var(--ink2); }
+.paper ul.notes li, .paper ol.notes li { margin-bottom: 9px; }
+.paper ol.notes { padding-left: 27px; }
+.paper ol.notes li { padding-left: 0; list-style: decimal; }
+.paper ol.notes li::before { display: none; }
+.paper code { background: var(--paper2); padding: 0 6px; }
+.paper mjx-container { color: var(--ink); }

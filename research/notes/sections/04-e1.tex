@@ -1,0 +1,20 @@
+\section*{E1. One learning serves every weighting}
+\begin{theorem}[successor features] Let $\psi^\pi(s,a)=\mathbb E^\pi[\sum_t\gamma^t\phi(s_t,a_t)\mid s_0=s,a_0=a]$. Then
+$Q^\pi_w=\psi^{\pi\top}w$ for every $w$.\end{theorem}
+\begin{proof} $Q^\pi_w(s,a)=\mathbb E^\pi[\sum_t\gamma^t\phi(s_t,a_t)^\top w]=\psi^\pi(s,a)^\top w$ by linearity of
+expectation.\end{proof}
+\noindent Check. 20 Garnets, 50 random $w$ each: largest $|\psi^\top w-Q_w|=2.1\times10^{-14}$. Learned by TD from samples
+(step $1/n^{0.7}$, so $\sum$ steps $=\infty$, $\sum$ squares $<\infty$), the relative error falls to $4.2\%$
+(IQM, 95\% CI $[4.0, 4.3]$) after $3\times10^5$ samples (Figure E1).
+
+\emph{So:} the mind may set $w$ (how much it cares for each kind) and the body has the value of that mix at once.
+
+\begin{figure}[h]\centering
+\begin{tikzpicture}\begin{axis}[width=0.8\textwidth,height=5cm,xlabel={samples},ylabel={relative error of $\psi$},ymin=0]
+\addplot[name path=hi,draw=none] table[x=samples,y=hi]{../data/e1_td.csv};
+\addplot[name path=lo,draw=none] table[x=samples,y=lo]{../data/e1_td.csv};
+\addplot[blue!20] fill between[of=hi and lo];
+\addplot[blue,thick,mark=*] table[x=samples,y=iqm]{../data/e1_td.csv};
+\end{axis}\end{tikzpicture}
+\caption{E1. TD-learned successor features: IQM over 20 Garnets, band the 95\% bootstrap interval.}
+\end{figure}

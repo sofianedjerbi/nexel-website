@@ -1,0 +1,77 @@
+{
+ "seeds": 20,
+ "E1": {
+  "exact_max_error": {
+   "iqm": 1.0658141036401503e-14,
+   "ci95": [
+    1.0480505352461478e-14,
+    1.2079226507921703e-14
+   ],
+   "min": 7.105427357601002e-15,
+   "max": 2.1316282072803006e-14,
+   "runs": 20
+  },
+  "td_final_relative_error": {
+   "iqm": 0.041505512038969496,
+   "ci95": [
+    0.04035997699859353,
+    0.0428624438361179
+   ],
+   "min": 0.03732176738519457,
+   "max": 0.047387375166379864,
+   "runs": 20
+  }
+ },
+ "E2": {
+  "min_margin_over_best_skill": -1.0658141036401503e-14,
+  "min_bound_slack": 2.334526079678739,
+  "relative_gap_to_optimum": {
+   "iqm": 0.04263338294088096,
+   "ci95": [
+    0.03815235075243381,
+    0.04741648781123567
+   ],
+   "min": -1.118791210956529e-10,
+   "max": 0.9816077395420522,
+   "runs": 800
+  },
+  "tasks": 800
+ },
+ "E3": {
+  "identical": {
+   "max_error_vs_theory": 7.74419670052274e-26,
+   "split_share": 0.0,
+   "steps_to_split_iqm": null
+  },
+  "twice": {
+   "max_error_vs_theory": 3.865352482534945e-12,
+   "split_share": 1.0,
+   "steps_to_split_iqm": 207.4
+  },
+  "opposite": {
+   "max_error_vs_theory": 1.546140993013978e-11,
+   "split_share": 1.0,
+   "steps_to_split_iqm": 201.0
+  }
+ },
+ "E4": {
+  "pair_agreement": {
+   "iqm": 1.0,
+   "ci95": [
+    1.0,
+    1.0
+   ],
+   "min": 1.0,
+   "max": 1.0,
+   "runs": 20
+  },
+  "kinds_found_share_right": 1.0,
+  "min_cos_within": 0.9984604956650219,
+  "max_cos_across": 0.7763007952379727
+ },
+ "E5": {
+  "achievement_only_reaches": false,
+  "verified_goal_reaches": true,
+  "mixed_share_reaching": 0.76
+ }
+}

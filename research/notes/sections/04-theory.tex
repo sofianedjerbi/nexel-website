@@ -1,0 +1,7 @@
+\section*{Theory for the body's retraining}
+The owner's proposal for the body: rewards sorted by kind, each routed to its own part of the network, shared with
+weights, the network splitting itself. With reward kinds $\phi(s,a)\in\mathbb R^K$ and a task a weighting
+$w\in\mathbb R^K$ ($r_w=\phi^\top w$), five claims say how, and when, this works. Each is checked on 20 seeds: Garnet MDPs
+$G(30,4,5)$ [Archibald et al.\ 1995] with $K=4$ and $\gamma=0.9$ for E1--E2, random linear problems for E3--E4, an exact
+dynamic program for E5; values computed exactly wherever the claim allows; summaries are the interquartile mean with a
+95\% bootstrap interval [Agarwal et al.\ 2021]. Code: \texttt{research/bench.py} (16\,s on one core).

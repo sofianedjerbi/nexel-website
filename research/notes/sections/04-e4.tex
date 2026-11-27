@@ -1,0 +1,15 @@
+\section*{E4. Reward kinds found without labels}
+\begin{proposition} If event $e$'s target is $y_e=c_eXu_k$ with $c_e>0$, its gradient at $\theta=0$ is
+$g_e=-c_eX^\top Xu_k$: events of one kind have $\cos=1$ whatever their scale.\end{proposition}
+\begin{proof} $g_e=X^\top(X\cdot0-y_e)=-c_eX^\top Xu_k$, a positive multiple of one vector per kind.\end{proof}
+\noindent Check. 20 seeds, 9 events of 3 hidden kinds with noise: within a kind $\cos\ge0.998$, across $\le0.78$;
+grouping at $\cos>0.9$ finds 3 kinds every time, every pair grouped right (Figure E4).
+
+\emph{So:} the reward kinds need not be named by hand: events that push the network the same way are one kind.
+
+\begin{figure}[h]\centering
+\begin{tikzpicture}\begin{axis}[width=6cm,height=6cm,xlabel={event},ylabel={event},y dir=reverse,colorbar,point meta min=-1,point meta max=1,enlargelimits=false]
+\addplot[matrix plot*,mesh/cols=9,point meta=explicit] table[x=i,y=j,meta=cos]{../data/e4_cos.csv};
+\end{axis}\end{tikzpicture}
+\caption{E4. Cosine between the events' gradients (seed 0): three blocks, the three kinds.}
+\end{figure}

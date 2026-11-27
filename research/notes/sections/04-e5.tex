@@ -1,0 +1,17 @@
+\section*{E5. The reward decides what is done}
+\begin{proposition} If the goal pays $0$ (achievements only), every policy that never reaches it is optimal.\end{proposition}
+\begin{proof} Reaching the goal adds $0$ to any return and ends the episode, so it can only lose achievements still to
+come: never reaching it is at least as good.\end{proof}
+\noindent Check. An exact dynamic program: 6 craft spots of 2 steps beside the start, the goal $d$ steps off, 16 steps.
+Achievements only: the goal is never reached. The verified goal only: it is. Both mixed: reached in $76\%$ of 25
+settings of craft pay and distance, not when crafts pay $\ge0.2$ and the goal is far (Figure E5). Live, the body paid
+per first craft made 897 crafts an hour and no house.
+
+\emph{So:} pay only what the game verifies done; a mix keeps the old pull wherever it outweighs the goal.
+
+\begin{figure}[h]\centering
+\begin{tikzpicture}\begin{axis}[width=0.7\textwidth,height=5cm,xlabel={goal distance $d$},ylabel={pay per craft},colormap={rg}{color=(red) color=(green!60!black)},point meta min=0,point meta max=1]
+\addplot[scatter,only marks,mark=square*,mark size=6pt,point meta=explicit] table[x=dist,y=pay,meta=reached]{../data/e5_sweep.csv};
+\end{axis}\end{tikzpicture}
+\caption{E5. Achievements and the goal mixed: green, the optimal policy reaches the goal; red, it crafts instead.}
+\end{figure}

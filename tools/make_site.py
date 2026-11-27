@@ -34,6 +34,7 @@ ICONS = {
     "log":  ["###### ", "#    # ", "# ## # ", "#    # ", "# ## # ", "#    # ", "###### "],
     "home": ["   #   ", "  ###  ", " ##### ", "#######", " #   # ", " # # # ", " ##### "],
     "heart": [" ## ## ", "#######", "#######", "#######", " ##### ", "  ###  ", "   #   "],
+    "flask": ["  ###  ", "  # #  ", "  # #  ", " #   # ", "#  #  #", "# ### #", " ##### "],
 }
 
 
@@ -58,6 +59,7 @@ def page(title: str, body: str, base: str, desc: str, active: str = "") -> str:
     """The frame round every page. base: the way back to the site's root ("" or "../")."""
     nav = (f'<a href="{base}index.html">{icon("home")}Home</a>'
            f'<a href="{base}news/index.html">{icon("log")}News</a>'
+           f'<a href="{base}research/index.html">{icon("flask")}Research</a>'
            f'<a href="{base}play/">{icon("play")}Play</a>')
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -220,13 +222,15 @@ def landing(posts):
 def crawl(posts):
     """sitemap.xml, for search engines (Search Console): every page a player reads. (No robots.txt: one is read only at
     the root of the domain, not under /nexel-website/.)"""
-    urls = [SITE, SITE + "news/", SITE + "play/"] + [f"{SITE}news/{p['slug']}.html" for p in posts]
+    urls = [SITE, SITE + "news/", SITE + "research/", SITE + "play/"] + [f"{SITE}news/{p['slug']}.html" for p in posts]
     (ROOT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                                       + "".join(f"<url><loc>{u}</loc></url>\n" for u in urls) + "</urlset>\n")
 
 
 if __name__ == "__main__":
+    from make_research import research
     posts = news()
     landing(posts)
+    research()
     crawl(posts)
     print("pages written")

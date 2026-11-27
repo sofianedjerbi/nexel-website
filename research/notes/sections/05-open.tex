@@ -1,0 +1,14 @@
+\section*{Open questions for review}
+\begin{enumerate}
+\item \textbf{The body's architecture.} About 30 kinds of goals, one CPU core for training, a language model setting
+goals every 20\,s. Successor features with per-kind policies combined by GPI (E1, E2), or one goal-conditioned policy?
+E2's bound is loose and its gap reaches 98\% for tasks far from every skill: how should the base skills be chosen?
+\item \textbf{Splitting beyond the linear case.} E3's criterion (a moving average of the gradient cosine staying near
+$-1$) is exact at a shared optimum of a linear model. For a deep network, per layer, is there a known criterion with
+guarantees, and how should merging be decided?
+\item \textbf{Order of construction.} The tower stands when every piece is in hand, not when built from scratch. Is
+there a standard formulation (planning over laying orders under reachability constraints) we should use rather than a
+greedy builder?
+\item \textbf{Evaluation.} Live trials cost an hour of a shared machine each. How many are needed to compare two bodies,
+and how should the gap between the simulator's completion rate and the live one be measured?
+\end{enumerate}

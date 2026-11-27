@@ -1,0 +1,36 @@
+\section*{A build owned by code, checked from an empty inventory}
+\textbf{Executor.} A drawn design's unlaid cells are expanded through the game's recipes down to what the land gives
+(a crafting station counted once); the raw material is gathered first, in trips of 24 (a trip, not a walk per piece),
+then the builder lays the design with a full inventory, the case its tests already covered. While a design is
+unfinished the executor chooses every action; the learned body acts only when the agent is hurt. The mind's build words
+are kept whatever its goal, until it names another build or none.
+
+\textbf{Acceptance test.} The game's simulator, an empty inventory, a design drawn: the executor alone must make it stand.
+Six designs (a gabled house, two storeys, a round house, a three-storey tower, a T and a cross of wings with mixed
+roofs) on three seeds each: 12 of 18 stand whole, in 335 to 7\,828 decisions (Figure S). The builder fetching a craft's
+worth at a time laid a fifth of the gabled house in 5\,000 decisions.
+
+\begin{figure}[h]\centering
+\begin{tikzpicture}\begin{axis}[width=\textwidth,height=5cm,ylabel={decisions},xlabel={design (seeds 7, 21, 9)},ymode=log,symbolic x coords={house,two-storey,round,tower,T-wings,cross}]
+\addplot[scatter,only marks,mark=square*,point meta=explicit] table[x=design,y=decisions,meta=whole]{../data/sim_board.csv};
+\end{axis}\end{tikzpicture}
+\caption{S. From an empty inventory in the simulator: each design on seeds 7, 21, 9; green whole, red not (decisions
+spent before it stalled).}
+\end{figure}
+
+\textbf{What the test exposed}, each a defect the live trials could only have shown as ``nothing built'':
+\begin{itemize}
+\item \emph{A side effect in a legality check.} Computing the action mask asked the builder for its next step, and the
+builder re-sited the house when the agent was more than 64 tiles away: each gathering trip moved the house. Legality
+predicates must be pure.
+\item \emph{Oscillation.} Fetching per craft, the agent walked between the trees and the site, each out of view of the
+other, for 1\,500 steps. Gathering the whole bill first removes it.
+\item \emph{Geometry the site check missed.} A roof's overhang over a hill puts a cell inside the land: placed for
+ever, refused for ever. The site check now bounds the land's height under every overhanging cell.
+\item \emph{Counting.} A flight of stairs was one piece in the plan but takes one stairs item per step: upper storeys
+were unreachable.
+\end{itemize}
+
+\textbf{Still failing.} The tower's top storey is not reached from an empty inventory though it is from a full one:
+the order cells are laid in matters, and nothing plans it. Earth and stone-block roofs need material dug from the land,
+which neither verb does. Two designs stall on one seed each. The live trial of the executor is pending.

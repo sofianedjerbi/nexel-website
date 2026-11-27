@@ -1,0 +1,15 @@
+\section*{The system}
+\begin{itemize}
+\item \textbf{Mind.} A local language model (Qwen3-30B-A3B, 4-bit) reads the game as text every $\sim$20\,s and sets a
+goal (gather, craft, ask, build) and, in its own words, the build it wants.
+\item \textbf{Architect.} The same model turns the words into a design (JSON: shape, storeys, roof style and materials,
+furniture); code draws it as cells in 3D; the game's own rules judge it (closed, a door, covered, reachable, symmetric,
+\dots) and the model redraws up to 5 times with what failed. A check that the design keeps what the words asked (roof
+style, shape, storeys) was added after trial 4.
+\item \textbf{Builder.} Scripted: choose a flat site, clear it, lay the cells in an order the game holds (walls before the
+blocks resting on them), crafting pieces from the inventory.
+\item \textbf{Body.} A policy trained in the game's simulator with reinforcement learning on a Crafter-style reward: $+1$
+the first time each of $\sim$150 events happens in an episode (a craft, a collect, a place, a defeat), behind a mask of
+legal actions. It acts whenever the mind's goal does not steer it.
+\end{itemize}
+A live trial: 60 minutes, one agent, a copy of the game server, the same persona (a builder) each time.

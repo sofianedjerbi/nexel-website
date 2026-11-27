@@ -1,0 +1,10 @@
+\section*{Summary}
+We build an AI player for Nexel Worlds, a voxel survival game, that should build what a language model describes (``a
+two-storey house with a gabled roof of shingles''). In three one-hour live trials it built nothing that was designed.
+The failures trace to three causes: the learned body was trained on a reward that pays for novelty, and it undid the
+work (897 crafts an hour, a house's site dug 463 times); no component owned a build from start to end; and every test of
+the builder started with the materials already in hand, so gathering hundreds of pieces was never tested. A
+code executor that gathers a design's whole bill of materials and then lays it, checked in the game's simulator from an
+empty inventory, completes 12 of 18 designs (0 before). For the learned body's retraining we state five claims, prove
+them, and check them on Garnet MDPs over 20 seeds: rewards by kind with weights set by the language model, skills
+combined by generalised policy improvement, and a network that splits where gradients conflict.
