@@ -9,7 +9,7 @@ Small things, all of them in the game now: [play it](play/).
 
 Walking up a stone hillside, the land under you could open up like a cave and show its grey insides. Now it stays shut.
 
-![Left before, right now: on a stone hill](img/new-xray-hill.png)
+![Left before, right now: climbing a stone hill](img/new-xray-hill.gif)
 
 ## The far land holds still
 
