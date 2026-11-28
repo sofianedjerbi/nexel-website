@@ -5,8 +5,9 @@ trial & asked & designed & what stood\\\midrule
 4 & a gabled roof of shingles & a flat $5\times4$ (judged 19/19) & nothing designed\\
 5 & two storeys, a flat stone roof & the same, judged whole & 0 of its 209 cells\\
 6 & a two-storey round house, gabled shingles & nothing drawn & a $3\times3$ hut of the old builder\\
-7 & a house, a gable roof of shingles & two houses, gabled shingles, plank eaves and ridge & a room judged 6/6, 8/8, 4/8\\\bottomrule
-\end{tabular}\caption{Live trials 4--7 (1--3 tested earlier components). Counts below are from the game's event
+7 & a house, a gable roof of shingles & two houses, gabled shingles, plank eaves and ridge & a room judged 6/6, 8/8, 4/8\\
+8 & a two-storey house, a gable roof of shingles & the same, $4\times3$, plank eaves and ridge & 201 of 203 cells; judged 6/6, 8/8, 6/8\\\bottomrule
+\end{tabular}\caption{Live trials 4--8 (1--3 tested earlier components). Counts below are from the game's event
 log of each trial (\texttt{research/data/trials}, recounted by \texttt{research/live\_counts.py}) or, where marked,
 from the agent's own logs.}
 \end{table}
@@ -33,6 +34,20 @@ looks (mixed wall materials, no windows, no path). Unasked crafts fell to 17 (16
 second house: the language model's requests failed 75 times from minute 19 (not logged; failures are now written
 with their cause), and with the mind silent the learned body acted freely, placing 22 workbenches and digging 134 times
 on tiles it had built on: trial 7 ran before the body was restricted (\S The system).
+
+\textbf{Trial 8: a two-storey house.} With the executor owning builds, skills owning goals and the learned body
+restricted, the agent built a two-storey house with a gabled roof of shingles, plank eaves and ridge, outside stairs
+and a furnished room, 201 of its 203 cells in about 12 minutes (Figure L). The game's judge scores the room 6/6, 8/8
+and 6/8: the best real player's in that world, 4/6, 5/8 and 6/8. The two cells left were the ridge's ends, nine
+layers up over the gable's overhang: out of reach from every stand (fixed in the design: a ridge stops at the end
+walls). A first run of this trial had its language model fail on every request: an aim made of a crafted item
+reached a set operation with a tuple; the error log added after trial 7 named it within minutes.
+
+\begin{figure}[h]\centering
+\includegraphics[width=0.48\textwidth]{../img/trial8-house.png}\includegraphics[width=0.48\textwidth]{../img/trial8-room.png}
+\caption{L. Live trial 8, rendered by the game from the trial's saved world: the house as a player sees it, and the
+room from above (bed, fire, chest, table, chair, workbench).}
+\end{figure}
 
 \textbf{Causes.} (i) \emph{The learned body's reward} pays $+1$ the first time each of $\sim$150 events happens in an
 episode, as in Crafter [Hafner 2022]; it acts whenever no goal steers it, and nothing in that reward values a design standing, so building

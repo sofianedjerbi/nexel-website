@@ -199,6 +199,10 @@ def blocks(t: str, base: Path) -> str:
         body = m.group(1)
         cap = re.search(r"\\caption\{(.*)\}", body, re.S)
         cap = cap.group(1) if cap else ""
+        imgs = re.findall(r"\\includegraphics(?:\[[^\]]*\])?\{(.*?)\}", body)
+        if imgs:                                          # (a picture: the game's own renders)
+            row = "".join(f'<img src="{html.escape(i.removeprefix("../"))}" alt="">' for i in imgs)   # (notes/ -> research/)
+            return stash(f'<figure><div class="pics">{row}</div><figcaption>{tex_inline(cap)}</figcaption></figure>')
         if "\\begin{tabular}" in body:
             return stash(f'<figure>{tabular(body)}<figcaption>{tex_inline(cap)}</figcaption></figure>')
         return stash(f'<figure>{axis_svg(body, base)}<figcaption>{tex_inline(cap)}</figcaption></figure>')
