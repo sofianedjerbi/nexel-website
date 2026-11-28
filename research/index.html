@@ -46,7 +46,8 @@ component owned a build to its end; and every builder test started with the mate
 owns a drawn build: it gathers the design's bill of materials, then lays it. In the simulator it stands 56 of 60
 designs on fresh seeds from an empty inventory (0 before); live, it built a room the game's judge scores 6/6 for working and 8/8 for sense,
 then a two-storey house with a gabled roof of shingles and plank eaves and ridge (201 of 203 cells, the last two a
-flaw of the design since fixed). On eight non-building goals over 20 seeds, the goal's code skill succeeds as often as the
+flaw of the design since fixed), then two houses whose best room scores above the best real player's on all three
+of the judge's counts. On eight non-building goals over 20 seeds, the goal's code skill succeeds as often as the
 learned body or more on all eight, in 2 to 22 times fewer decisions. Two results are proved here and checked in the
 game's simulator: the bill the executor gathers is the least raw material a design takes (Theorem 1; the earlier
 bill overcounted by up to the recipes' yield), and a flight of stairs reaches its storey exactly when the column
@@ -57,7 +58,7 @@ model redraws up to 5 times with what failed.</li><li><b>Executor.</b> While a d
 (Theorem 1), then lays the cells in an order the game holds (Theorem 2 for stairs).</li><li><b>Skills.</b> A gather or craft goal is carried out by code (walk to a source, dig, craft, place a station),
 looking further when nothing in view gives the item.</li><li><b>Body.</b> A policy trained in the simulator with reinforcement learning (reward: $+1$ the first time each of
 $\sim$150 events happens, goal completion with progress shaping, the old hut's judged grade). It now acts only when
-nothing above has a step, and unhurt it may move, eat, fight and talk but not craft, place or dig.</li></ul></section><section class="panel paper" id="02-live"><h2><a class="anchor" href="#02-live">Live trials</a></h2><figure><table class="data"><tr><th>trial</th><th>asked</th><th>designed</th><th>what stood</th></tr><tr><td>4</td><td>a gabled roof of shingles</td><td>a flat $5\times4$ (judged 19/19)</td><td>nothing designed</td></tr><tr><td>5</td><td>two storeys, a flat stone roof</td><td>the same, judged whole</td><td>0 of its 209 cells</td></tr><tr><td>6</td><td>a two-storey round house, gabled shingles</td><td>nothing drawn</td><td>a $3\times3$ hut of the old builder</td></tr><tr><td>7</td><td>a house, a gable roof of shingles</td><td>two houses, gabled shingles, plank eaves and ridge</td><td>a room judged 6/6, 8/8, 4/8</td></tr><tr><td>8</td><td>a two-storey house, a gable roof of shingles</td><td>the same, $4\times3$, plank eaves and ridge</td><td>201 of 203 cells; judged 6/6, 8/8, 6/8</td></tr></table><figcaption>Live trials 4–8 (1–3 tested earlier components). Counts below are from the game's event
+nothing above has a step, and unhurt it may move, eat, fight and talk but not craft, place or dig.</li></ul></section><section class="panel paper" id="02-live"><h2><a class="anchor" href="#02-live">Live trials</a></h2><figure><table class="data"><tr><th>trial</th><th>asked</th><th>designed</th><th>what stood</th></tr><tr><td>4</td><td>a gabled roof of shingles</td><td>a flat $5\times4$ (judged 19/19)</td><td>nothing designed</td></tr><tr><td>5</td><td>two storeys, a flat stone roof</td><td>the same, judged whole</td><td>0 of its 209 cells</td></tr><tr><td>6</td><td>a two-storey round house, gabled shingles</td><td>nothing drawn</td><td>a $3\times3$ hut of the old builder</td></tr><tr><td>7</td><td>a house, a gable roof of shingles</td><td>two houses, gabled shingles, plank eaves and ridge</td><td>a room judged 6/6, 8/8, 4/8</td></tr><tr><td>8</td><td>a two-storey house, a gable roof of shingles</td><td>the same, $4\times3$, plank eaves and ridge</td><td>201 of 203 cells; judged 6/6, 8/8, 6/8</td></tr><tr><td>9</td><td>a house, a gable roof of shingles</td><td>houses on one site, gabled shingles, plank eaves and ridge</td><td>two rooms; the best judged 6/6, 8/8, 7/8</td></tr></table><figcaption>Live trials 4–9 (1–3 tested earlier components). Counts below are from the game's event
 log of each trial (<code>research/data/trials</code>, recounted by <code>research/live_counts.py</code>) or, where marked,
 from the agent's own logs.</figcaption></figure>
 <p><b>Trial 4: the judge checked the rules, not the request.</b> The design passed every rule of the game's judge and
@@ -88,6 +89,14 @@ walls). A first run of this trial had its language model fail on every request: 
 reached a set operation with a tuple; the error log added after trial 7 named it within minutes.</p>
 <figure><div class="pics"><img src="img/trial8-house.png" alt=""><img src="img/trial8-room.png" alt=""></div><figcaption>L. Live trial 8, rendered by the game from the trial's saved world: the house as a player sees it, and the
 room from above (bed, fire, chest, table, chair, workbench).</figcaption></figure>
+<p><b>Trial 9: two houses.</b> With the ridge fixed, the agent built two houses on one site, each closed, roofed
+with shingle slopes and plank eaves and ridge, and furnished, then named a third (Figure M). The language model made
+185 thoughts without an error; the event log counts 0 digs on tiles the agent had built on (trial 5: 554; trial 7,
+before the learned body was restricted: 134). The game's judge scores the better room 6/6, 8/8 and 7/8, above the best real
+player's on all three (4/6, 5/8, 6/8); the point left is windows, which the game cannot yet give a closed room (a
+window is a fence, and a fence opens the room to the game's shelter rule).</p>
+<figure><div class="pics"><img src="img/trial9-houses.png" alt=""><img src="img/trial9-room.png" alt=""></div><figcaption>M. Live trial 9, rendered by the game: the roofs of shingles with plank eaves and ridge, the door and its
+path, the second house beside it; one house's room from above.</figcaption></figure>
 <p><b>Causes.</b> (i) <em>The learned body's reward</em> pays $+1$ the first time each of $\sim$150 events happens in an
 episode, as in Crafter [Hafner 2022]; it acts whenever no goal steers it, and nothing in that reward values a design standing, so building
 and unbuilding are alike to it [Amodei et al. 2016]. (ii) <em>No owner of long-horizon execution</em>: the language model

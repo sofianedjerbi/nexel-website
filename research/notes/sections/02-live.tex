@@ -6,8 +6,9 @@ trial & asked & designed & what stood\\\midrule
 5 & two storeys, a flat stone roof & the same, judged whole & 0 of its 209 cells\\
 6 & a two-storey round house, gabled shingles & nothing drawn & a $3\times3$ hut of the old builder\\
 7 & a house, a gable roof of shingles & two houses, gabled shingles, plank eaves and ridge & a room judged 6/6, 8/8, 4/8\\
-8 & a two-storey house, a gable roof of shingles & the same, $4\times3$, plank eaves and ridge & 201 of 203 cells; judged 6/6, 8/8, 6/8\\\bottomrule
-\end{tabular}\caption{Live trials 4--8 (1--3 tested earlier components). Counts below are from the game's event
+8 & a two-storey house, a gable roof of shingles & the same, $4\times3$, plank eaves and ridge & 201 of 203 cells; judged 6/6, 8/8, 6/8\\
+9 & a house, a gable roof of shingles & houses on one site, gabled shingles, plank eaves and ridge & two rooms; the best judged 6/6, 8/8, 7/8\\\bottomrule
+\end{tabular}\caption{Live trials 4--9 (1--3 tested earlier components). Counts below are from the game's event
 log of each trial (\texttt{research/data/trials}, recounted by \texttt{research/live\_counts.py}) or, where marked,
 from the agent's own logs.}
 \end{table}
@@ -47,6 +48,19 @@ reached a set operation with a tuple; the error log added after trial 7 named it
 \includegraphics[width=0.48\textwidth]{../img/trial8-house.png}\includegraphics[width=0.48\textwidth]{../img/trial8-room.png}
 \caption{L. Live trial 8, rendered by the game from the trial's saved world: the house as a player sees it, and the
 room from above (bed, fire, chest, table, chair, workbench).}
+\end{figure}
+
+\textbf{Trial 9: two houses.} With the ridge fixed, the agent built two houses on one site, each closed, roofed
+with shingle slopes and plank eaves and ridge, and furnished, then named a third (Figure M). The language model made
+185 thoughts without an error; the event log counts 0 digs on tiles the agent had built on (trial 5: 554; trial 7,
+before the learned body was restricted: 134). The game's judge scores the better room 6/6, 8/8 and 7/8, above the best real
+player's on all three (4/6, 5/8, 6/8); the point left is windows, which the game cannot yet give a closed room (a
+window is a fence, and a fence opens the room to the game's shelter rule).
+
+\begin{figure}[h]\centering
+\includegraphics[width=0.48\textwidth]{../img/trial9-houses.png}\includegraphics[width=0.48\textwidth]{../img/trial9-room.png}
+\caption{M. Live trial 9, rendered by the game: the roofs of shingles with plank eaves and ridge, the door and its
+path, the second house beside it; one house's room from above.}
 \end{figure}
 
 \textbf{Causes.} (i) \emph{The learned body's reward} pays $+1$ the first time each of $\sim$150 events happens in an
