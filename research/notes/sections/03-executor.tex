@@ -1,9 +1,10 @@
 \section*{The executor and the skills, in the simulator}
 \textbf{Building.} A drawn design's unlaid cells are turned into a bill of raw material (Theorem 1), gathered in trips
 of 24, then laid by the builder with a full inventory. Six designs on three seeds each, from an empty inventory: 18 of 18 stand whole, in 241 to 1\,381 decisions; but
-these three seeds are the ones the faults below were found and fixed on. On ten fresh seeds per design, used to fix
-nothing until the last fault below, 56 of 60 stand whole ($93\%$, Wilson 95\% interval $84$--$97\%$; 51 of 60
-before that fault was fixed) (Figure S). Before the executor the builder,
+these three seeds are the ones the faults below were found and fixed on. Each fresh set of ten seeds per design was
+used, once read, to find faults, so each in turn stopped being held out: seeds 100--109 stood 51 of 60, then 60 of 60
+after their faults were fixed; seeds 200--209, read next, 53 of 60; seeds 300--309, 55 of 60. Seeds 400--409,
+touched by no fix, stand 60 of 60 (Wilson 95\% interval $94$--$100\%$)(Figure S). Before the executor the builder,
 fetching a craft's worth at a time, laid a fifth of the smallest house in 5\,000 decisions.
 
 \begin{figure}[h]\centering
@@ -22,7 +23,14 @@ the land'' from where it stood and was dug at 199 times (now tried from another 
 eaves left no storey of room, which the game requires under a block (the site check now asks for it); walled in by
 its own wall, rocks and a bush, it walked nowhere 199 times (it now digs out, and a walk that goes nowhere is
 looked past); and, found on the fresh seeds, a search for material walked 230 tiles off and the home was given up
-(a search now stays within 200 tiles of it). Still failing on the fresh seeds: four runs, each a different case.
+(a search now stays within 200 tiles of it). The later sets found seven more, two of them on one map each: a site
+found uneven was dropped with nothing said, so the executor stopped at its first decision; a site's first ground tile
+out of view read as uneven, and four sites were given up while the agent gathered beside them; a workbench put on
+the agent's last open side was dug back up to get out (611 times); a walk whose stand had no path was ordered again
+(2\,585 times); walks over the land ended in a river, or went down cliffs into a lake or pit with no way back up
+(the walk home then ordered 1\,352 times); and shut in by its own walls and two trees of its own site, the agent
+would dig neither. Each was a loop, the same failing order repeated; none was a fault of planning. Still failing on
+seeds 300--309: one roof cell of the tower on one map.
 
 \textbf{Other goals.} Eight goals from an empty inventory, 20 seeds, paired: the learned body choosing every action
 as it played live, against the goal's code skill (Table G). The skill succeeds as often or more on all eight and
@@ -30,18 +38,18 @@ needs 2 to 30 times fewer decisions; it looks further when nothing in view gives
 20 of 20). The last skill failures were one case: the look's way is fixed by the clock, and where that way's walk has
 no path from where the agent stands it was ordered again in place (craft axe, one seed: 586 times, the pack still
 empty). A walk ordered four times from one tile is now marked shut and the next way taken; every goal is 20 of 20,
-and a gabled 3 by 3 house, built by the executor through the same skills, 18 of 20 within its budget, from 13.
+and a gabled 3 by 3 house, built by the executor through the same skills, 20 of 20 within its budget, from 13 (with the faults above fixed).
 
 \begin{table}[h]\centering
 \begin{tabular}{lll}\toprule
 goal & learned body: done (median decisions) & skill: done (median decisions)\\\midrule
-gather wood & 18/20 (58) & 20/20 (8)\\
-gather stone & 13/20 (133) & 20/20 (19)\\
-gather fibre & 14/20 (32) & 20/20 (9)\\
-gather berries & 16/20 (33) & 20/20 (6)\\
+gather wood & 18/20 (54) & 20/20 (8)\\
+gather stone & 13/20 (147) & 20/20 (19)\\
+gather fibre & 15/20 (32) & 20/20 (9)\\
+gather berries & 15/20 (32) & 20/20 (6)\\
 craft workbench & 19/20 (15) & 20/20 (4)\\
-craft axe & 2/20 (542) & 20/20 (18)\\
-craft bed & 6/20 (318) & 20/20 (18)\\
+craft axe & 4/20 (263) & 20/20 (18)\\
+craft bed & 5/20 (249) & 20/20 (18)\\
 craft door & 19/20 (18) & 20/20 (3)\\\bottomrule
 \end{tabular}\caption{G. Goals done within 600 decisions (\texttt{data/scenarios.csv}, \texttt{nexel-agent tools/scenarios.py}).}
 \end{table}

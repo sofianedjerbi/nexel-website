@@ -33,7 +33,7 @@
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <main class="wrap research">
 <section class="panel lead"><div class="eyebrow">Research notes <span class="badge">revision 4 · 2026-11-27</span></div><h1>An AI player that builds what it is asked: what failed live, the executor that fixed it, and two theorems about building</h1>
-<div class="kpis"><div class="kpi"><b>56 / 60</b><span>designs built from an empty inventory, fresh seeds (95% 84%–97%)</span></div><div class="kpi"><b>6/6 · 8/8</b><span>trial 7: the room the agent built, judged works · makes sense</span></div><div class="kpi"><b>181 → 104</b><span>wood in a house's bill, per-cell vs least (Theorem 1)</span></div><div class="kpi"><b>2 → 20 / 20</b><span>axe crafted: learned body vs code skill</span></div></div>
+<div class="kpis"><div class="kpi"><b>60 / 60</b><span>designs built from an empty inventory, seeds no fix was made on (95% 94%–100%)</span></div><div class="kpi"><b>6/6 · 8/8</b><span>trial 7: the room the agent built, judged works · makes sense</span></div><div class="kpi"><b>181 → 104</b><span>wood in a house's bill, per-cell vs least (Theorem 1)</span></div><div class="kpi"><b>4 → 20 / 20</b><span>axe crafted: learned body vs code skill</span></div></div>
 <p class="files"><a href="notes/main.tex">LaTeX source</a> · <a href="live_counts.py">live counts</a> ·
 <a href="https://github.com/sofianedjerbi/nexel-agent/blob/main/tools/theorems.py">theorem checks</a> ·
 <a href="https://github.com/sofianedjerbi/nexel-agent/blob/main/tools/scenarios.py">scenarios</a> ·
@@ -43,8 +43,8 @@
 trials it built nothing designed: between the model's goals a learned body, rewarded for first-time events, crafted
 away the materials and dug up what had been built (554 digs on tiles it had itself built on, of 750 placements); no
 component owned a build to its end; and every builder test started with the materials in hand. A code executor now
-owns a drawn build: it gathers the design's bill of materials, then lays it. In the simulator it stands 56 of 60
-designs on fresh seeds from an empty inventory (0 before); live, it built a room the game's judge scores 6/6 for working and 8/8 for sense,
+owns a drawn build: it gathers the design's bill of materials, then lays it. In the simulator it stands 60 of 60
+designs on seeds no fix was made on, from an empty inventory (0 before); live, it built a room the game's judge scores 6/6 for working and 8/8 for sense,
 then a two-storey house with a gabled roof of shingles and plank eaves and ridge (201 of 203 cells, the last two a
 flaw of the design since fixed), then two houses whose best room scores above the best real player's on all three
 of the judge's counts. On eight non-building goals over 20 seeds, the goal's code skill succeeds as often as the
@@ -107,9 +107,10 @@ Cai et al. 2024; JARVIS-VLA 2025]. (iii)
 (iv) The trial 5 design was infeasible regardless: its roof of stone blocks is a material no verb can obtain; the
 designer may choose what the executor cannot do.</p></section><section class="panel paper" id="03-executor"><h2><a class="anchor" href="#03-executor">The executor and the skills, in the simulator</a></h2><p><b>Building.</b> A drawn design's unlaid cells are turned into a bill of raw material (Theorem 1), gathered in trips
 of 24, then laid by the builder with a full inventory. Six designs on three seeds each, from an empty inventory: 18 of 18 stand whole, in 241 to 1 381 decisions; but
-these three seeds are the ones the faults below were found and fixed on. On ten fresh seeds per design, used to fix
-nothing until the last fault below, 56 of 60 stand whole ($93\%$, Wilson 95% interval $84$–$97\%$; 51 of 60
-before that fault was fixed) (Figure S). Before the executor the builder,
+these three seeds are the ones the faults below were found and fixed on. Each fresh set of ten seeds per design was
+used, once read, to find faults, so each in turn stopped being held out: seeds 100–109 stood 51 of 60, then 60 of 60
+after their faults were fixed; seeds 200–209, read next, 53 of 60; seeds 300–309, 55 of 60. Seeds 400–409,
+touched by no fix, stand 60 of 60 (Wilson 95% interval $94$–$100\%$)(Figure S). Before the executor the builder,
 fetching a craft's worth at a time, laid a fifth of the smallest house in 5 000 decisions.</p>
 <figure><svg class="chart" viewBox="0 0 720 300"><line class="ax" x1="84" y1="254" x2="696" y2="254"/><line class="ax" x1="84" y1="16" x2="84" y2="254"/><line class="grid" x1="84" y1="254.0" x2="696" y2="254.0"/><text x="76" y="258.0" text-anchor="end">241</text><line class="grid" x1="84" y1="194.5" x2="696" y2="194.5"/><text x="76" y="198.5" text-anchor="end">486</text><line class="grid" x1="84" y1="135.0" x2="696" y2="135.0"/><text x="76" y="139.0" text-anchor="end">979</text><line class="grid" x1="84" y1="75.5" x2="696" y2="75.5"/><text x="76" y="79.5" text-anchor="end">1 974</text><line class="grid" x1="84" y1="16.0" x2="696" y2="16.0"/><text x="76" y="20.0" text-anchor="end">3 980</text><text x="135.0" y="274" text-anchor="middle">house</text><text x="237.0" y="274" text-anchor="middle">two-storey</text><text x="339.0" y="274" text-anchor="middle">round</text><text x="441.0" y="274" text-anchor="middle">tower</text><text x="543.0" y="274" text-anchor="middle">T-wings</text><text x="645.0" y="274" text-anchor="middle">cross</text><rect x="112.6" y="238.8" width="8" height="8" fill="#4f9a6a"/><rect x="131.0" y="212.2" width="8" height="8" fill="#4f9a6a"/><rect x="149.4" y="231.1" width="8" height="8" fill="#4f9a6a"/><rect x="214.6" y="239.1" width="8" height="8" fill="#4f9a6a"/><rect x="233.0" y="216.7" width="8" height="8" fill="#4f9a6a"/><rect x="251.4" y="233.1" width="8" height="8" fill="#4f9a6a"/><rect x="316.6" y="250.0" width="8" height="8" fill="#4f9a6a"/><rect x="335.0" y="230.3" width="8" height="8" fill="#4f9a6a"/><rect x="353.4" y="246.2" width="8" height="8" fill="#4f9a6a"/><rect x="418.6" y="204.9" width="8" height="8" fill="#4f9a6a"/><rect x="437.0" y="12.0" width="8" height="8" fill="#4f9a6a"/><rect x="455.4" y="214.1" width="8" height="8" fill="#4f9a6a"/><rect x="520.6" y="168.9" width="8" height="8" fill="#4f9a6a"/><rect x="539.0" y="149.1" width="8" height="8" fill="#4f9a6a"/><rect x="557.4" y="187.2" width="8" height="8" fill="#4f9a6a"/><rect x="622.6" y="199.9" width="8" height="8" fill="#4f9a6a"/><rect x="641.0" y="168.2" width="8" height="8" fill="#4f9a6a"/><rect x="659.4" y="197.2" width="8" height="8" fill="#4f9a6a"/><text x="390.0" y="294" text-anchor="middle" class="lab">design (seeds 7, 21, 9)</text><text x="12" y="135.0" text-anchor="middle" class="lab" transform="rotate(-90 12 135.0)">decisions</text></svg><figcaption>S. From an empty inventory: green, the design stands whole; red, it stalled (decisions spent).</figcaption></figure>
 <p>What this test exposed, each a fault the live trials could only show as nothing built: computing the action mask
@@ -121,15 +122,22 @@ the land” from where it stood and was dug at 199 times (now tried from another
 eaves left no storey of room, which the game requires under a block (the site check now asks for it); walled in by
 its own wall, rocks and a bush, it walked nowhere 199 times (it now digs out, and a walk that goes nowhere is
 looked past); and, found on the fresh seeds, a search for material walked 230 tiles off and the home was given up
-(a search now stays within 200 tiles of it). Still failing on the fresh seeds: four runs, each a different case.</p>
+(a search now stays within 200 tiles of it). The later sets found seven more, two of them on one map each: a site
+found uneven was dropped with nothing said, so the executor stopped at its first decision; a site's first ground tile
+out of view read as uneven, and four sites were given up while the agent gathered beside them; a workbench put on
+the agent's last open side was dug back up to get out (611 times); a walk whose stand had no path was ordered again
+(2 585 times); walks over the land ended in a river, or went down cliffs into a lake or pit with no way back up
+(the walk home then ordered 1 352 times); and shut in by its own walls and two trees of its own site, the agent
+would dig neither. Each was a loop, the same failing order repeated; none was a fault of planning. Still failing on
+seeds 300–309: one roof cell of the tower on one map.</p>
 <p><b>Other goals.</b> Eight goals from an empty inventory, 20 seeds, paired: the learned body choosing every action
 as it played live, against the goal's code skill (Table G). The skill succeeds as often or more on all eight and
 needs 2 to 30 times fewer decisions; it looks further when nothing in view gives the item (gathering stone: 17 to
 20 of 20). The last skill failures were one case: the look's way is fixed by the clock, and where that way's walk has
 no path from where the agent stands it was ordered again in place (craft axe, one seed: 586 times, the pack still
 empty). A walk ordered four times from one tile is now marked shut and the next way taken; every goal is 20 of 20,
-and a gabled 3 by 3 house, built by the executor through the same skills, 18 of 20 within its budget, from 13.</p>
-<figure><table class="data"><tr><th>goal</th><th>learned body: done (median decisions)</th><th>skill: done (median decisions)</th></tr><tr><td>gather wood</td><td>18/20 (58)</td><td>20/20 (8)</td></tr><tr><td>gather stone</td><td>13/20 (133)</td><td>20/20 (19)</td></tr><tr><td>gather fibre</td><td>14/20 (32)</td><td>20/20 (9)</td></tr><tr><td>gather berries</td><td>16/20 (33)</td><td>20/20 (6)</td></tr><tr><td>craft workbench</td><td>19/20 (15)</td><td>20/20 (4)</td></tr><tr><td>craft axe</td><td>2/20 (542)</td><td>20/20 (18)</td></tr><tr><td>craft bed</td><td>6/20 (318)</td><td>20/20 (18)</td></tr><tr><td>craft door</td><td>19/20 (18)</td><td>20/20 (3)</td></tr></table><figcaption>G. Goals done within 600 decisions (<code>data/scenarios.csv</code>, <code>nexel-agent tools/scenarios.py</code>).</figcaption></figure></section><section class="panel paper" id="04-bill"><h2><a class="anchor" href="#04-bill">Theorem 1. The least raw material a design takes</a></h2><p>A recipe table: each craftable item $k$ has one recipe, taking $m_{k,c}$ of each input $c$, yielding $y_k\ge1$, and
+and a gabled 3 by 3 house, built by the executor through the same skills, 20 of 20 within its budget, from 13 (with the faults above fixed).</p>
+<figure><table class="data"><tr><th>goal</th><th>learned body: done (median decisions)</th><th>skill: done (median decisions)</th></tr><tr><td>gather wood</td><td>18/20 (54)</td><td>20/20 (8)</td></tr><tr><td>gather stone</td><td>13/20 (147)</td><td>20/20 (19)</td></tr><tr><td>gather fibre</td><td>15/20 (32)</td><td>20/20 (9)</td></tr><tr><td>gather berries</td><td>15/20 (32)</td><td>20/20 (6)</td></tr><tr><td>craft workbench</td><td>19/20 (15)</td><td>20/20 (4)</td></tr><tr><td>craft axe</td><td>4/20 (263)</td><td>20/20 (18)</td></tr><tr><td>craft bed</td><td>5/20 (249)</td><td>20/20 (18)</td></tr><tr><td>craft door</td><td>19/20 (18)</td><td>20/20 (3)</td></tr></table><figcaption>G. Goals done within 600 decisions (<code>data/scenarios.csv</code>, <code>nexel-agent tools/scenarios.py</code>).</figcaption></figure></section><section class="panel paper" id="04-bill"><h2><a class="anchor" href="#04-bill">Theorem 1. The least raw material a design takes</a></h2><p>A recipe table: each craftable item $k$ has one recipe, taking $m_{k,c}$ of each input $c$, yielding $y_k\ge1$, and
 possibly a station $\sigma_k$ (a workbench), used but not consumed; land items $L$ (wood, stone, fibre) are gathered,
 never crafted; the graph $k\to c$ (inputs and station) is acyclic. Given a demand $D$ (what the design's unlaid cells
 take) and an inventory $I$, process the items in a topological order that puts every item after all items that consume

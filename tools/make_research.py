@@ -253,7 +253,7 @@ def key_results() -> str:
     c, h = (p + z * z / (2 * n)) / (1 + z * z / n), z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / (1 + z * z / n)
     sc = {(r["scenario"], r["controller"]): r for r in table(data / "scenarios.csv")} if (data / "scenarios.csv").exists() else {}
     axe = (sc.get(("craft_axe", "learned")), sc.get(("craft_axe", "skills")))
-    tiles = [(f"{k} / {n}", f"designs built from an empty inventory, fresh seeds (95% {c - h:.0%}\u2013{c + h:.0%})"),
+    tiles = [(f"{k} / {n}", f"designs built from an empty inventory, seeds no fix was made on (95% {c - h:.0%}\u2013{c + h:.0%})"),
              ("6/6 · 8/8", "trial 7: the room the agent built, judged works · makes sense"),
              ("181 \u2192 104", "wood in a house's bill, per-cell vs least (Theorem 1)")]
     if all(axe):
